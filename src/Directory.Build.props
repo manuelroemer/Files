@@ -1,0 +1,55 @@
+<Project>
+
+  <PropertyGroup>
+    <LangVersion>8.0</LangVersion>
+    <Nullable>enable</Nullable>
+
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../key.snk</AssemblyOriginatorKeyFile>
+    <CodeAnalysisRuleSet>../Default.ruleset</CodeAnalysisRuleSet>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+    
+    <IsPackable>false</IsPackable>
+    <Product>Files</Product>
+    <Authors>Manuel Römer</Authors>
+    <NeutralLanguage>en</NeutralLanguage>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/manuelroemer/Files</RepositoryUrl>
+    <PackageProjectUrl>https://github.com/manuelroemer/Files</PackageProjectUrl>
+    <PackageReleaseNotes>https://github.com/manuelroemer/Files/blob/master/CHANGELOG.md</PackageReleaseNotes>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+
+    <IsTestProject>$(MSBuildProjectName.Contains('Test'))</IsTestProject>
+  </PropertyGroup>
+  
+  <PropertyGroup Condition=" $(IsTestProject) ">
+    <CodeAnalysisRuleSet>../Tests.ruleset</CodeAnalysisRuleSet>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SauceControl.InheritDoc" Version="1.0.0" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8" PrivateAssets="all" />
+  </ItemGroup>
+
+  <!-- netstandard2.0 inheritdoc fixes. -->
+  <PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <NoWarn>$(NoWarn);IDT001</NoWarn>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
+    <PackageDownload Include="NETStandard.Library.Ref" Version="[2.1.0]" />
+    <InheritDocReference Include="$([MSBuild]::EnsureTrailingSlash('$(NugetPackageRoot)'))netstandard.library.ref\2.1.0\ref\netstandard2.1\netstandard.xml" />
+  </ItemGroup>
+  
+  <PropertyGroup Condition=" $(Configuration) == 'Release' ">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!-- Certain warnings make no sense in test projects. -->
+  <PropertyGroup Condition=" $(IsTestProject) ">
+    <NoWarn>$(NoWarn);CS1573</NoWarn>
+  </PropertyGroup>
+
+</Project>
