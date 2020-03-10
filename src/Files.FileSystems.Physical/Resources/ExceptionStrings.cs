@@ -1,7 +1,5 @@
 ﻿namespace Files.FileSystems.Physical.Resources
 {
-    using System;
-
     internal static partial class ExceptionStrings
     {
 

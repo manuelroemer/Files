@@ -9,24 +9,21 @@
     using Files.FileSystems.Physical.Resources;
     using Files.FileSystems.Physical.Utilities;
     using Files.Utilities;
-    using File = File;
-    using IOFile = System.IO.File;
     using IOPath = System.IO.Path;
-    using Path = Path;
 
-    internal sealed class PhysicalFile : File
+    internal sealed class PhysicalStorageFile : StorageFile
     {
 
-        private readonly Path _path;
-        private readonly Path _fullPath;
-        private readonly Path _fullParentPath;
+        private readonly StoragePath _path;
+        private readonly StoragePath _fullPath;
+        private readonly StoragePath _fullParentPath;
         private readonly FileInfo _fileInfo;
 
         public override FileSystem FileSystem { get; }
 
-        public override Path Path => _path;
+        public override StoragePath Path => _path;
 
-        public PhysicalFile(FileSystem fileSystem, PhysicalPath path)
+        public PhysicalStorageFile(FileSystem fileSystem, PhysicalStoragePath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
@@ -46,7 +43,7 @@
             _fileInfo = new FileInfo(_fullPath);
         }
 
-        public override Task<FileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
+        public override Task<StorageFileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(async () =>
@@ -59,9 +56,9 @@
                 // for such cases.
                 cancellationToken.ThrowIfCancellationRequested();
                 var realFileName = _fileInfo.GetRealName() ?? _fileInfo.Name;
-                var lastWriteTime = IOFile.GetLastWriteTimeUtc(_fullPath.ToString());
+                var lastWriteTime = File.GetLastWriteTimeUtc(_fullPath.ToString());
 
-                return new FileProperties(
+                return new StorageFileProperties(
                     realFileName,
                     IOPath.GetFileNameWithoutExtension(realFileName),
                     PathHelper.GetExtensionWithoutTrailingExtensionSeparator(realFileName)?.ToNullIfEmpty(),
@@ -75,19 +72,19 @@
         public override Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => IOFile.GetAttributes(_fullPath.ToString()));
+            return Task.Run(() => File.GetAttributes(_fullPath.ToString()));
         }
 
         public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => IOFile.SetAttributes(_fullPath.ToString(), attributes));
+            return Task.Run(() => File.SetAttributes(_fullPath.ToString(), attributes));
         }
 
         public override Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => IOFile.Exists(_fullPath.ToString()));
+            return Task.Run(() => File.Exists(_fullPath.ToString()));
         }
 
         public override Task CreateAsync(
@@ -109,8 +106,8 @@
             });
         }
 
-        public override Task<File> CopyAsync(
-            Path destinationPath,
+        public override Task<StorageFile> CopyAsync(
+            StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         )
@@ -121,13 +118,13 @@
             return Task.Run(() =>
             {
                 var overwrite = options.ToOverwriteBool();
-                IOFile.Copy(_fullPath.ToString(), destinationPath.FullPath.ToString(), overwrite);
+                File.Copy(_fullPath.ToString(), destinationPath.FullPath.ToString(), overwrite);
                 return FileSystem.GetFile(destinationPath);
             });
         }
 
-        public override Task<File> MoveAsync(
-            Path destinationPath,
+        public override Task<StorageFile> MoveAsync(
+            StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         )
@@ -138,12 +135,12 @@
             return Task.Run(() =>
             {
                 var overwrite = options.ToOverwriteBool();
-                IOFile.Move(_fullPath.ToString(), destinationPath.FullPath.ToString(), overwrite);
+                File.Move(_fullPath.ToString(), destinationPath.FullPath.ToString(), overwrite);
                 return FileSystem.GetFile(destinationPath);
             });
         }
 
-        public override Task<File> RenameAsync(
+        public override Task<StorageFile> RenameAsync(
             string newName,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
@@ -165,33 +162,47 @@
                     await EnsureExistsAsync(cancellationToken);
                 }
 
-                cancellationToken.ThrowIfCancellationRequested();
-                IOFile.Delete(_fullPath.ToString());
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    File.Delete(_fullPath.ToString());
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    // The exception is thrown if a parent directory does not exist.
+                    // Must be caught manually to ensure compatibility with DeletionOption.IgnoreMissing.
+                    if (options != DeletionOption.IgnoreMissing)
+                    {
+                        throw;
+                    }
+                }
             });
         }
 
         public override Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run<Stream>(() => IOFile.Open(_fullPath.ToString(), FileMode.Open, fileAccess));
+            return Task.Run<Stream>(() => File.Open(_fullPath.ToString(), FileMode.Open, fileAccess));
         }
 
         public override Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
         {
-            return IOFile.ReadAllBytesAsync(_fullPath.ToString(), cancellationToken);
+            return File.ReadAllBytesAsync(_fullPath.ToString(), cancellationToken);
         }
 
         public override Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
         {
             return encoding is null
-                ? IOFile.ReadAllTextAsync(_fullPath.ToString(), cancellationToken)
-                : IOFile.ReadAllTextAsync(_fullPath.ToString(), encoding, cancellationToken);
+                ? File.ReadAllTextAsync(_fullPath.ToString(), cancellationToken)
+                : File.ReadAllTextAsync(_fullPath.ToString(), encoding, cancellationToken);
         }
 
-        public override Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
+        public override async Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
         {
             _ = bytes ?? throw new ArgumentNullException(nameof(bytes));
-            return IOFile.WriteAllBytesAsync(_fullPath.ToString(), bytes, cancellationToken);
+            await EnsureExistsAsync(cancellationToken).ConfigureAwait(false);
+            cancellationToken.ThrowIfCancellationRequested();
+            await File.WriteAllBytesAsync(_fullPath.ToString(), bytes, cancellationToken).ConfigureAwait(false);
         }
 
         public override async Task WriteTextAsync(
@@ -203,13 +214,14 @@
             _ = text ?? throw new ArgumentNullException(nameof(text));
             await EnsureExistsAsync(cancellationToken).ConfigureAwait(false);
 
+            cancellationToken.ThrowIfCancellationRequested();
             if (encoding is null)
             {
-                await IOFile.WriteAllTextAsync(_fullPath.ToString(), text, cancellationToken).ConfigureAwait(false);
+                await File.WriteAllTextAsync(_fullPath.ToString(), text, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await IOFile.WriteAllTextAsync(_fullPath.ToString(), text, encoding, cancellationToken).ConfigureAwait(false);
+                await File.WriteAllTextAsync(_fullPath.ToString(), text, encoding, cancellationToken).ConfigureAwait(false);
             }
         }
 

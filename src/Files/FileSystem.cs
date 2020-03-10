@@ -17,13 +17,13 @@
         public abstract PathInformation PathInformation { get; }
 
         /// <summary>
-        ///     Returns a <see cref="Path"/> instance from a specified <see cref="string"/>.
+        ///     Returns a <see cref="StoragePath"/> instance from a specified <see cref="string"/>.
         /// </summary>
         /// <param name="path">
-        ///     The <see cref="string"/> from which a new <see cref="Path"/> instance should be created.
+        ///     The <see cref="string"/> from which a new <see cref="StoragePath"/> instance should be created.
         /// </param>
         /// <returns>
-        ///     A <see cref="Path"/> instance created from the specified <see cref="string"/>.
+        ///     A <see cref="StoragePath"/> instance created from the specified <see cref="string"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="path"/>
@@ -32,10 +32,10 @@
         ///     The <paramref name="path"/> had an invalid format which is not compatible with this
         ///     file system implementation.
         /// </exception>
-        public abstract Path GetPath(string path);
+        public abstract StoragePath GetPath(string path);
 
         /// <summary>
-        ///     Returns a <see cref="Path"/> instance which represents a specific folder
+        ///     Returns a <see cref="StoragePath"/> instance which represents a specific folder
         ///     identified through the <paramref name="knownFolder"/> parameter.
         /// </summary>
         /// <param name="knownFolder">
@@ -46,21 +46,21 @@
         ///     <paramref name="knownFolder"/> parameter.
         /// </returns>
         /// <remarks>
-        ///     If not overridden, this method calls <see cref="TryGetPath(KnownFolder, out Path)"/>
+        ///     If not overridden, this method calls <see cref="TryGetPath(KnownFolder, out StoragePath)"/>
         ///     and throws a <see cref="NotSupportedException"/> if the return value is
         ///     <see langword="false"/>.
         /// </remarks>
         /// <exception cref="NotSupportedException">
         ///     The requested folder is not supported by this file system implementation.
         /// </exception>
-        public virtual Path GetPath(KnownFolder knownFolder)
+        public virtual StoragePath GetPath(KnownFolder knownFolder)
         {
             return TryGetPath(knownFolder, out var result)
                 ? result
                 : throw new NotSupportedException(ExceptionStrings.FileSystem.KnownFolderNotSupported(knownFolder));
         }
 
-        public virtual bool TryGetPath(string? path, [NotNullWhen(true)] out Path? result)
+        public virtual bool TryGetPath(string? path, [NotNullWhen(true)] out StoragePath? result)
         {
             // Fast path without a (guaranteed) exception.
             if (string.IsNullOrEmpty(path))
@@ -84,7 +84,7 @@
         }
 
         /// <summary>
-        ///     Attempts to return a <see cref="Path"/> instance which represents a specific folder
+        ///     Attempts to return a <see cref="StoragePath"/> instance which represents a specific folder
         ///     identified through the <paramref name="knownFolder"/> parameter.
         ///     
         ///     In comparison to <see cref="GetPath(KnownFolder)"/> this method doesn't throw an
@@ -92,7 +92,7 @@
         ///     file system.
         /// </summary>
         /// <param name="knownFolder">
-        ///     A known folder for which a <see cref="Path"/> instance should be retrieved.
+        ///     A known folder for which a <see cref="StoragePath"/> instance should be retrieved.
         /// </param>
         /// <param name="result">
         ///     The result of retrieving the path.
@@ -103,19 +103,19 @@
         ///     <see langword="false"/> if not.
         /// </returns>
         /// <seealso cref="GetPath(KnownFolder)"/>
-        public abstract bool TryGetPath(KnownFolder knownFolder, [NotNullWhen(true)] out Path? result);
+        public abstract bool TryGetPath(KnownFolder knownFolder, [NotNullWhen(true)] out StoragePath? result);
 
         /// <summary>
-        ///     Returns a <see cref="File"/> instance which represents the file at the specified
+        ///     Returns a <see cref="StorageFile"/> instance which represents the file at the specified
         ///     <paramref name="path"/>.
         /// </summary>
         /// <param name="path">The path of the file.</param>
         /// <returns>
-        ///     A <see cref="File"/> instance which represents the file at the specified <paramref name="path"/>.
+        ///     A <see cref="StorageFile"/> instance which represents the file at the specified <paramref name="path"/>.
         /// </returns>
         /// <remarks>
-        ///     Calling this method is equivalent to calling <see cref="GetFile(Path)"/> with a
-        ///     <see cref="Path"/> instance obtained through the <see cref="GetPath(string)"/> method.
+        ///     Calling this method is equivalent to calling <see cref="GetFile(StoragePath)"/> with a
+        ///     <see cref="StoragePath"/> instance obtained through the <see cref="GetPath(string)"/> method.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="path"/>
@@ -124,27 +124,27 @@
         ///     The <paramref name="path"/> had an invalid format which is not compatible with this
         ///     file system implementation.
         /// </exception>
-        public virtual File GetFile(string path) =>
+        public virtual StorageFile GetFile(string path) =>
             GetFile(GetPath(path));
 
         /// <summary>
-        ///     Returns a <see cref="File"/> instance which represents the file at the specified
+        ///     Returns a <see cref="StorageFile"/> instance which represents the file at the specified
         ///     <paramref name="path"/>.
         /// </summary>
         /// <param name="path">The path of the file.</param>
         /// <returns>
-        ///     A <see cref="File"/> instance which represents the file at the specified <paramref name="path"/>.
+        ///     A <see cref="StorageFile"/> instance which represents the file at the specified <paramref name="path"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="path"/>
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The specified <paramref name="path"/> instance is a <see cref="Path"/> implementation
+        ///     The specified <paramref name="path"/> instance is a <see cref="StoragePath"/> implementation
         ///     which is not supported by this file system.
         /// </exception>
-        public abstract File GetFile(Path path);
+        public abstract StorageFile GetFile(StoragePath path);
 
-        public virtual bool TryGetFile(string? path, [NotNullWhen(true)] out File? result)
+        public virtual bool TryGetFile(string? path, [NotNullWhen(true)] out StorageFile? result)
         {
             // Fast path without a (guaranteed) exception.
             if (string.IsNullOrEmpty(path))
@@ -167,7 +167,7 @@
             }
         }
 
-        public virtual bool TryGetFile(Path? path, [NotNullWhen(true)] out File? result)
+        public virtual bool TryGetFile(StoragePath? path, [NotNullWhen(true)] out StorageFile? result)
         {
             // Fast path without a (guaranteed) exception.
             if (path is null)
@@ -191,16 +191,16 @@
         }
 
         /// <summary>
-        ///     Returns a <see cref="Folder"/> instance which represents the folder at the specified
+        ///     Returns a <see cref="StorageFolder"/> instance which represents the folder at the specified
         ///     <paramref name="path"/>.
         /// </summary>
         /// <param name="path">The path of the folder.</param>
         /// <returns>
-        ///     A <see cref="Folder"/> instance which represents the folder at the specified <paramref name="path"/>.
+        ///     A <see cref="StorageFolder"/> instance which represents the folder at the specified <paramref name="path"/>.
         /// </returns>
         /// <remarks>
-        ///     Calling this method is equivalent to calling <see cref="GetFolder(Path)"/> with a
-        ///     <see cref="Path"/> instance obtained through the <see cref="GetPath(string)"/> method.
+        ///     Calling this method is equivalent to calling <see cref="GetFolder(StoragePath)"/> with a
+        ///     <see cref="StoragePath"/> instance obtained through the <see cref="GetPath(string)"/> method.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="path"/>
@@ -209,47 +209,47 @@
         ///     The <paramref name="path"/> had an invalid format which is not compatible with this
         ///     file system implementation.
         /// </exception>
-        public virtual Folder GetFolder(string path) =>
+        public virtual StorageFolder GetFolder(string path) =>
             GetFolder(GetPath(path));
 
         /// <summary>
-        ///     Returns a <see cref="Folder"/> instance which represents the folder at the specified
+        ///     Returns a <see cref="StorageFolder"/> instance which represents the folder at the specified
         ///     <paramref name="path"/>.
         /// </summary>
         /// <param name="path">The path of the folder.</param>
         /// <returns>
-        ///     A <see cref="Folder"/> instance which represents the folder at the specified <paramref name="path"/>.
+        ///     A <see cref="StorageFolder"/> instance which represents the folder at the specified <paramref name="path"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="path"/>
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The specified <paramref name="path"/> instance is a <see cref="Path"/> implementation
+        ///     The specified <paramref name="path"/> instance is a <see cref="StoragePath"/> implementation
         ///     which is not supported by this file system.
         /// </exception>
-        public abstract Folder GetFolder(Path path);
+        public abstract StorageFolder GetFolder(StoragePath path);
 
         /// <summary>
-        ///     Attempts to return a <see cref="Folder"/> instance instance which represents a
+        ///     Attempts to return a <see cref="StorageFolder"/> instance instance which represents a
         ///     specific folder identified through the <paramref name="knownFolder"/> parameter.
         /// </summary>
         /// <param name="knownFolder">
-        ///     A known folder for which a <see cref="Folder"/> instance should be retrieved.
+        ///     A known folder for which a <see cref="StorageFolder"/> instance should be retrieved.
         /// </param>
         /// <returns>
-        ///     A <see cref="Folder"/> instance identified through the <paramref name="knownFolder"/> parameter.
+        ///     A <see cref="StorageFolder"/> instance identified through the <paramref name="knownFolder"/> parameter.
         /// </returns>
         /// <remarks>
-        ///     Calling this method is equivalent to calling <see cref="GetFolder(Path)"/> with a
-        ///     <see cref="Path"/> instance obtained through the <see cref="GetPath(string)"/> method.
+        ///     Calling this method is equivalent to calling <see cref="GetFolder(StoragePath)"/> with a
+        ///     <see cref="StoragePath"/> instance obtained through the <see cref="GetPath(string)"/> method.
         /// </remarks>
         /// <exception cref="NotSupportedException">
         ///     The requested folder is not supported by this file system implementation.
         /// </exception>
-        public virtual Folder GetFolder(KnownFolder knownFolder) =>
+        public virtual StorageFolder GetFolder(KnownFolder knownFolder) =>
             GetFolder(GetPath(knownFolder));
         
-        public virtual bool TryGetFolder(string? path, [NotNullWhen(true)] out Folder? result)
+        public virtual bool TryGetFolder(string? path, [NotNullWhen(true)] out StorageFolder? result)
         {
             // Fast path without a (guaranteed) exception.
             if (string.IsNullOrEmpty(path))
@@ -272,7 +272,7 @@
             }
         }
 
-        public virtual bool TryGetFolder(Path? path, [NotNullWhen(true)] out Folder? result)
+        public virtual bool TryGetFolder(StoragePath? path, [NotNullWhen(true)] out StorageFolder? result)
         {
             // Fast path without a (guaranteed) exception.
             if (path is null)
@@ -296,7 +296,7 @@
         }
 
         /// <summary>
-        ///     Attempts to return a <see cref="Folder"/> instance instance which represents a
+        ///     Attempts to return a <see cref="StorageFolder"/> instance instance which represents a
         ///     specific folder identified through the <paramref name="knownFolder"/> parameter.
         /// </summary>
         /// <param name="knownFolder">
@@ -311,7 +311,7 @@
         ///     <see langword="false"/> if not.
         /// </returns>
         /// <seealso cref="GetFolder(KnownFolder)"/>
-        public virtual bool TryGetFolder(KnownFolder knownFolder, [NotNullWhen(true)] out Folder? result)
+        public virtual bool TryGetFolder(KnownFolder knownFolder, [NotNullWhen(true)] out StorageFolder? result)
         {
             if (TryGetPath(knownFolder, out var path))
             {

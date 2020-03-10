@@ -1,14 +1,13 @@
 ﻿namespace Files
 {
     using System;
-    using System.Collections.Generic;
     using System.Diagnostics.CodeAnalysis;
     using Files.Resources;
 
     /// <summary>
     ///     An immutable representation of a path which points to an element in a file system.
     /// </summary>
-    public abstract class Path : IFileSystemItem, IEquatable<string?>, IEquatable<Path?>
+    public abstract class StoragePath : IFileSystemElement, IEquatable<string?>, IEquatable<StoragePath?>
     {
 
         private const StringComparison DefaultStringComparison = StringComparison.Ordinal;
@@ -30,26 +29,26 @@
         public abstract PathKind Kind { get; }
         
         /// <summary>
-        ///     Gets a <see cref="Path"/> instance which represent's this path's root directory.
+        ///     Gets a <see cref="StoragePath"/> instance which represent's this path's root directory.
         ///     If the path doesn't have a root directory (for example if it is a relative path),
         ///     this returns <see langword="null"/>.
         /// </summary>
-        public abstract Path? Root { get; }
+        public abstract StoragePath? Root { get; }
 
         /// <summary>
-        ///     Gets a <see cref="Path"/> instance which represent's this path's parent directory.
+        ///     Gets a <see cref="StoragePath"/> instance which represent's this path's parent directory.
         ///     If the path doesn't have a parent directory (for example if it points to a root
         ///     directory), this returns <see langword="null"/>.
         ///     
         ///     Any trailing directory separator characters are ignored when determining the parent.
         /// </summary>
-        public abstract Path? Parent { get; }
+        public abstract StoragePath? Parent { get; }
 
         /// <summary>
-        ///     Gets a <see cref="Path"/> instance which represents a fully resolved, absolute path
+        ///     Gets a <see cref="StoragePath"/> instance which represents a fully resolved, absolute path
         ///     which is derived from this path.
         /// </summary>
-        public abstract Path FullPath { get; }
+        public abstract StoragePath FullPath { get; }
 
         /// <summary>
         ///     Gets the base name of the path, i.e. its last portion.
@@ -73,10 +72,10 @@
         public abstract bool EndsInDirectorySeparator { get; }
 
         /// <summary>
-        ///     Initializes a new <see cref="Path"/> instance from the specified <paramref name="path"/> string.
+        ///     Initializes a new <see cref="StoragePath"/> instance from the specified <paramref name="path"/> string.
         /// </summary>
         /// <param name="path">
-        ///     The string on which this <see cref="Path"/> instance is based.
+        ///     The string on which this <see cref="StoragePath"/> instance is based.
         /// </param>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="path"/>
@@ -84,7 +83,7 @@
         /// <exception cref="ArgumentException">
         ///     <paramref name="path"/> is an empty string.
         /// </exception>
-        protected Path(string path)
+        protected StoragePath(string path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
             if (path.Length == 0)
@@ -95,7 +94,7 @@
             _underlyingString = path;
         }
 
-        public virtual bool TrimEndingDirectorySeparator([NotNullWhen(true)] out Path? result)
+        public virtual bool TrimEndingDirectorySeparator([NotNullWhen(true)] out StoragePath? result)
         {
             if (!EndsInDirectorySeparator)
             {
@@ -122,7 +121,7 @@
         ///     resulting path.
         /// </summary>
         /// <returns>
-        ///     A new <see cref="Path"/> instance where one trailing directory separator has been
+        ///     A new <see cref="StoragePath"/> instance where one trailing directory separator has been
         ///     trimmed.
         ///     If this path doesn't have a trailing directory separator character, the same path
         ///     instance is returned.
@@ -131,9 +130,9 @@
         ///     Trimming the trailing directory separator character is not possible.
         ///     This can happen when the path consists of one directory separator character only.
         /// </exception>
-        public abstract Path TrimEndingDirectorySeparator();
+        public abstract StoragePath TrimEndingDirectorySeparator();
 
-        public virtual bool TryAppend(string? part, [NotNullWhen(true)] out Path? result)
+        public virtual bool TryAppend(string? part, [NotNullWhen(true)] out StoragePath? result)
         {
             if (part is null)
             {
@@ -162,7 +161,7 @@
         ///     The part to be appended to the path.
         /// </param>
         /// <returns>
-        ///     A new <see cref="Path"/> instance which represents the path after appending the
+        ///     A new <see cref="StoragePath"/> instance which represents the path after appending the
         ///     specified <paramref name="part"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
@@ -171,12 +170,12 @@
         /// <exception cref="ArgumentException">
         ///     Appending <paramref name="part"/> would result in an invalid path.
         /// </exception>
-        public abstract Path Append(string part);
+        public abstract StoragePath Append(string part);
 
-        public bool TryCombine(Path? other, [NotNullWhen(true)] out Path? result) =>
+        public bool TryCombine(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
             TryCombine(other?._underlyingString, out result);
         
-        public virtual bool TryCombine(string? other, [NotNullWhen(true)] out Path? result)
+        public virtual bool TryCombine(string? other, [NotNullWhen(true)] out StoragePath? result)
         {
             if (other is null)
             {
@@ -198,15 +197,15 @@
             }
         }
 
-        public Path Combine(Path other) =>
+        public StoragePath Combine(StoragePath other) =>
             Combine(other?._underlyingString!);
 
-        public abstract Path Combine(string other);
+        public abstract StoragePath Combine(string other);
 
-        public bool TryJoin(Path? other, [NotNullWhen(true)] out Path? result) =>
+        public bool TryJoin(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
             TryJoin(other?._underlyingString, out result);
 
-        public virtual bool TryJoin(string? other, [NotNullWhen(true)] out Path? result)
+        public virtual bool TryJoin(string? other, [NotNullWhen(true)] out StoragePath? result)
         {
             if (other is null)
             {
@@ -228,22 +227,22 @@
             }
         }
 
-        public Path Join(Path other) =>
+        public StoragePath Join(StoragePath other) =>
             Join(other?._underlyingString!);
 
-        public abstract Path Join(string other);
+        public abstract StoragePath Join(string other);
 
         public sealed override bool Equals(object? obj) => obj switch
         {
             string path => Equals(path),
-            Path path => Equals(path),
+            StoragePath path => Equals(path),
             _ => false
         };
 
-        public bool Equals(Path? path) =>
+        public bool Equals(StoragePath? path) =>
             Equals(path?._underlyingString, DefaultStringComparison);
 
-        public bool Equals(Path? path, StringComparison stringComparison) =>
+        public bool Equals(StoragePath? path, StringComparison stringComparison) =>
             Equals(path?._underlyingString, stringComparison);
 
         public bool Equals(string? path) =>
@@ -272,45 +271,45 @@
         public sealed override string ToString() =>
             _underlyingString;
 
-        public static Path operator /(Path path1, Path path2)
+        public static StoragePath operator /(StoragePath path1, StoragePath path2)
         {
             return path1 / path2?._underlyingString!;
         }
 
-        public static Path operator /(Path path1, string path2)
+        public static StoragePath operator /(StoragePath path1, string path2)
         {
             _ = path1 ?? throw new ArgumentNullException(nameof(path1));
             // JoinWith should validate path2.
             return path1.Join(path2);
         }
 
-        public static Path operator +(Path path, string part)
+        public static StoragePath operator +(StoragePath path, string part)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
             // Append should validate part.
             return path.Append(part);
         }
 
-        public static bool operator ==(Path? path1, Path? path2) =>
+        public static bool operator ==(StoragePath? path1, StoragePath? path2) =>
             path1?.Equals(path2) ?? path2?.Equals(path1) ?? true;
 
-        public static bool operator !=(Path? path1, Path? path2) =>
+        public static bool operator !=(StoragePath? path1, StoragePath? path2) =>
             !(path1 == path2);
 
-        public static bool operator ==(Path? path1, string? path2) =>
+        public static bool operator ==(StoragePath? path1, string? path2) =>
             path1?.Equals(path2) ?? path2 is null;
 
-        public static bool operator !=(Path? path1, string? path2) =>
+        public static bool operator !=(StoragePath? path1, string? path2) =>
             !(path1 == path2);
 
-        public static bool operator ==(string? path1, Path? path2) =>
+        public static bool operator ==(string? path1, StoragePath? path2) =>
             path2?.Equals(path1) ?? path1 is null;
 
-        public static bool operator !=(string? path1, Path? path2) =>
+        public static bool operator !=(string? path1, StoragePath? path2) =>
             !(path1 == path2);
 
         [return: NotNullIfNotNull("path")]
-        public static implicit operator string?(Path? path) =>
+        public static implicit operator string?(StoragePath? path) =>
             path?.ToString();
 
     }

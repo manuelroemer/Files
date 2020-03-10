@@ -4,31 +4,27 @@
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
-    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Files;
     using Files.FileSystems.Physical.Resources;
     using Files.FileSystems.Physical.Utilities;
     using Files.Utilities;
-    using File = File;
-    using IOFile = System.IO.File;
     using IOPath = System.IO.Path;
-    using Path = Path;
 
-    internal sealed class PhysicalFolder : Folder
+    internal sealed class PhysicalFolder : StorageFolder
     {
 
-        private readonly Path _path;
-        private readonly Path _fullPath;
-        private readonly Path? _fullParentPath;
+        private readonly StoragePath _path;
+        private readonly StoragePath _fullPath;
+        private readonly StoragePath? _fullParentPath;
         private readonly DirectoryInfo _directoryInfo;
 
         public override FileSystem FileSystem { get; }
 
-        public override Path Path => _path;
+        public override StoragePath Path => _path;
 
-        public PhysicalFolder(FileSystem fileSystem, PhysicalPath path)
+        public PhysicalFolder(FileSystem fileSystem, PhysicalStoragePath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
@@ -40,7 +36,7 @@
             _directoryInfo = new DirectoryInfo(_fullPath);
         }
 
-        public override Task<FolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
+        public override Task<StorageFolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(async () =>
@@ -55,7 +51,7 @@
                 var realFileName = _directoryInfo.GetRealName() ?? _directoryInfo.Name;
                 var lastWriteTime = Directory.GetLastWriteTimeUtc(_fullPath.ToString());
 
-                return new FolderProperties(
+                return new StorageFolderProperties(
                     realFileName,
                     IOPath.GetFileNameWithoutExtension(realFileName),
                     PathHelper.GetExtensionWithoutTrailingExtensionSeparator(realFileName)?.ToNullIfEmpty(),
@@ -68,13 +64,13 @@
         public override Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => IOFile.GetAttributes(_fullPath.ToString()));
+            return Task.Run(() => File.GetAttributes(_fullPath.ToString()));
         }
 
         public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => IOFile.SetAttributes(_fullPath.ToString(), attributes));
+            return Task.Run(() => File.SetAttributes(_fullPath.ToString(), attributes));
         }
 
         public override Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
@@ -110,7 +106,7 @@
                         case CreationCollisionOption.Fail:
                             throw new IOException(ExceptionStrings.Folder.CreateFailFolderAlreadyExists());
                         case CreationCollisionOption.ReplaceExisting:
-                            await DeleteAsync(DeletionOption.IgnoreMissing).ConfigureAwait(false);
+                            await DeleteAsync(DeletionOption.IgnoreMissing, cancellationToken).ConfigureAwait(false);
                             break;
                         case CreationCollisionOption.Ignore:
                             return;
@@ -124,8 +120,8 @@
             });
         }
 
-        public override Task<Folder> CopyAsync(
-            Path destinationPath,
+        public override Task<StorageFolder> CopyAsync(
+            StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         )
@@ -148,8 +144,8 @@
             });
         }
 
-        public override Task<Folder> MoveAsync(
-            Path destinationPath,
+        public override Task<StorageFolder> MoveAsync(
+            StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         )
@@ -173,7 +169,7 @@
             });
         }
 
-        public override Task<Folder> RenameAsync(
+        public override Task<StorageFolder> RenameAsync(
             string newName,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
@@ -195,12 +191,24 @@
                     await EnsureExistsAsync(cancellationToken);
                 }
 
-                cancellationToken.ThrowIfCancellationRequested();
-                Directory.Delete(_fullPath.ToString(), recursive: true);
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    Directory.Delete(_fullPath.ToString(), recursive: true);
+                }
+                catch (DirectoryNotFoundException)
+                {
+                    // The exception is thrown if a parent directory does not exist.
+                    // Must be caught manually to ensure compatibility with DeletionOption.IgnoreMissing.
+                    if (options != DeletionOption.IgnoreMissing)
+                    {
+                        throw;
+                    }
+                }
             });
         }
 
-        public override Task<IEnumerable<File>> GetAllFilesAsync(CancellationToken cancellationToken = default)
+        public override Task<IEnumerable<StorageFile>> GetAllFilesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
@@ -211,7 +219,7 @@
             });
         }
 
-        public override Task<IEnumerable<Folder>> GetAllFoldersAsync(CancellationToken cancellationToken = default)
+        public override Task<IEnumerable<StorageFolder>> GetAllFoldersAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>

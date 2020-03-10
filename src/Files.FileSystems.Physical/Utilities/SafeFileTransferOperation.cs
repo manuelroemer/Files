@@ -1,9 +1,6 @@
 ﻿namespace Files.FileSystems.Physical.Utilities
 {
     using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using System.Linq;
     using System.Runtime.ExceptionServices;
     using System.Threading;
     using IOPath = System.IO.Path;

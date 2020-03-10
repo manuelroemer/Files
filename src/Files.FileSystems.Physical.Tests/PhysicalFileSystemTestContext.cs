@@ -14,15 +14,12 @@
 
         private PhysicalFileSystemTestContext() { }
 
-        public override async Task<Folder> GetTestFolderAsync()
+        public override async Task<StorageFolder> GetTestFolderAsync()
         {
-            var tmpPath = System.IO.Path.GetTempPath();
-            var testFolderPath = System.IO.Path.Join(
-                tmpPath,
-                Assembly.GetExecutingAssembly().GetName().Name,
-                "TestFolder"
-            );
-            var folder = FileSystem.GetFolder(testFolderPath);
+            var folder = FileSystem
+                .GetFolder(KnownFolder.TemporaryData)
+                .GetFolder(Assembly.GetExecutingAssembly().GetName().Name ?? "")
+                .GetFolder("TestFolder");
             await folder.CreateAsync(recursive: true, CreationCollisionOption.ReplaceExisting).ConfigureAwait(false);
             return folder;
         }

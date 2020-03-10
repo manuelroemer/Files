@@ -5,7 +5,7 @@
     /// <summary>
     ///     Provides basic properties of a file in a file system.
     /// </summary>
-    public sealed class FileProperties : FileSystemElementProperties
+    public sealed class StorageFileProperties : StorageElementProperties
     {
 
         /// <summary>
@@ -14,7 +14,7 @@
         public ulong Size { get; }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="FileProperties"/> class.
+        ///     Initializes a new instance of the <see cref="StorageFileProperties"/> class.
         /// </summary>
         /// <param name="name">The real name of the element.</param>
         /// <param name="nameWithoutExtension">The real name of the element without an extension.</param>
@@ -25,7 +25,7 @@
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="name"/> or <paramref name="nameWithoutExtension"/> is <see langword="null"/>.
         /// </exception>
-        public FileProperties(
+        public StorageFileProperties(
             string name,
             string nameWithoutExtension,
             string? extension,

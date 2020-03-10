@@ -14,8 +14,8 @@
         Fail,
 
         /// <summary>
-        ///     If the element does not exist (for example because it has already been deleted)
-        ///     the operation should not fail, but exit without any errors.
+        ///     If the element or one of its parent folders does not exist (for example because
+        ///     it has already been deleted) the operation should not fail, but exit without any errors.
         /// </summary>
         IgnoreMissing,
 

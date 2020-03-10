@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Files.Resources
+﻿namespace Files.Resources
 {
     internal static partial class ExceptionStrings
     {
@@ -16,9 +14,9 @@ namespace Files.Resources
         public static class FileSystem
         {
 
-            public static string SpecialFolderNotSupported(Environment.SpecialFolder value) =>
+            public static string KnownFolderNotSupported(KnownFolder value) =>
                 $"The file system doesn't support creating a path or folder from the " +
-                $"\"{nameof(Environment)}.{nameof(Environment.SpecialFolder)}.{value}\" enumeration value.";
+                $"\"{nameof(KnownFolder)}.{value}\" enumeration value.";
 
         }
 

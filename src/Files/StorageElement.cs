@@ -7,12 +7,12 @@
 
     /// <summary>
     ///     An immutable representation of a file or folder in a file system.
-    ///     This is the base class of the <see cref="File"/> and <see cref="Folder"/> classes.
+    ///     This is the base class of the <see cref="StorageFile"/> and <see cref="StorageFolder"/> classes.
     ///     No other classes can derive from this class.
     /// </summary>
-    /// <seealso cref="File"/>
-    /// <seealso cref="Folder"/>
-    public abstract class FileSystemElement : IFileSystemItem
+    /// <seealso cref="StorageFile"/>
+    /// <seealso cref="StorageFolder"/>
+    public abstract class StorageElement : IFileSystemElement
     {
 
         internal const CreationCollisionOption DefaultCreationCollisionOption = CreationCollisionOption.Fail;
@@ -23,37 +23,19 @@
         public abstract FileSystem FileSystem { get; }
 
         /// <summary>
-        ///     <para>Gets the path which identifies this element.</para>
-        ///     <para>
-        ///         <b>Note:</b>
-        ///         Avoid using the <see cref="Path"/> property to determine the element's
-        ///         name or extension. Use <see cref="GetPropertiesAsync(CancellationToken)"/> instead
-        ///         (see remarks for details).
-        ///     </para>
+        ///     Gets the path which identifies this element.
         /// </summary>
-        /// <remarks>
-        ///     The <see cref="Path"/> property of a file system element may return a non-normalized
-        ///     path, for example <c>first/second/third/..</c>.
-        ///     While a file system implementation has no problem locating the corresponding element
-        ///     (<c>second</c> in this case), the <see cref="Path.Name"/> property would return
-        ///     <c>third</c> for the given path. This is obviously not the correct name of the element.
-        ///     
-        ///     To avoid these problems, use the <see cref="GetPropertiesAsync(CancellationToken)"/>
-        ///     method for getting current data about the element.
-        ///     You can furthermore traverse the file system tree by using methods like
-        ///     <see cref="File.GetParent"/> or <see cref="Folder.GetAllChildrenAsync(CancellationToken)"/>.
-        /// </remarks>
-        public abstract Path Path { get; }
+        public abstract StoragePath Path { get; }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="FileSystemElement"/> class.
+        ///     Initializes a new instance of the <see cref="StorageElement"/> class.
         /// </summary>
         /// <remarks>
-        ///     This internal constructor ensures that only the <see cref="File"/> and
-        ///     <see cref="Folder"/> classes can derive from this base class.
+        ///     This internal constructor ensures that only the <see cref="StorageFile"/> and
+        ///     <see cref="StorageFolder"/> classes can derive from this base class.
         ///     External users of the library cannot derive from it.
         /// </remarks>
-        private protected FileSystemElement()
+        private protected StorageElement()
         {
             // Never make this public or protected!
             // Only the file/folder classes within this library are supposed to inherit from this base.
@@ -82,10 +64,10 @@
         ///     
         ///     -or-
         ///     
-        ///     The element is a <see cref="Folder"/> and does not exist.
+        ///     The element is a <see cref="StorageFolder"/> and does not exist.
         /// </exception>
         /// <exception cref="FileNotFoundException">
-        ///     The element is a <see cref="File"/> and does not exist.
+        ///     The element is a <see cref="StorageFile"/> and does not exist.
         /// </exception>
         public abstract Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default);
 
@@ -117,10 +99,10 @@
         ///     
         ///     -or-
         ///     
-        ///     The element is a <see cref="Folder"/> and does not exist.
+        ///     The element is a <see cref="StorageFolder"/> and does not exist.
         /// </exception>
         /// <exception cref="FileNotFoundException">
-        ///     The element is a <see cref="File"/> and does not exist.
+        ///     The element is a <see cref="StorageFile"/> and does not exist.
         /// </exception>
         public abstract Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default);
 
@@ -308,7 +290,7 @@
         );
 
         /// <summary>
-        ///     Deletes the element (and all of its children if it is a <see cref="Folder"/>).
+        ///     Deletes the element (and all of its children if it is a <see cref="StorageFolder"/>).
         /// </summary>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
@@ -328,20 +310,20 @@
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="FileNotFoundException">
-        ///     The element is a <see cref="File"/> and does not exist.
+        ///     The element is a <see cref="StorageFile"/> and does not exist.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
         ///     One of the element's parent folders does not exist.
         ///     
         ///     -or-
         ///     
-        ///     The element is a <see cref="Folder"/> and does not exist.
+        ///     The element is a <see cref="StorageFolder"/> and does not exist.
         /// </exception>
         public Task DeleteAsync(CancellationToken cancellationToken = default) =>
             DeleteAsync(DefaultDeletionOption, cancellationToken);
 
         /// <summary>
-        ///     Deletes the element (and all of its children if it is a <see cref="Folder"/>).
+        ///     Deletes the element (and all of its children if it is a <see cref="StorageFolder"/>).
         /// </summary>
         /// <param name="options">
         ///     Defines how to react when the element to be deleted does not exist.
@@ -359,7 +341,7 @@
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="FileNotFoundException">
-        ///     The element is a <see cref="File"/> which does not exist and <paramref name="options"/>
+        ///     The element is a <see cref="StorageFile"/> which does not exist and <paramref name="options"/>
         ///     has the value <see cref="DeletionOption.Fail"/>.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
@@ -367,23 +349,16 @@
         ///     
         ///     -or-
         ///     
-        ///     The element is a <see cref="Folder"/> which does not exist and <paramref name="options"/>
+        ///     The element is a <see cref="StorageFolder"/> which does not exist and <paramref name="options"/>
         ///     has the value <see cref="DeletionOption.Fail"/>.
         /// </exception>
         public abstract Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default);
 
         /// <summary>
-        ///     Returns a string representation of the element.
+        ///     Returns the element's full path as a string.
         /// </summary>
-        /// <returns>
-        ///     If not overridden, this returns the string representation of the element's <see cref="Path"/>.
-        ///     
-        ///     If you want to retrieve the element's path as a string, ensure that you call <see cref="Path.ToString"/>
-        ///     on the element's <see cref="Path"/> property instead of calling this method, because this
-        ///     method may be overridden by certain file system implementations.
-        /// </returns>
-        public override string ToString() =>
-            Path.ToString();
+        public sealed override string ToString() =>
+            Path.FullPath.ToString();
 
     }
 

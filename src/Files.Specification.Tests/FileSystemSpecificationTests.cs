@@ -1,10 +1,6 @@
 ﻿namespace Files.Specification.Tests
 {
     using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using System.Linq;
-    using Files.Specification.Tests;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
@@ -20,6 +16,16 @@
 
         public FileSystemSpecificationTests(FileSystemTestContext context)
             : base(context) { }
+
+        #region PathInformation Tests
+
+        [TestMethod]
+        public void PathInformation_Returns_Non_Null_Instance()
+        {
+            Assert.IsNotNull(FileSystem.PathInformation);
+        }
+
+        #endregion
 
         #region GetPath Tests
 

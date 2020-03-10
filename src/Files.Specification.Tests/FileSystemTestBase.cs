@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using Files;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using File = File;
 
     /// <summary>
     ///     Defines base for test classes which need to interact or test a file system element
@@ -18,7 +17,7 @@
     public abstract class FileSystemTestBase
     {
 
-        private Folder? _testFolder;
+        private StorageFolder? _testFolder;
 
         /// <summary>
         ///     Gets the <see cref="FileSystemTestContext"/> with which the test class has been initialized.
@@ -36,7 +35,7 @@
         ///     By only interacting with items in this folder, the tests are deterministic.
         /// </summary>
         [AllowNull]
-        protected Folder TestFolder
+        protected StorageFolder TestFolder
         {
             get => _testFolder ?? throw new InvalidOperationException("The test folder has not been initialized yet.");
             set => _testFolder = value;
@@ -76,7 +75,7 @@
             {
                 if (_testFolder is object)
                 {
-                    await _testFolder.DeleteAsync();
+                    await _testFolder.DeleteAsync(DeletionOption.IgnoreMissing);
                 }
             }
             catch (DirectoryNotFoundException)

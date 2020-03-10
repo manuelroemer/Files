@@ -1,34 +1,28 @@
 ﻿namespace Files.FileSystems.Physical
 {
     using System;
-    using System.Collections.Generic;
-    using System.Collections.ObjectModel;
-    using System.Diagnostics.CodeAnalysis;
     using System.IO;
-    using System.Linq;
     using Files;
     using Files.FileSystems.Physical.Resources;
     using Files.FileSystems.Physical.Utilities;
-    using IOPath = System.IO.Path;
-    using Path = Files.Path;
 
-    internal sealed class PhysicalPath : Path
+    internal sealed class PhysicalStoragePath : StoragePath
     {
 
-        private readonly Lazy<Path?> _rootLazy;
-        private readonly Lazy<Path?> _parentLazy;
-        private readonly Lazy<Path> _fullPathLazy;
-        private readonly Lazy<Path> _pathWithoutEndingDirectorySeparatorLazy;
+        private readonly Lazy<StoragePath?> _rootLazy;
+        private readonly Lazy<StoragePath?> _parentLazy;
+        private readonly Lazy<StoragePath> _fullPathLazy;
+        private readonly Lazy<StoragePath> _pathWithoutEndingDirectorySeparatorLazy;
 
         public override FileSystem FileSystem { get; }
 
         public override PathKind Kind { get; }
 
-        public override Path? Root => _rootLazy.Value;
+        public override StoragePath? Root => _rootLazy.Value;
 
-        public override Path? Parent => _parentLazy.Value;
+        public override StoragePath? Parent => _parentLazy.Value;
 
-        public override Path FullPath => _fullPathLazy.Value;
+        public override StoragePath FullPath => _fullPathLazy.Value;
 
         public override string Name { get; }
 
@@ -38,18 +32,18 @@
 
         public override bool EndsInDirectorySeparator { get; }
 
-        internal PhysicalPath(PhysicalFileSystem fileSystem, string path)
+        internal PhysicalStoragePath(PhysicalFileSystem fileSystem, string path)
             : base(path)
         {
             var fullPath = GetFullPathOrThrow(path);
-            var rootPath = IOPath.GetPathRoot(ToString());
-            var pathWithoutTrailingSeparator = IOPath.TrimEndingDirectorySeparator(path);
-            var directoryPath = IOPath.GetDirectoryName(pathWithoutTrailingSeparator);
-            var name = IOPath.GetFileName(pathWithoutTrailingSeparator);
-            var nameWithoutExtension = IOPath.GetFileNameWithoutExtension(pathWithoutTrailingSeparator);
+            var rootPath = Path.GetPathRoot(ToString());
+            var pathWithoutTrailingSeparator = Path.TrimEndingDirectorySeparator(path);
+            var directoryPath = Path.GetDirectoryName(pathWithoutTrailingSeparator);
+            var name = Path.GetFileName(pathWithoutTrailingSeparator);
+            var nameWithoutExtension = Path.GetFileNameWithoutExtension(pathWithoutTrailingSeparator);
             var extension = PathHelper.GetExtensionWithoutTrailingExtensionSeparator(pathWithoutTrailingSeparator);
-            var isPathFullyQualified = IOPath.IsPathFullyQualified(path);
-            var endsInDirectorySeparator = IOPath.EndsInDirectorySeparator(path);
+            var isPathFullyQualified = Path.IsPathFullyQualified(path);
+            var endsInDirectorySeparator = Path.EndsInDirectorySeparator(path);
 
             FileSystem = fileSystem;
             Kind = isPathFullyQualified ? PathKind.Absolute : PathKind.Relative;
@@ -58,22 +52,22 @@
             Extension = string.IsNullOrEmpty(extension) ? null : extension;
             EndsInDirectorySeparator = endsInDirectorySeparator;
 
-            _rootLazy = new Lazy<Path?>(
+            _rootLazy = new Lazy<StoragePath?>(
                 () => string.IsNullOrEmpty(rootPath) ? null : fileSystem.GetPath(rootPath),
                 isThreadSafe: false
             );
 
-            _parentLazy = new Lazy<Path?>(
+            _parentLazy = new Lazy<StoragePath?>(
                 () => string.IsNullOrEmpty(directoryPath) ? null : fileSystem.GetPath(directoryPath),
                 isThreadSafe: false
             );
 
-            _fullPathLazy = new Lazy<Path>(
+            _fullPathLazy = new Lazy<StoragePath>(
                 () => fileSystem.GetPath(fullPath),
                 isThreadSafe: false
             );
 
-            _pathWithoutEndingDirectorySeparatorLazy = new Lazy<Path>(
+            _pathWithoutEndingDirectorySeparatorLazy = new Lazy<StoragePath>(
                 () =>
                 {
                     if (!EndsInDirectorySeparator)
@@ -81,7 +75,7 @@
                         return this;
                     }
 
-                    var trimmedPath = IOPath.TrimEndingDirectorySeparator(ToString());
+                    var trimmedPath = Path.TrimEndingDirectorySeparator(ToString());
 
                     try
                     {
@@ -114,7 +108,7 @@
 
             try
             {
-                return IOPath.GetFullPath(path);
+                return Path.GetFullPath(path);
             }
             catch (Exception ex) when (
                    ex is ArgumentException
@@ -130,7 +124,7 @@
             }
         }
 
-        public override Path Append(string part)
+        public override StoragePath Append(string part)
         {
             _ = part ?? throw new ArgumentNullException(nameof(part));
             if (part.Length == 0)
@@ -141,7 +135,7 @@
             return FileSystem.GetPath(ToString() + part);
         }
 
-        public override Path Combine(string other)
+        public override StoragePath Combine(string other)
         {
             _ = other ?? throw new ArgumentNullException(nameof(other));
             if (other.Length == 0)
@@ -149,10 +143,10 @@
                 return this;
             }
 
-            return FileSystem.GetPath(IOPath.Combine(ToString(), other));
+            return FileSystem.GetPath(Path.Combine(ToString(), other));
         }
 
-        public override Path Join(string other)
+        public override StoragePath Join(string other)
         {
             _ = other ?? throw new ArgumentNullException(nameof(other));
             if (other.Length == 0)
@@ -160,10 +154,10 @@
                 return this;
             }
 
-            return FileSystem.GetPath(IOPath.Join(ToString(), other));
+            return FileSystem.GetPath(Path.Join(ToString(), other));
         }
 
-        public override Path TrimEndingDirectorySeparator() =>
+        public override StoragePath TrimEndingDirectorySeparator() =>
             _pathWithoutEndingDirectorySeparatorLazy.Value;
 
     }

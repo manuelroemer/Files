@@ -5,9 +5,9 @@
     /// <summary>
     ///     Provides basic properties of a file or folder in a file system.
     /// </summary>
-    /// <seealso cref="FileProperties"/>
-    /// <seealso cref="FolderProperties"/>
-    public abstract class FileSystemElementProperties
+    /// <seealso cref="StorageFileProperties"/>
+    /// <seealso cref="StorageFolderProperties"/>
+    public abstract class StorageElementProperties
     {
 
         /// <summary>
@@ -38,7 +38,7 @@
         public DateTimeOffset? ModifiedOn { get; }
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="FileSystemElementProperties"/> class.
+        ///     Initializes a new instance of the <see cref="StorageElementProperties"/> class.
         /// </summary>
         /// <param name="name">The real name of the element.</param>
         /// <param name="nameWithoutExtension">The real name of the element without an extension.</param>
@@ -48,7 +48,7 @@
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="name"/> or <paramref name="nameWithoutExtension"/> is <see langword="null"/>.
         /// </exception>
-        private protected FileSystemElementProperties(
+        private protected StorageElementProperties(
             string name,
             string nameWithoutExtension,
             string? extension,

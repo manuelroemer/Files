@@ -1,9 +1,5 @@
 ﻿namespace Files.FileSystems.Physical.Utilities
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using System.Linq;
     using System.IO;
 
     internal static class FileNameUtils

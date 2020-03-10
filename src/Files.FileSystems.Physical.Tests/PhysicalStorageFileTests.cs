@@ -4,10 +4,10 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
     [TestClass]
-    public sealed class PhysicalFileTests : FileSpecificationTests
+    public sealed class PhysicalStorageFileTests : StorageFileSpecificationTests
     {
 
-        public PhysicalFileTests() : base(PhysicalFileSystemTestContext.Instance) { }
+        public PhysicalStorageFileTests() : base(PhysicalFileSystemTestContext.Instance) { }
 
     }
 

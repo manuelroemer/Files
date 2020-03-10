@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Files;
-    using Files.Specification.Tests.Preparation;
     using Files.Specification.Tests.Utilities;
 
     /// <summary>
@@ -28,7 +27,7 @@
         ///     |_ dst
         ///     </code>
         /// </summary>
-        public static async Task<(Folder SrcFolder, Folder DstFolder, File SrcFile)> SetupSrcDstFileAsync(this Folder folder)
+        public static async Task<(StorageFolder SrcFolder, StorageFolder DstFolder, StorageFile SrcFile)> SetupSrcDstFileAsync(this StorageFolder folder)
         {
             var (src, dst) = await folder.SetupFolderAsync(
                 basePath => basePath / Default.SrcFolderName,
@@ -51,7 +50,7 @@
         ///     |_ dst.file
         ///     </code>
         /// </summary>
-        public static async Task<(File SrcFile, File ConflictingDstFile)> SetupTwoConflictingFilesAsync(this Folder folder)
+        public static async Task<(StorageFile SrcFile, StorageFile ConflictingDstFile)> SetupTwoConflictingFilesAsync(this StorageFolder folder)
         {
             var (src, dst) = await folder.SetupFileAsync(
                 basePath => basePath / Default.FileName,
@@ -63,7 +62,7 @@
         /// <summary>
         ///     Sets up and returns a file with the <see cref="Default.FileName"/> in the folder.
         /// </summary>
-        public static Task<File> SetupFileAsync(this Folder folder)
+        public static Task<StorageFile> SetupFileAsync(this StorageFolder folder)
         {
             return folder.SetupFileAsync(basePath => basePath / Default.FileName);
         }
@@ -75,7 +74,7 @@
         /// <param name="pathProvider">
         ///     A function which returns the path of the file to be created, based on the initial folder.
         /// </param>
-        public static async Task<File> SetupFileAsync(this Folder folder, PathProvider pathProvider)
+        public static async Task<StorageFile> SetupFileAsync(this StorageFolder folder, PathProvider pathProvider)
         {
             var files = await folder.SetupFileAsync(new[] { pathProvider }).ConfigureAwait(false);
             return files[0];
@@ -88,7 +87,7 @@
         /// <param name="pathProviders">
         ///     Functions which return the path of the files to be created, based on the initial folder.
         /// </param>
-        public static async Task<IList<File>> SetupFileAsync(this Folder folder, params PathProvider[] pathProviders)
+        public static async Task<IList<StorageFile>> SetupFileAsync(this StorageFolder folder, params PathProvider[] pathProviders)
         {
             var files = pathProviders
                 .Select(pathFactory => pathFactory(folder.Path))
@@ -106,7 +105,7 @@
         /// <summary>
         ///     Sets up and returns a file with the <see cref="Default.FolderName"/> in the folder.
         /// </summary>
-        public static Task<Folder> SetupFolderAsync(this Folder folder)
+        public static Task<StorageFolder> SetupFolderAsync(this StorageFolder folder)
         {
             return folder.SetupFolderAsync(basePath => basePath / Default.FolderName);
         }
@@ -118,7 +117,7 @@
         /// <param name="pathProvider">
         ///     A function which returns the path of the folder to be created, based on the initial folder.
         /// </param>
-        public static async Task<Folder> SetupFolderAsync(this Folder folder, PathProvider pathProvider)
+        public static async Task<StorageFolder> SetupFolderAsync(this StorageFolder folder, PathProvider pathProvider)
         {
             var folders = await folder.SetupFolderAsync(new[] { pathProvider }).ConfigureAwait(false);
             return folders[0];
@@ -131,7 +130,7 @@
         /// <param name="pathProviders">
         ///     Functions which return the path of the folders to be created, based on the initial folder.
         /// </param>
-        public static async Task<IList<Folder>> SetupFolderAsync(this Folder folder, params PathProvider[] pathProviders)
+        public static async Task<IList<StorageFolder>> SetupFolderAsync(this StorageFolder folder, params PathProvider[] pathProviders)
         {
             var folders = pathProviders
                 .Select(pathFactory => pathFactory(folder.Path))

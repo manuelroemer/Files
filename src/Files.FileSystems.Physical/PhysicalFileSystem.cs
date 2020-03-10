@@ -1,26 +1,20 @@
 ﻿namespace Files.FileSystems.Physical
 {
     using System;
-    using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using System.Linq;
-    using Files;
     using System.Diagnostics.CodeAnalysis;
-    using IOPath = System.IO.Path;
-    using System.Xml.XPath;
-    using Files.FileSystems.Physical.Resources;
-    using static System.Environment.SpecialFolder;
+    using System.IO;
+    using Files;
     using static System.Environment;
-    using System.Runtime.CompilerServices;
+    using static System.Environment.SpecialFolder;
 
     public sealed class PhysicalFileSystem : FileSystem
     {
 
         private static readonly PathInformation PhysicalPathInformation = new PathInformation(
-            IOPath.GetInvalidPathChars(),
-            IOPath.GetInvalidFileNameChars(),
-            IOPath.DirectorySeparatorChar,
-            IOPath.AltDirectorySeparatorChar,
+            Path.GetInvalidPathChars(),
+            Path.GetInvalidFileNameChars(),
+            Path.DirectorySeparatorChar,
+            Path.AltDirectorySeparatorChar,
             extensionSeparatorChar: '.',
             currentDirectorySegment: ".",
             parentDirectorySegment: ".."
@@ -35,32 +29,32 @@
         public override PathInformation PathInformation => PhysicalPathInformation;
 
         /// <inheritdoc/>
-        public override File GetFile(Path path)
+        public override StorageFile GetFile(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new PhysicalFile(this, (PhysicalPath)path);
+            return new PhysicalStorageFile(this, (PhysicalStoragePath)path);
         }
 
         /// <inheritdoc/>
-        public override Folder GetFolder(Path path)
+        public override StorageFolder GetFolder(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new PhysicalFolder(this, (PhysicalPath)path);
+            return new PhysicalFolder(this, (PhysicalStoragePath)path);
         }
 
         /// <inheritdoc/>
-        public override Path GetPath(string path)
+        public override StoragePath GetPath(string path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new PhysicalPath(this, path);
+            return new PhysicalStoragePath(this, path);
         }
 
         /// <inheritdoc/>
-        public override bool TryGetPath(KnownFolder knownFolder, [NotNullWhen(true)] out Path? result)
+        public override bool TryGetPath(KnownFolder knownFolder, [NotNullWhen(true)] out StoragePath? result)
         {
             var path = knownFolder switch
             {
-                KnownFolder.TemporaryData => IOPath.GetTempPath(),
+                KnownFolder.TemporaryData => Path.GetTempPath(),
                 KnownFolder.RoamingApplicationData => GetSpecialFolder(ApplicationData),
                 KnownFolder.LocalApplicationData => GetSpecialFolder(LocalApplicationData),
                 KnownFolder.ProgramData => GetSpecialFolder(CommonApplicationData),
@@ -70,7 +64,7 @@
                 KnownFolder.PicturesLibrary => GetSpecialFolder(MyPictures),
                 KnownFolder.VideosLibrary => GetSpecialFolder(MyVideos),
                 KnownFolder.MusicLibrary => GetSpecialFolder(MyMusic),
-                _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(knownFolder)),
+                _ => null,
             };
 
             return TryGetPath(path, out result);

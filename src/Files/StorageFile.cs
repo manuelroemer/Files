@@ -10,16 +10,16 @@
     /// <summary>
     ///     An immutable representation of a file in a file system.
     /// </summary>
-    public abstract class File : FileSystemElement
+    public abstract class StorageFile : StorageElement
     {
 
         /// <summary>
         ///     Returns this file's parent folder.
         /// </summary>
         /// <returns>
-        ///     A <see cref="Folder"/> instance which represents the parent of this file.
+        ///     A <see cref="StorageFolder"/> instance which represents the parent of this file.
         /// </returns>
-        public virtual Folder GetParent()
+        public virtual StorageFolder GetParent()
         {
             var parentPath = Path.FullPath.Parent;
 
@@ -56,7 +56,7 @@
         /// <exception cref="FileNotFoundException">
         ///     The file does not exist.
         /// </exception>
-        public abstract Task<FileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default);
+        public abstract Task<StorageFileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default);
 
         /// <summary>
         ///     Copies the file to the specified location.
@@ -68,7 +68,7 @@
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
         /// <returns>
-        ///     A <see cref="File"/> instance representing the newly created copy of this file.
+        ///     A <see cref="StorageFile"/> instance representing the newly created copy of this file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="destinationPath"/>
@@ -96,7 +96,7 @@
         /// <exception cref="FileNotFoundException">
         ///     The file does not exist.
         /// </exception>
-        public Task<File> CopyAsync(Path destinationPath, CancellationToken cancellationToken = default) =>
+        public Task<StorageFile> CopyAsync(StoragePath destinationPath, CancellationToken cancellationToken = default) =>
             CopyAsync(destinationPath, DefaultNameCollisionOption, cancellationToken);
 
         /// <summary>
@@ -113,7 +113,7 @@
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
         /// <returns>
-        ///     A <see cref="File"/> instance representing the newly created copy of this file.
+        ///     A <see cref="StorageFile"/> instance representing the newly created copy of this file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="destinationPath"/>
@@ -141,8 +141,8 @@
         /// <exception cref="FileNotFoundException">
         ///     The file does not exist.
         /// </exception>
-        public abstract Task<File> CopyAsync(
-            Path destinationPath,
+        public abstract Task<StorageFile> CopyAsync(
+            StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         );
@@ -157,7 +157,7 @@
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
         /// <returns>
-        ///     A <see cref="File"/> instance representing the new location of the moved file.
+        ///     A <see cref="StorageFile"/> instance representing the new location of the moved file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="destinationPath"/>
@@ -185,7 +185,7 @@
         /// <exception cref="FileNotFoundException">
         ///     The file does not exist.
         /// </exception>
-        public Task<File> MoveAsync(Path destinationPath, CancellationToken cancellationToken = default) =>
+        public Task<StorageFile> MoveAsync(StoragePath destinationPath, CancellationToken cancellationToken = default) =>
             MoveAsync(destinationPath, DefaultNameCollisionOption, cancellationToken);
 
         /// <summary>
@@ -202,7 +202,7 @@
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
         /// <returns>
-        ///     A <see cref="File"/> instance representing the new location of the moved file.
+        ///     A <see cref="StorageFile"/> instance representing the new location of the moved file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="destinationPath"/>
@@ -230,8 +230,8 @@
         /// <exception cref="FileNotFoundException">
         ///     The file does not exist.
         /// </exception>
-        public abstract Task<File> MoveAsync(
-            Path destinationPath,
+        public abstract Task<StorageFile> MoveAsync(
+            StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         );
@@ -244,7 +244,7 @@
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
         /// <returns>
-        ///     A <see cref="File"/> instance representing the new location of the renamed file.
+        ///     A <see cref="StorageFile"/> instance representing the new location of the renamed file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="newName"/>
@@ -267,7 +267,7 @@
         /// <exception cref="FileNotFoundException">
         ///     The file does not exist.
         /// </exception>
-        public Task<File> RenameAsync(string newName, CancellationToken cancellationToken = default) =>
+        public Task<StorageFile> RenameAsync(string newName, CancellationToken cancellationToken = default) =>
             RenameAsync(newName, DefaultNameCollisionOption, cancellationToken);
 
         /// <summary>
@@ -282,7 +282,7 @@
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
         /// <returns>
-        ///     A <see cref="File"/> instance representing the new location of the renamed file.
+        ///     A <see cref="StorageFile"/> instance representing the new location of the renamed file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     * <paramref name="newName"/>
@@ -305,7 +305,7 @@
         /// <exception cref="FileNotFoundException">
         ///     The file does not exist.
         /// </exception>
-        public abstract Task<File> RenameAsync(
+        public abstract Task<StorageFile> RenameAsync(
             string newName,
             NameCollisionOption options,
             CancellationToken cancellationToken = default

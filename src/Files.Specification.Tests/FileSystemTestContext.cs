@@ -7,7 +7,7 @@
 
         public abstract FileSystem FileSystem { get; }
 
-        public abstract Task<Folder> GetTestFolderAsync();
+        public abstract Task<StorageFolder> GetTestFolderAsync();
 
     }
 
