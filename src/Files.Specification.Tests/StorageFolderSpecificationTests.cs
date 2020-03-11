@@ -13,6 +13,40 @@
         public StorageFolderSpecificationTests(FileSystemTestContext context)
             : base(context) { }
 
+        #region FileSystem Tests
+
+        [TestMethod]
+        public void FileSystem_IsSameInstanceAsOfParentFolder()
+        {
+            // This is obviously not the best test case, as the file system could be a different
+            // instance in a lot of other scenarios.
+            // Testing all of them is incredibly tedious with little value gained though, so
+            // I trust on common sense of library implementers (including myself) here.
+            // I might regret that.
+            var file = TestFolder.GetFolder(Default.FolderName);
+            file.FileSystem.ShouldBeSameAs(TestFolder.FileSystem);
+        }
+
+        #endregion
+
+        #region Path Tests
+
+        [TestMethod]
+        public void Path_ReturnsExpectedPath()
+        {
+            // This test doesn't test that the property is ALWAYS implemented correctly.
+            // To do that, we'd have run this test after each method which creates a new instance (e.g.
+            // after calling MoveAsync, CopyAsync, GetFolder, ...), because the value can always be set
+            // wrongly there.
+            // That is way beyond the scope of this specification though.
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            var parentPath = TestFolder.Path;
+            var expectedPath = parentPath.Join(Default.FolderName);
+            folder.Path.ShouldBeEffectivelyEqualTo(expectedPath);
+        }
+
+        #endregion
+
         #region CreateAsync Tests
 
         [DataTestMethod]

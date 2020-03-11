@@ -6,7 +6,6 @@
     using System.Threading.Tasks;
     using Files.Specification.Tests.Assertions;
     using Files.Specification.Tests.Setup;
-    using Files.Specification.Tests.Utilities;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Shouldly;
 
@@ -20,13 +19,13 @@
         #region FileSystem Tests
 
         [TestMethod]
-        public void FileSystem_Returns_Current_FileSystem()
+        public void FileSystem_IsSameInstanceAsOfParentFolder()
         {
-            // This test doesn't test that the property is ALWAYS implemented correctly.
-            // To do that, we'd have run this test after each method which creates a new instance (e.g.
-            // after calling MoveAsync, CopyAsync, GetFile, ...), because the value can always be set
-            // wrongly there.
-            // That is way beyond the scope of this specification though.
+            // This is obviously not the best test case, as the file system could be a different
+            // instance in a lot of other scenarios.
+            // Testing all of them is incredibly tedious with little value gained though, so
+            // I trust on common sense of library implementers (including myself) here.
+            // I might regret that.
             var file = TestFolder.GetFile(Default.FileName);
             file.FileSystem.ShouldBeSameAs(TestFolder.FileSystem);
         }
@@ -36,18 +35,17 @@
         #region Path Tests
 
         [TestMethod]
-        public void Path_Returns_Current_Path()
+        public void Path_ReturnsExpectedPath()
         {
             // This test doesn't test that the property is ALWAYS implemented correctly.
             // To do that, we'd have run this test after each method which creates a new instance (e.g.
             // after calling MoveAsync, CopyAsync, GetFile, ...), because the value can always be set
             // wrongly there.
             // That is way beyond the scope of this specification though.
-            var parentPath = TestFolder.Path;
-            var expectedPath = (parentPath / Default.FileName).TrimEndingDirectorySeparator();
             var file = TestFolder.GetFile(Default.FileName);
-            var actualPath = file.Path.TrimEndingDirectorySeparator();
-            actualPath.ShouldBe(expectedPath);
+            var parentPath = TestFolder.Path;
+            var expectedPath = parentPath.Join(Default.FileName);
+            file.Path.ShouldBeEffectivelyEqualTo(expectedPath);
         }
 
         #endregion

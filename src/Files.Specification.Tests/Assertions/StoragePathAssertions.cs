@@ -7,12 +7,33 @@
 
         public static void ShouldBeEffectivelyEqualTo(this StoragePath? path, StoragePath? other)
         {
-            path?.FullPath.ShouldBe(other?.FullPath);
+            PseudoNormalize(path).ShouldBe(PseudoNormalize(other));
         }
         
         public static void ShouldNotBeEffectivelyEqualTo(this StoragePath? path, StoragePath? other)
         {
-            path?.FullPath.ShouldNotBe(other?.FullPath);
+            PseudoNormalize(path).ShouldNotBe(PseudoNormalize(other));
+        }
+
+        private static StoragePath? PseudoNormalize(StoragePath? path)
+        {
+            // We cannot really normalize the paths since there is no corresponding method.
+            // The best we can do is to grab a full path and then remove any trailing separators.
+            // This way, we should arrive at two equal paths in a lot of cases, at least.
+            if (path is null)
+            {
+                return null;
+            }
+
+            var fullPath = path.FullPath;
+            if (fullPath.TryTrimEndingDirectorySeparator(out var trimmedPath))
+            {
+                return trimmedPath;
+            }
+            else
+            {
+                return fullPath;
+            }
         }
 
     }
