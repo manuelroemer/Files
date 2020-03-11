@@ -77,9 +77,17 @@
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
-                EnsureNoConflictingFileExists();
-                cancellationToken.ThrowIfCancellationRequested();
-                File.SetAttributes(_fullPath.ToString(), attributes);
+                try
+                {
+                    EnsureNoConflictingFileExists();
+                    cancellationToken.ThrowIfCancellationRequested();
+                    File.SetAttributes(_fullPath.ToString(), attributes);
+                }
+                catch (FileNotFoundException ex)
+                {
+                    // Since we're using a File API, we must manually convert the FileNotFoundException.
+                    throw new DirectoryNotFoundException(message: null, ex);
+                }
             });
         }
 
