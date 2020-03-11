@@ -2,9 +2,10 @@
 {
     using System.IO;
     using System.Threading.Tasks;
-    using Files.Specification.Tests.Preparation;
-    using Files.Specification.Tests.Utilities;
+    using Files.Specification.Tests.Assertions;
+    using Files.Specification.Tests.Setup;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Shouldly;
 
     public abstract class StorageFolderSpecificationTests : FileSystemTestBase
     {
@@ -25,7 +26,7 @@
         {
             var folder = TestFolder.GetFolder(Default.FolderName);
             await folder.CreateAsync(recursive, options).ConfigureAwait(false);
-            await Assert.That.ElementExistsAsync(folder);
+            await folder.ShouldExistAsync();
         }
 
         [DataTestMethod]
@@ -36,7 +37,7 @@
         {
             var folder = TestFolder.GetFolder(Default.FolderName).GetFolder(Default.FolderName);
             await folder.CreateAsync(recursive: true, options: options);
-            await Assert.That.ElementExistsAsync(folder);
+            await folder.ShouldExistAsync();
         }
 
         [DataTestMethod]
@@ -46,9 +47,7 @@
         public async Task CreateAsync_NotRecursiveAndNonExistingParent_ThrowsDirectoryNotFoundException(CreationCollisionOption options)
         {
             var folder = TestFolder.GetFolder(Default.FolderName).GetFolder(Default.FolderName);
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => folder.CreateAsync(recursive: false, options)
-            );
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.CreateAsync(recursive: false, options));
         }
 
         [DataTestMethod]
@@ -57,9 +56,7 @@
         public async Task CreateAsync_FailAndExistingFolder_ThrowsIOException(bool recursive)
         {
             var folder = await TestFolder.SetupFolderAsync();
-            await Assert.ThrowsExceptionAsync<IOException>(
-                () => folder.CreateAsync(recursive, CreationCollisionOption.Fail)
-            );
+            await Should.ThrowAsync<IOException>(async () => await folder.CreateAsync(recursive, CreationCollisionOption.Fail));
         }
 
         [DataTestMethod]
@@ -71,9 +68,9 @@
             var nestedFile = await folder.SetupFileAsync();
 
             await folder.CreateAsync(recursive, CreationCollisionOption.ReplaceExisting);
-            
-            await Assert.That.ElementExistsAsync(folder);
-            await Assert.That.ElementDoesNotExistAsync(nestedFile);
+
+            await folder.ShouldExistAsync();
+            await nestedFile.ShouldNotExistAsync();
         }
 
         [DataTestMethod]
@@ -86,8 +83,32 @@
 
             await folder.CreateAsync(recursive, CreationCollisionOption.Ignore);
 
-            await Assert.That.ElementExistsAsync(folder);
-            await Assert.That.ElementExistsAsync(nestedFile);
+            await folder.ShouldExistAsync();
+            await nestedFile.ShouldExistAsync();
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail, true)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, true)]
+        [DataRow(CreationCollisionOption.Ignore, true)]
+        [DataRow(CreationCollisionOption.Fail, false)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, false)]
+        [DataRow(CreationCollisionOption.Ignore, false)]
+        public async Task CreateAsync_ConflictingFileExistsAtLocation_ThrowsIOException(CreationCollisionOption options, bool recursive)
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            await Should.ThrowAsync<IOException>(async () => await folder.CreateAsync(recursive, options));
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail)]
+        [DataRow(CreationCollisionOption.ReplaceExisting)]
+        [DataRow(CreationCollisionOption.Ignore)]
+        public async Task CreateAsync_RecursiveAndConflictingFileExistsAtParentLocation_ThrowsIOException(CreationCollisionOption options)
+        {
+            var parentFolder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            var thisFolder = parentFolder.GetFolder(Default.FolderName);
+            await Should.ThrowAsync<IOException>(async () => await thisFolder.CreateAsync(recursive: true, options));
         }
 
         #endregion
@@ -101,7 +122,7 @@
         {
             var folder = await TestFolder.SetupFolderAsync();
             await folder.DeleteAsync(options);
-            await Assert.That.ElementDoesNotExistAsync(folder);
+            await folder.ShouldNotExistAsync();
         }
 
         [TestMethod]
@@ -112,27 +133,22 @@
             var folder = await TestFolder.SetupFolderAsync();
             await folder.SetupFolderAsync();
             await folder.SetupFileAsync();
-
             await folder.DeleteAsync(options);
-            await Assert.That.ElementDoesNotExistAsync(folder);
+            await folder.ShouldNotExistAsync();
         }
 
         [TestMethod]
         public async Task DeleteAsync_FailAndNonExistingFolder_ThrowsDirectoryNotFoundException()
         {
             var folder = TestFolder.GetFolder(Default.FolderName);
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => folder.DeleteAsync(DeletionOption.Fail)
-            );
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.DeleteAsync(DeletionOption.Fail));
         }
         
         [TestMethod]
         public async Task DeleteAsync_FailAndNonExistingParent_ThrowsDirectoryNotFoundException()
         {
             var folder = TestFolder.GetFolder(Default.FolderName).GetFolder(Default.FolderName);
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => folder.DeleteAsync(DeletionOption.Fail)
-            );
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.DeleteAsync(DeletionOption.Fail));
         }
 
         [TestMethod]
@@ -147,6 +163,80 @@
         {
             var folder = TestFolder.GetFolder(Default.FolderName).GetFolder(Default.FolderName);
             await folder.DeleteAsync(DeletionOption.IgnoreMissing);
+        }
+
+        [DataTestMethod]
+        [DataRow(DeletionOption.Fail)]
+        [DataRow(DeletionOption.IgnoreMissing)]
+        public async Task DeleteAsync_ConflictingFileExistsAtLocation_ThrowsIOException(DeletionOption options)
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            await Should.ThrowAsync<IOException>(async () => await folder.DeleteAsync(options));
+        }
+
+        #endregion
+
+        #region ExistsAsync Tests
+
+        [TestMethod]
+        public async Task ExistsAsync_ExistingFolder_ReturnsTrue()
+        {
+            var folder = await TestFolder.SetupFolderAsync();
+            await folder.ShouldExistAsync();
+        }
+
+        [TestMethod]
+        public async Task ExistsAsync_NonExistingFolder_ReturnsFalse()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            await folder.ShouldNotExistAsync();
+        }
+
+        [TestMethod]
+        public async Task ExistsAsync_NonExistingParent_ReturnsFalse()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName).GetFolder(Default.FolderName);
+            await folder.ShouldNotExistAsync();
+        }
+
+        [TestMethod]
+        public async Task ExistsAsync_ConflictingFileExistsAtLocation_ReturnsFalse()
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            await folder.ShouldNotExistAsync();
+        }
+
+        #endregion
+
+        #region GetAttributesAsync Tests
+
+        [TestMethod]
+        public async Task GetAttributesAsync_ExistingFile_DoesNotThrow()
+        {
+            var folder = await TestFolder.SetupFolderAsync();
+            await folder.GetAttributesAsync();
+            // Should not throw. We cannot know which attributes are present.
+        }
+
+        [TestMethod]
+        public async Task GetAttributesAsync_NonExistingFile_ThrowsFileNotFoundException()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            await Should.ThrowAsync<FileNotFoundException>(async () => await folder.GetAttributesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAttributesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolderWithNonExistingParent();
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAttributesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAttributesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            await Should.ThrowAsync<IOException>(async () => await folder.GetAttributesAsync());
         }
 
         #endregion

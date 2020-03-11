@@ -1,4 +1,4 @@
-﻿namespace Files.Specification.Tests.Preparation
+﻿namespace Files.Specification.Tests.Setup
 {
     using System.Collections.Generic;
     using System.Linq;
@@ -13,6 +13,22 @@
     /// </summary>
     public static class SetupExtensions
     {
+
+        /// <summary>
+        ///     Returns a non-existing folder whose parent folder is also missing.
+        /// </summary>
+        public static StorageFolder GetFolderWithNonExistingParent(this StorageFolder folder)
+        {
+            return folder.GetFolder(Default.FolderName).GetFolder(Default.FolderName);
+        }
+        
+        /// <summary>
+        ///     Returns a non-existing folder whose parent folder is also missing.
+        /// </summary>
+        public static StorageFile GetFileWithNonExistingParent(this StorageFolder folder)
+        {
+            return folder.GetFolder(Default.FolderName).GetFile(Default.FileName);
+        }
 
         /// <summary>
         ///     Sets up a default folder structure for tests which require a source and destination file using the <see cref="Default.SrcFolderName"/>,
@@ -57,6 +73,28 @@
                 basePath => basePath / Default.ConflictingFileName
             ).ConfigureAwait(false);
             return (src, dst);
+        }
+
+        /// <summary>
+        ///     Sets up a file and returns a folder which points to the same location as the created file.
+        ///     This can be used for testing how APIs behave when an element of another type exists
+        ///     at the same location.
+        /// </summary>
+        public static async Task<StorageFolder> SetupFileAndGetFolderAtSameLocation(this StorageFolder folder)
+        {
+            await folder.SetupFileAsync(basePath => basePath / Default.SharedFileFolderName);
+            return folder.GetFolder(Default.SharedFileFolderName);
+        }
+
+        /// <summary>
+        ///     Sets up a folder and returns a file which points to the same location as the created folder.
+        ///     This can be used for testing how APIs behave when an element of another type exists
+        ///     at the same location.
+        /// </summary>
+        public static async Task<StorageFile> SetupFolderAndGetFileAtSameLocation(this StorageFolder folder)
+        {
+            await folder.SetupFolderAsync(basePath => basePath / Default.SharedFileFolderName);
+            return folder.GetFile(Default.SharedFileFolderName);
         }
 
         /// <summary>

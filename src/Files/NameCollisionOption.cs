@@ -6,19 +6,21 @@
     /// </summary>
     public enum NameCollisionOption
     {
-        // The numbers here are important, because it allows casting NameCollisionOption to
-        // CreationCollisionOption. Always keep them in sync!
 
         /// <summary>
         ///     The method should throw an exception if a file or folder already exists at the same 
         ///     location.
         /// </summary>
-        Fail = 0,
+        Fail = CreationCollisionOption.Fail,
 
         /// <summary>
         ///     The existing file or folder should be overwritten or replaced.
+        ///     
+        ///     Specifying this flag only replaces elements of the same type.
+        ///     If a folder already exists in the location where a file is supposed to be created,
+        ///     the creation will fail (and vice versa).
         /// </summary>
-        ReplaceExisting = 1,
+        ReplaceExisting = CreationCollisionOption.ReplaceExisting,
 
     }
 

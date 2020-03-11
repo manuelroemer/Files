@@ -2,6 +2,7 @@
 {
     using System;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Shouldly;
 
     [TestClass]
     public abstract class FileSystemSpecificationTests : FileSystemTestBase
@@ -22,7 +23,7 @@
         [TestMethod]
         public void PathInformation_Returns_Non_Null_Instance()
         {
-            Assert.IsNotNull(FileSystem.PathInformation);
+            FileSystem.PathInformation.ShouldNotBeNull();
         }
 
         #endregion
@@ -32,7 +33,7 @@
         [TestMethod]
         public void GetPath_KnownFolder_Throws_NotSupportedException_For_Unknown_Folder()
         {
-            Assert.ThrowsException<NotSupportedException>(() => FileSystem.GetPath(UnknownFolder));
+            Should.Throw<NotSupportedException>(() => FileSystem.GetPath(UnknownFolder));
         }
 
         #endregion
@@ -42,8 +43,8 @@
         [TestMethod]
         public void TryGetPath_KnownFolder_Fails_For_Unknown_Folder()
         {
-            Assert.IsFalse(FileSystem.TryGetPath(UnknownFolder, out var path));
-            Assert.IsNull(path);
+            FileSystem.TryGetPath(UnknownFolder, out var path).ShouldBeFalse();
+            path.ShouldBeNull();
         }
 
         #endregion
@@ -53,7 +54,7 @@
         [TestMethod]
         public void GetFolder_KnownFolder_Throws_NotSupportedException_For_Unknown_Folder()
         {
-            Assert.ThrowsException<NotSupportedException>(() => FileSystem.GetFolder(UnknownFolder));
+            Should.Throw<NotSupportedException>(() => FileSystem.GetFolder(UnknownFolder));
         }
 
         #endregion
@@ -63,8 +64,8 @@
         [TestMethod]
         public void TryGetFolder_KnownFolder_Fails_For_Unknown_Folder()
         {
-            Assert.IsFalse(FileSystem.TryGetFolder(UnknownFolder, out var folder));
-            Assert.IsNull(folder);
+            FileSystem.TryGetFolder(UnknownFolder, out var folder).ShouldBeFalse();
+            folder.ShouldBeNull();
         }
 
         #endregion

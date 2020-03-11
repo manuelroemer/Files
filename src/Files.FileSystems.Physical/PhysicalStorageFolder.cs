@@ -39,10 +39,10 @@
         public override Task<StorageFolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
                 _directoryInfo.Refresh();
-                await EnsureExistsAsync(cancellationToken).ConfigureAwait(false);
+                EnsureExists();
 
                 // Attempting to get the real file name can fail, e.g. the file might have been deleted in between.
                 // In such a case, simply return the last fetched name. It will happen rarely and is good enough
@@ -64,13 +64,23 @@
         public override Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => File.GetAttributes(_fullPath.ToString()));
+            return Task.Run(() =>
+            {
+                EnsureNoConflictingFileExists();
+                cancellationToken.ThrowIfCancellationRequested();
+                return File.GetAttributes(_fullPath.ToString());
+            });
         }
 
         public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => File.SetAttributes(_fullPath.ToString(), attributes));
+            return Task.Run(() =>
+            {
+                EnsureNoConflictingFileExists();
+                cancellationToken.ThrowIfCancellationRequested();
+                File.SetAttributes(_fullPath.ToString(), attributes);
+            });
         }
 
         public override Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
@@ -184,11 +194,11 @@
         public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
                 if (options == DeletionOption.Fail)
                 {
-                    await EnsureExistsAsync(cancellationToken);
+                    EnsureExists();
                 }
 
                 try
@@ -230,11 +240,19 @@
             });
         }
 
-        private async ValueTask EnsureExistsAsync(CancellationToken cancellationToken)
+        private void EnsureExists()
         {
-            if (!await ExistsAsync(cancellationToken).ConfigureAwait(false))
+            if (!Directory.Exists(_fullPath.ToString()))
             {
                 throw new DirectoryNotFoundException();
+            }
+        }
+
+        private void EnsureNoConflictingFileExists()
+        {
+            if (File.Exists(_fullPath.ToString()))
+            {
+                throw new IOException(ExceptionStrings.Folder.ConflictingFileExistsAtFolderLocation());
             }
         }
 

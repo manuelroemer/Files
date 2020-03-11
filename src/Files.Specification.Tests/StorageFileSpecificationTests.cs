@@ -4,10 +4,11 @@
     using System.IO;
     using System.Text;
     using System.Threading.Tasks;
-    using Files.Specification.Tests.Preparation;
+    using Files.Specification.Tests.Assertions;
+    using Files.Specification.Tests.Setup;
     using Files.Specification.Tests.Utilities;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
-    using StoragePath = StoragePath;
+    using Shouldly;
 
     [TestClass]
     public abstract class StorageFileSpecificationTests : FileSystemTestBase
@@ -27,7 +28,7 @@
             // wrongly there.
             // That is way beyond the scope of this specification though.
             var file = TestFolder.GetFile(Default.FileName);
-            Assert.AreSame(TestFolder.FileSystem, file.FileSystem);
+            file.FileSystem.ShouldBeSameAs(TestFolder.FileSystem);
         }
 
         #endregion
@@ -46,7 +47,7 @@
             var expectedPath = (parentPath / Default.FileName).TrimEndingDirectorySeparator();
             var file = TestFolder.GetFile(Default.FileName);
             var actualPath = file.Path.TrimEndingDirectorySeparator();
-            Assert.AreEqual(expectedPath, actualPath);
+            actualPath.ShouldBe(expectedPath);
         }
 
         #endregion
@@ -64,7 +65,7 @@
         {
             var file = TestFolder.GetFile(Default.FileName);
             await file.CreateAsync(recursive, options).ConfigureAwait(false);
-            await Assert.That.ElementExistsAsync(file);
+            await file.ShouldExistAsync();
         }
         
         [DataTestMethod]
@@ -73,9 +74,9 @@
         [DataRow(CreationCollisionOption.Ignore)]
         public async Task CreateAsync_RecursiveAndNonExistingParent_CreatesFileAndParent(CreationCollisionOption options)
         {
-            var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
+            var file = TestFolder.GetFileWithNonExistingParent();
             await file.CreateAsync(recursive: true, options: options);
-            await Assert.That.ElementExistsAsync(file);
+            await file.ShouldExistAsync();
         }
 
         [DataTestMethod]
@@ -84,10 +85,8 @@
         [DataRow(CreationCollisionOption.Ignore)]
         public async Task CreateAsync_NotRecursiveAndNonExistingParent_ThrowsDirectoryNotFoundException(CreationCollisionOption options)
         {
-            var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => file.CreateAsync(recursive: false, options)
-            );
+            var file = TestFolder.GetFileWithNonExistingParent();
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.CreateAsync(recursive: false, options));
         }
 
         [DataTestMethod]
@@ -96,9 +95,7 @@
         public async Task CreateAsync_FailAndExistingFile_ThrowsIOException(bool recursive)
         {
             var file = await TestFolder.SetupFileAsync();
-            await Assert.ThrowsExceptionAsync<IOException>(
-                () => file.CreateAsync(recursive, CreationCollisionOption.Fail)
-            );
+            await Should.ThrowAsync<IOException>(async () => await file.CreateAsync(recursive, CreationCollisionOption.Fail));
         }
 
         [DataTestMethod]
@@ -110,9 +107,9 @@
             await file.WriteTextAsync(Default.TextContent);
             
             await file.CreateAsync(recursive, CreationCollisionOption.ReplaceExisting);
-            
-            await Assert.That.ElementExistsAsync(file);
-            await Assert.That.FileHasContentAsync(file, "");
+
+            await file.ShouldExistAsync();
+            await file.ShouldHaveEmptyContentAsync();
         }
 
         [DataTestMethod]
@@ -124,9 +121,22 @@
             await file.WriteTextAsync(Default.TextContent);
             
             await file.CreateAsync(recursive, CreationCollisionOption.Ignore);
-            
-            await Assert.That.ElementExistsAsync(file);
-            await Assert.That.FileHasContentAsync(file, Default.TextContent);
+
+            await file.ShouldExistAsync();
+            await file.ShouldHaveContentAsync(Default.TextContent);
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail, true)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, true)]
+        [DataRow(CreationCollisionOption.Ignore, true)]
+        [DataRow(CreationCollisionOption.Fail, false)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, false)]
+        [DataRow(CreationCollisionOption.Ignore, false)]
+        public async Task CreateAsync_ConflictingFolderExistsAtLocation_ThrowsIOException(CreationCollisionOption options, bool recursive)
+        {
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation();
+            await Should.ThrowAsync<IOException>(async () => await file.CreateAsync(recursive, options));
         }
 
         #endregion
@@ -140,25 +150,21 @@
         {
             var file = await TestFolder.SetupFileAsync();
             await file.DeleteAsync(options);
-            await Assert.That.ElementDoesNotExistAsync(file);
+            await file.ShouldNotExistAsync();
         }
 
         [TestMethod]
         public async Task DeleteAsync_FailAndNonExistingFile_ThrowsFileNotFoundException()
         {
             var file = TestFolder.GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<FileNotFoundException>(
-                () => file.DeleteAsync(DeletionOption.Fail)
-            );
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.DeleteAsync(DeletionOption.Fail));
         }
 
         [DataTestMethod]
         public async Task DeleteAsync_FailAndNonExistingParent_ThrowsDirectoryNotFoundException()
         {
-            var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => file.DeleteAsync(DeletionOption.Fail)
-            );
+            var file = TestFolder.GetFileWithNonExistingParent();
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.DeleteAsync(DeletionOption.Fail));
         }
 
         [TestMethod]
@@ -171,8 +177,93 @@
         [TestMethod]
         public async Task DeleteAsync_IgnoreMissingAndNonExistingParent_DoesNothing()
         {
-            var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
+            var file = TestFolder.GetFileWithNonExistingParent();
             await file.DeleteAsync(DeletionOption.IgnoreMissing);
+        }
+
+        [DataTestMethod]
+        [DataRow(DeletionOption.Fail)]
+        [DataRow(DeletionOption.IgnoreMissing)]
+        public async Task DeleteAsync_ConflictingFolderExistsAtLocation_ThrowsIOException(DeletionOption options)
+        {
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation();
+            await Should.ThrowAsync<IOException>(async () => await file.DeleteAsync(options));
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail)]
+        [DataRow(CreationCollisionOption.ReplaceExisting)]
+        [DataRow(CreationCollisionOption.Ignore)]
+        public async Task CreateAsync_RecursiveAndConflictingFileExistsAtParentLocation_ThrowsIOException(CreationCollisionOption options)
+        {
+            var parentFolder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            var thisFile = parentFolder.GetFile(Default.FileName);
+            await Should.ThrowAsync<IOException>(async () => await thisFile.CreateAsync(recursive: true, options));
+        }
+
+        #endregion
+
+        #region ExistsAsync Tests
+
+        [TestMethod]
+        public async Task ExistsAsync_ExistingFile_ReturnsTrue()
+        {
+            var file = await TestFolder.SetupFileAsync();
+            await file.ShouldExistAsync();
+        }
+
+        [TestMethod]
+        public async Task ExistsAsync_NonExistingFile_ReturnsFalse()
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            await file.ShouldNotExistAsync();
+        }
+
+        [TestMethod]
+        public async Task ExistsAsync_NonExistingParent_ReturnsFalse()
+        {
+            var file = TestFolder.GetFileWithNonExistingParent();
+            await file.ShouldNotExistAsync();
+        }
+
+        [TestMethod]
+        public async Task ExistsAsync_ConflictingFolderExistsAtLocation_ReturnsFalse()
+        {
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation();
+            await file.ShouldNotExistAsync();
+        }
+
+        #endregion
+
+        #region GetAttributesAsync Tests
+
+        [TestMethod]
+        public async Task GetAttributesAsync_ExistingFile_DoesNotThrow()
+        {
+            var file = await TestFolder.SetupFileAsync();
+            await file.GetAttributesAsync();
+            // Should not throw. We cannot know which attributes are present.
+        }
+
+        [TestMethod]
+        public async Task GetAttributesAsync_NonExistingFile_ThrowsFileNotFoundException()
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.GetAttributesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAttributesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var file = TestFolder.GetFileWithNonExistingParent();
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.GetAttributesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAttributesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        {
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation();
+            await Should.ThrowAsync<IOException>(async () => await file.GetAttributesAsync());
         }
 
         #endregion
@@ -185,7 +276,7 @@
             var initialParent = TestFolder.GetFolder(Default.FolderName);
             var file = initialParent.GetFile(Default.FileName);
             var retrievedParent = file.GetParent();
-            Assert.That.PathsAreEffectivelyEqual(initialParent.Path, retrievedParent.Path);
+            initialParent.Path.ShouldBeEffectivelyEqualTo(retrievedParent.Path);
         }
 
         #endregion
@@ -197,7 +288,7 @@
         {
             var file = await TestFolder.SetupFileAsync();
             var props = await file.GetPropertiesAsync();
-            Assert.IsNotNull(props);
+            props.ShouldNotBeNull();
         }
 
         [TestMethod]
@@ -219,30 +310,15 @@
             // - Not testing that ModifiedOn is null without any modification. We don't know if the FS leaves it blank
             //   or sets it on creation.
             // - Testing dates is somewhat hard. We only ensure that they are in a certain time range relative to now.
-            Assert.AreEqual(fileName, props.Name, $"Name ({props.Name}) does not equal \"{fileName}\".");
-            Assert.AreEqual("file", props.NameWithoutExtension, $"NameWithoutExtension ({props.NameWithoutExtension}) does not equal \"file\".");
-            Assert.AreEqual("ext", props.Extension, $"Extension ({props.Extension}) does not equal \"ext\".");
-            Assert.IsTrue((DateTimeOffset.UtcNow - props.CreatedOn).Ticks < TimeSpan.FromSeconds(10).Ticks, $"CreatedOn ({props.CreatedOn}) isn't set to a point in time within in the last 10 seconds.");
-            Assert.IsTrue((DateTimeOffset.UtcNow - props.ModifiedOn)?.Ticks < TimeSpan.FromSeconds(10).Ticks, $"ModifiedOn ({props.ModifiedOn}) isn't set to a point in time within in the last 10 seconds.");
-            Assert.AreEqual((ulong)Default.ByteContent.Length, props.Size, $"Size ({props.Size}) does not equal the expected content size ({Default.ByteContent.Length}).");
-        }
-
-        #endregion
-
-        #region ExistsAsync Tests
-
-        [TestMethod]
-        public async Task ExistsAsync_Returns_True_If_File_Exists()
-        {
-            var file = await TestFolder.SetupFileAsync();
-            Assert.IsTrue(await file.ExistsAsync());
-        }
-
-        [TestMethod]
-        public async Task ExistsAsync_Returns_False_If_File_Does_Not_Exist()
-        {
-            var file = TestFolder.GetFile(Default.FileName);
-            Assert.IsFalse(await file.ExistsAsync());
+            var timeSinceCreation = (DateTimeOffset.UtcNow - props.CreatedOn);
+            var timeSinceModification = (DateTimeOffset.UtcNow - props.ModifiedOn);
+            
+            props.Name.ShouldBe(fileName);
+            props.NameWithoutExtension.ShouldBe("file");
+            props.Extension.ShouldBe("ext");
+            props.Size.ShouldBe((ulong)Default.ByteContent.Length);
+            timeSinceCreation.ShouldBeLessThan(TimeSpan.FromSeconds(10));
+            timeSinceModification?.ShouldBeLessThan(TimeSpan.FromSeconds(10));
         }
 
         #endregion
@@ -253,7 +329,7 @@
         public async Task CopyAsync_Throws_ArgumentNullException()
         {
             var file = await TestFolder.SetupFileAsync();
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => file.CopyAsync((StoragePath)null!));
+            await Should.ThrowAsync<ArgumentNullException>(async () => await file.CopyAsync(destinationPath: null!));
         }
 
         [DataTestMethod]
@@ -269,23 +345,18 @@
 
             // Asserting that the parent changed is hard without path normalization.
             // This is the best we can easily check.
-            Assert.AreNotEqual(srcFile.GetParent()?.Path, dstFile.GetParent()?.Path);
-
-            await Assert.That.ElementExistsAsync(srcFile);
-            await Assert.That.ElementExistsAsync(dstFile);
-
-            await Assert.That.FileHasContentAsync(srcFile, Default.TextContent);
-            await Assert.That.FileHasContentAsync(dstFile, Default.TextContent);
+            srcFile.GetParent()?.Path.ShouldNotBeEffectivelyEqualTo(dstFile.GetParent()?.Path);
+            await srcFile.ShouldExistAsync();
+            await dstFile.ShouldExistAsync();
+            await srcFile.ShouldHaveContentAsync(Default.TextContent);
+            await dstFile.ShouldHaveContentAsync(Default.TextContent);
         }
 
         [TestMethod]
         public async Task CopyAsync_Fail_Throws_IOException_If_File_Already_Exists()
         {
             var (src, dst) = await TestFolder.SetupTwoConflictingFilesAsync();
-
-            await Assert.ThrowsExceptionAsync<IOException>(
-                () => src.CopyAsync(dst.Path, NameCollisionOption.Fail)
-            );
+            await Should.ThrowAsync<IOException>(async () => await src.CopyAsync(dst.Path, NameCollisionOption.Fail));
         }
         
         [TestMethod]
@@ -295,7 +366,7 @@
             await src.WriteTextAsync(Default.TextContent);
 
             await src.CopyAsync(dst.Path, NameCollisionOption.ReplaceExisting);
-            await Assert.That.FileHasContentAsync(dst, Default.TextContent);
+            await dst.ShouldHaveContentAsync(Default.TextContent);
         }
 
         [DataTestMethod]
@@ -304,10 +375,7 @@
         public async Task CopyAsync_Throws_IOException_If_Source_Equals_Destination(NameCollisionOption options)
         {
             var srcFile = await TestFolder.SetupFileAsync();
-
-            await Assert.ThrowsExceptionAsync<IOException>(
-                () => srcFile.CopyAsync(srcFile.Path, options)
-            );
+            await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(srcFile.Path, options));
         }
         
         [DataTestMethod]
@@ -318,10 +386,7 @@
             var srcFile = TestFolder.GetFolder(Default.SrcFolderName).GetFile(Default.SrcFileName);
             var dstDir = await TestFolder.SetupFolderAsync(basePath => basePath / Default.DstFolderName);
             var dstPath = dstDir.Path / Default.DstFileName;
-
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => srcFile.CopyAsync(dstPath, options)
-            );
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await srcFile.CopyAsync(dstPath, options));
         }
         
         [DataTestMethod]
@@ -332,10 +397,7 @@
             var src = await TestFolder.SetupFileAsync(basePath => basePath / Default.SrcFolderName / Default.FileName);
             var dstDir = TestFolder.GetFolder(Default.DstFolderName);
             var dstPath = dstDir.Path / Default.DstFileName;
-
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => src.CopyAsync(dstPath, options)
-            );
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await src.CopyAsync(dstPath, options));
         }
         
         #endregion
@@ -346,7 +408,7 @@
         public async Task WriteTextAsync_Throws_ArgumentNullException()
         {
             var file = await TestFolder.SetupFileAsync();
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => file.WriteTextAsync(null!));
+            await Should.ThrowAsync<ArgumentNullException>(async () => await file.WriteTextAsync(null!));
         }
 
         [TestMethod]
@@ -354,9 +416,7 @@
         {
             var file = await TestFolder.SetupFileAsync();
             await file.WriteTextAsync(Default.TextContent);
-
-            var content = await file.ReadTextAsync();
-            Assert.AreEqual(Default.TextContent, content);
+            await file.ShouldHaveContentAsync(Default.TextContent);
         }
 
         [TestMethod]
@@ -364,45 +424,35 @@
         {
             var file = await TestFolder.SetupFileAsync();
             await file.WriteTextAsync(Default.TextContent, Encoding.ASCII);
-
-            var content = await file.ReadTextAsync(Encoding.ASCII);
-            Assert.AreEqual(Default.TextContent, content);
+            await file.ShouldHaveContentAsync(Default.TextContent, Encoding.ASCII);
         }
 
         [TestMethod]
         public async Task WriteTextAsync_Throws_FileNotFoundException_If_File_Does_Not_Exist()
         {
             var file = TestFolder.GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<FileNotFoundException>(
-                () => file.WriteTextAsync(Default.TextContent)
-            );
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.WriteTextAsync(Default.TextContent));
         }
         
         [TestMethod]
         public async Task ReadTextAsync_Throws_FileNotFoundException_If_File_Does_Not_Exist()
         {
             var file = TestFolder.GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<FileNotFoundException>(
-                () => file.ReadTextAsync()
-            );
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.ReadTextAsync());
         }
         
         [TestMethod]
         public async Task WriteTextAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
         {
             var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => file.WriteTextAsync(Default.TextContent)
-            );
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.WriteTextAsync(Default.TextContent));
         }
         
         [TestMethod]
         public async Task ReadTextAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
         {
             var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => file.ReadTextAsync()
-            );
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.ReadTextAsync());
         }
 
         #endregion
@@ -413,7 +463,7 @@
         public async Task WriteBytesAsync_Throws_ArgumentNullException()
         {
             var file = await TestFolder.SetupFileAsync();
-            await Assert.ThrowsExceptionAsync<ArgumentNullException>(() => file.WriteBytesAsync(null!));
+            await Should.ThrowAsync<ArgumentNullException>(async () => await file.WriteBytesAsync(null!));
         }
 
         [TestMethod]
@@ -421,45 +471,35 @@
         {
             var file = await TestFolder.SetupFileAsync();
             await file.WriteBytesAsync(Default.ByteContent);
-
-            var content = await file.ReadBytesAsync();
-            CollectionAssert.AreEqual(Default.ByteContent, content);
+            await file.ShouldHaveContentAsync(Default.ByteContent);
         }
 
         [TestMethod]
         public async Task WriteBytesAsync_Throws_FileNotFoundException_If_File_Does_Not_Exist()
         {
             var file = TestFolder.GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<FileNotFoundException>(
-                () => file.WriteBytesAsync(Default.ByteContent)
-            );
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.WriteBytesAsync(Default.ByteContent));
         }
 
         [TestMethod]
         public async Task ReadBytesAsync_Throws_FileNotFoundException_If_File_Does_Not_Exist()
         {
             var file = TestFolder.GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<FileNotFoundException>(
-                () => file.ReadBytesAsync()
-            );
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.ReadBytesAsync());
         }
 
         [TestMethod]
         public async Task WriteBytesAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
         {
             var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => file.WriteBytesAsync(Default.ByteContent)
-            );
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.WriteBytesAsync(Default.ByteContent));
         }
 
         [TestMethod]
         public async Task ReadBytesAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
         {
             var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
-            await Assert.ThrowsExceptionAsync<DirectoryNotFoundException>(
-                () => file.ReadBytesAsync()
-            );
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.ReadBytesAsync());
         }
 
         #endregion

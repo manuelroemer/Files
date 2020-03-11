@@ -1,4 +1,4 @@
-﻿namespace Files.Specification.Tests.Preparation
+﻿namespace Files.Specification.Tests.Setup
 {
     using System.Text;
 
@@ -13,6 +13,7 @@
 
         public static string FileName => "defaultFile.ext";
         public static string FolderName => "defaultFolder";
+        public static string SharedFileFolderName => "maybeFileMaybeFolder";
 
         public static string ConflictingFileName => "conflictingFile.ext";
         public static string ConflictingFolderName => "conflictingFolder";

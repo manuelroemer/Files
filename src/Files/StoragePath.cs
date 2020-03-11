@@ -94,13 +94,15 @@
             _underlyingString = path;
         }
 
-        public virtual bool TrimEndingDirectorySeparator([NotNullWhen(true)] out StoragePath? result)
+        public virtual bool TryTrimEndingDirectorySeparator([NotNullWhen(true)] out StoragePath? result)
         {
             if (!EndsInDirectorySeparator)
             {
                 result = this;
                 return true;
             }
+
+            
 
             try
             {

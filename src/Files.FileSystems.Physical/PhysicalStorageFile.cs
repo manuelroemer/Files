@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Runtime.ExceptionServices;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -46,10 +47,10 @@
         public override Task<StorageFileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
                 _fileInfo.Refresh();
-                await EnsureExistsAsync(cancellationToken).ConfigureAwait(false);
+                EnsureExists(cancellationToken);
 
                 // Attempting to get the real file name can fail, e.g. the file might have been deleted in between.
                 // In such a case, simply return the last fetched name. It will happen rarely and is good enough
@@ -72,13 +73,23 @@
         public override Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => File.GetAttributes(_fullPath.ToString()));
+            return Task.Run(() =>
+            {
+                EnsureNoConflictingFolderExists();
+                cancellationToken.ThrowIfCancellationRequested();
+                return File.GetAttributes(_fullPath.ToString());
+            });
         }
 
         public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => File.SetAttributes(_fullPath.ToString(), attributes));
+            return Task.Run(() =>
+            {
+                EnsureNoConflictingFolderExists();
+                cancellationToken.ThrowIfCancellationRequested();
+                File.SetAttributes(_fullPath.ToString(), attributes);
+            });
         }
 
         public override Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
@@ -101,8 +112,15 @@
                     Directory.CreateDirectory(_fullParentPath.ToString());
                 }
 
-                cancellationToken.ThrowIfCancellationRequested();
-                new FileStream(_fullPath.ToString(), options.ToFileMode()).Dispose();
+                try
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+                    new FileStream(_fullPath.ToString(), options.ToFileMode()).Dispose();
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(ex);
+                }
             });
         }
 
@@ -155,11 +173,11 @@
         public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
                 if (options == DeletionOption.Fail)
                 {
-                    await EnsureExistsAsync(cancellationToken);
+                    EnsureExists(cancellationToken);
                 }
 
                 try
@@ -167,7 +185,7 @@
                     cancellationToken.ThrowIfCancellationRequested();
                     File.Delete(_fullPath.ToString());
                 }
-                catch (DirectoryNotFoundException)
+                catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException)
                 {
                     // The exception is thrown if a parent directory does not exist.
                     // Must be caught manually to ensure compatibility with DeletionOption.IgnoreMissing.
@@ -175,6 +193,10 @@
                     {
                         throw;
                     }
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(ex);
                 }
             });
         }
@@ -225,16 +247,64 @@
             }
         }
 
-        private async ValueTask EnsureExistsAsync(CancellationToken cancellationToken)
+        private Task EnsureExistsAsync(CancellationToken cancellationToken) =>
+            Task.Run(() => EnsureExists(cancellationToken));
+
+        private void EnsureExists(CancellationToken cancellationToken)
         {
-            if (!await GetParent().ExistsAsync(cancellationToken).ConfigureAwait(false))
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!Directory.Exists(_fullParentPath.ToString()))
             {
                 throw new DirectoryNotFoundException();
             }
 
-            if (!await ExistsAsync(cancellationToken).ConfigureAwait(false))
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!File.Exists(_fullPath.ToString()))
             {
                 throw new FileNotFoundException();
+            }
+        }
+
+        private void EnsureNoConflictingFolderExists()
+        {
+            if (Directory.Exists(_fullPath.ToString()))
+            {
+                throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation());
+            }
+        }
+
+        /// <summary>
+        ///     Several methods in the <see cref="File"/> class throw an <see cref="UnauthorizedAccessException"/>
+        ///     when a file operation (e.g. Create, Delete, ...) is executed on a directory.
+        ///     
+        ///     Per library specification, the library should throw an IOException in such cases.
+        ///     To do this, we manually check if a directory exists in such a location.
+        ///     If so, we certainly have access to the location and can throw the appropriate exception.
+        /// </summary>
+        private void RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(UnauthorizedAccessException originalException)
+        {
+            bool hasConflictingDirectory;
+
+            try
+            {
+                hasConflictingDirectory = Directory.Exists(_fullPath.ToString());
+            }
+            // Do not catch general exception types
+            // Since this is only used for exception conversions, it's okay to fail.
+#pragma warning disable CA1031
+            catch
+            {
+                hasConflictingDirectory = false;
+            }
+#pragma warning restore CA1031
+
+            if (hasConflictingDirectory)
+            {
+                throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation(), originalException);
+            }
+            else
+            {
+                ExceptionDispatchInfo.Throw(originalException);
             }
         }
 
