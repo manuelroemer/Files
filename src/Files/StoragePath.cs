@@ -102,8 +102,6 @@
                 return true;
             }
 
-            
-
             try
             {
                 result = TrimEndingDirectorySeparator();
