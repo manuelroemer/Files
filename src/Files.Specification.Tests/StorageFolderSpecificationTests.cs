@@ -1,5 +1,6 @@
 ﻿namespace Files.Specification.Tests
 {
+    using System;
     using System.IO;
     using System.Threading.Tasks;
     using Files.Specification.Tests.Assertions;
@@ -149,6 +150,69 @@
 
         #endregion
 
+        #region GetPropertiesAsync Tests
+
+        [TestMethod]
+        public async Task GetPropertiesAsync_ExistingFolder_ReturnsNonNullProperties()
+        {
+            var folder = await TestFolder.SetupFolderAsync();
+            var props = await folder.GetPropertiesAsync();
+            props.ShouldNotBeNull();
+            // Without any additional info, this is the best we can do.
+        }
+
+        [DataTestMethod]
+        [DataRow("folder", "ext")]
+        [DataRow("folderWithoutExt", null)]
+        [DataRow("folder{0}with{0}many{0}extensions{0}", "finalExt")]
+        public async Task GetPropertiesAsync_ExistingFolder_ReturnsPropertiesWithExpectedValues(string name, string? extension)
+        {
+            name = string.Format(name, FileSystem.PathInformation.ExtensionSeparatorChar);
+            var extSeparator = extension is null ? (char?)null : FileSystem.PathInformation.ExtensionSeparatorChar;
+            var fullName = $"{name}{extSeparator}{extension}";
+
+            var folder = await TestFolder.SetupFolderAsync(basePath => basePath / fullName);
+            var props = await folder.GetPropertiesAsync();
+
+            // Test the props to the best of our abilities. Specialities:
+            // - We cannot really test that the name returns the REAL folder name, because we don't know if
+            //   the FS uses case sensitive paths.
+            // - Not testing that ModifiedOn is null without any modification. We don't know if the FS leaves it blank
+            //   or sets it on creation.
+            // - Testing dates is somewhat hard. We only ensure that they are in a certain time range relative to now.
+            var timeSinceCreation = DateTimeOffset.UtcNow - props.CreatedOn;
+            var timeSinceModification = DateTimeOffset.UtcNow - props.ModifiedOn;
+
+            props.Name.ShouldBe(fullName);
+            props.NameWithoutExtension.ShouldBe(name);
+            props.Extension.ShouldBe(extension);
+            timeSinceCreation.ShouldBeLessThan(TimeSpan.FromSeconds(10));
+            timeSinceModification?.ShouldBeLessThan(TimeSpan.FromSeconds(10));
+        }
+
+        [TestMethod]
+        public async Task GetPropertiesAsync_NonExistingFolder_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetPropertiesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetPropertiesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolderWithNonExistingParent();
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetPropertiesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetPropertiesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            await Should.ThrowAsync<IOException>(async () => await folder.GetPropertiesAsync());
+        }
+
+        #endregion
+
         #region CreateAsync Tests
 
         [DataTestMethod]
@@ -279,7 +343,7 @@
             var folder = TestFolder.GetFolder(Default.FolderName);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.DeleteAsync(DeletionOption.Fail));
         }
-        
+
         [TestMethod]
         public async Task DeleteAsync_FailAndNonExistingParent_ThrowsDirectoryNotFoundException()
         {

@@ -146,6 +146,71 @@
 
         #endregion
 
+        #region GetPropertiesAsync Tests
+
+        [TestMethod]
+        public async Task GetPropertiesAsync_ExistingFile_ReturnsNonNullProperties()
+        {
+            var file = await TestFolder.SetupFileAsync();
+            var props = await file.GetPropertiesAsync();
+            props.ShouldNotBeNull();
+            // Without any additional info, this is the best we can do.
+        }
+
+        [DataTestMethod]
+        [DataRow("file", "ext")]
+        [DataRow("fileWithoutExt", null)]
+        [DataRow("file{0}with{0}many{0}extensions{0}", "finalExt")]
+        public async Task GetPropertiesAsync_ExistingFile_ReturnsPropertiesWithExpectedValues(string name, string? extension)
+        {
+            name = string.Format(name, FileSystem.PathInformation.ExtensionSeparatorChar);
+            var extSeparator = extension is null ? (char?)null : FileSystem.PathInformation.ExtensionSeparatorChar;
+            var fullName = $"{name}{extSeparator}{extension}";
+
+            var file = await TestFolder.SetupFileAsync(basePath => basePath / fullName);
+            await file.WriteBytesAsync(Default.ByteContent);
+            var props = await file.GetPropertiesAsync();
+
+            // Test the props to the best of our abilities. Specialities:
+            // - We cannot really test that the name returns the REAL file name, because we don't know if
+            //   the FS uses case sensitive paths.
+            // - Not testing that ModifiedOn is null without any modification. We don't know if the FS leaves it blank
+            //   or sets it on creation.
+            // - Testing dates is somewhat hard. We only ensure that they are in a certain time range relative to now.
+            var timeSinceCreation = DateTimeOffset.UtcNow - props.CreatedOn;
+            var timeSinceModification = DateTimeOffset.UtcNow - props.ModifiedOn;
+
+            props.Name.ShouldBe(fullName);
+            props.NameWithoutExtension.ShouldBe(name);
+            props.Extension.ShouldBe(extension);
+            props.Size.ShouldBe((ulong)Default.ByteContent.Length);
+            timeSinceCreation.ShouldBeLessThan(TimeSpan.FromSeconds(10));
+            timeSinceModification?.ShouldBeLessThan(TimeSpan.FromSeconds(10));
+        }
+
+        [TestMethod]
+        public async Task GetPropertiesAsync_NonExistingFile_ThrowsFileNotFoundException()
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.GetPropertiesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetPropertiesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var file = TestFolder.GetFileWithNonExistingParent();
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.GetPropertiesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetPropertiesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        {
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation();
+            await Should.ThrowAsync<IOException>(async () => await file.GetPropertiesAsync());
+        }
+
+        #endregion
+
         #region CreateAsync Tests
 
         [DataTestMethod]
@@ -325,48 +390,6 @@
         {
             var file = await TestFolder.SetupFolderAndGetFileAtSameLocation();
             await file.ShouldNotExistAsync();
-        }
-
-        #endregion
-
-        #region GetPropertiesAsync Tests
-
-        [TestMethod]
-        public async Task GetPropertiesAsync_Returns_Properties()
-        {
-            var file = await TestFolder.SetupFileAsync();
-            var props = await file.GetPropertiesAsync();
-            props.ShouldNotBeNull();
-        }
-
-        [TestMethod]
-        public async Task GetPropertiesAsync_Returns_Expected_Properties()
-        {
-            // Create a file with the real name "file.ext", but access it via the path "file.ext/foo/.."
-            // to make things difficult.
-            // The real point of getting the properties is to access the real values of the underlying FS,
-            // e.g. the REAL name. By accessing the file via the relative path above, we replicate
-            // the potential error that a user is unable to retrieve any file info from the path itself
-            // and ensure that the underlying FS implementation doesn't use the path for the properties itself.
-            var fileName = "file" + FileSystem.PathInformation.ExtensionSeparatorChar + "ext";
-            await TestFolder.SetupFileAsync(basePath => basePath / fileName);
-            var file = FileSystem.GetFile(TestFolder.Path / fileName / "foo" / FileSystem.PathInformation.ParentDirectorySegment);
-            await file.WriteBytesAsync(Default.ByteContent);
-            var props = await file.GetPropertiesAsync();
-
-            // Test the props to the best of our abilities. Specialities:
-            // - Not testing that ModifiedOn is null without any modification. We don't know if the FS leaves it blank
-            //   or sets it on creation.
-            // - Testing dates is somewhat hard. We only ensure that they are in a certain time range relative to now.
-            var timeSinceCreation = (DateTimeOffset.UtcNow - props.CreatedOn);
-            var timeSinceModification = (DateTimeOffset.UtcNow - props.ModifiedOn);
-            
-            props.Name.ShouldBe(fileName);
-            props.NameWithoutExtension.ShouldBe("file");
-            props.Extension.ShouldBe("ext");
-            props.Size.ShouldBe((ulong)Default.ByteContent.Length);
-            timeSinceCreation.ShouldBeLessThan(TimeSpan.FromSeconds(10));
-            timeSinceModification?.ShouldBeLessThan(TimeSpan.FromSeconds(10));
         }
 
         #endregion
