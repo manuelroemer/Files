@@ -16,7 +16,7 @@
         #region FileSystem Tests
 
         [TestMethod]
-        public void FileSystem_IsSameInstanceAsOfParentFolder()
+        public void FileSystem_StandardFolder_IsSameInstanceAsOfParentFolder()
         {
             // This is obviously not the best test case, as the file system could be a different
             // instance in a lot of other scenarios.
@@ -32,7 +32,7 @@
         #region Path Tests
 
         [TestMethod]
-        public void Path_ReturnsExpectedPath()
+        public void Path_StandardFolder_ReturnsExpectedPath()
         {
             // This test doesn't test that the property is ALWAYS implemented correctly.
             // To do that, we'd have run this test after each method which creates a new instance (e.g.
@@ -43,6 +43,108 @@
             var parentPath = TestFolder.Path;
             var expectedPath = parentPath.Join(Default.FolderName);
             folder.Path.ShouldBeEffectivelyEqualTo(expectedPath);
+        }
+
+        #endregion
+
+        #region GetParent Tests
+
+        [TestMethod]
+        public void GetParent_StandardFolder_ReturnsParentFolder()
+        {
+            var expectedParent = TestFolder;
+            var actualParent = TestFolder.GetFolder(Default.FolderName).GetParent();
+            actualParent?.Path.ShouldBeEffectivelyEqualTo(expectedParent.Path);
+        }
+
+        [TestMethod]
+        public void GetParent_FolderInRootFolder_ReturnsRootFolder()
+        {
+            var expectedParent = RootFolder;
+            var actualParent = RootFolder.GetFolder(Default.FolderName).GetParent();
+            actualParent?.Path.ShouldBeEffectivelyEqualTo(expectedParent.Path);
+        }
+
+        [TestMethod]
+        public void GetParent_RootFolder_ReturnsNull()
+        {
+            RootFolder.GetParent().ShouldBeNull();
+        }
+
+        #endregion
+
+        #region GetAttributesAsync Tests
+
+        [TestMethod]
+        public async Task GetAttributesAsync_ExistingFile_DoesNotThrow()
+        {
+            var folder = await TestFolder.SetupFolderAsync();
+            await folder.GetAttributesAsync();
+            // Should not throw. We cannot know which attributes are present.
+        }
+
+        [TestMethod]
+        public async Task GetAttributesAsync_NonExistingFile_ThrowsFileNotFoundException()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            await Should.ThrowAsync<FileNotFoundException>(async () => await folder.GetAttributesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAttributesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolderWithNonExistingParent();
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAttributesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAttributesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            await Should.ThrowAsync<IOException>(async () => await folder.GetAttributesAsync());
+        }
+
+        #endregion
+
+        #region SetAttributesAsync Tests
+
+        [TestMethod]
+        public async Task SetAttributesAsync_ExistingFile_DoesNotThrow()
+        {
+            var folder = await TestFolder.SetupFolderAsync();
+            await folder.SetAttributesAsync(FileAttributes.Normal);
+            // Should not throw. We cannot know which attributes can be set.
+        }
+
+        [TestMethod]
+        public async Task SetAttributes_InvalidAttributeCombination_DoesNotThrow()
+        {
+            // Of course, there is no guarantee that this is invalid in every FS implementation.
+            // But in most, it should be.
+            var invalidAttributes = FileAttributes.Normal | FileAttributes.Directory;
+            var folder = await TestFolder.SetupFolderAsync();
+            await folder.SetAttributesAsync(invalidAttributes);
+        }
+
+        [TestMethod]
+        public async Task SetAttributesAsync_NonExistingFolderThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.SetAttributesAsync(FileAttributes.Normal));
+        }
+
+        [TestMethod]
+        public async Task SetAttributesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolderWithNonExistingParent();
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.SetAttributesAsync(FileAttributes.Normal));
+        }
+
+        [TestMethod]
+        public async Task SetAttributesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            await Should.ThrowAsync<IOException>(async () => await folder.SetAttributesAsync(FileAttributes.Normal));
         }
 
         #endregion
@@ -242,78 +344,13 @@
 
         #endregion
 
-        #region GetAttributesAsync Tests
+        #region ToString Tests
 
         [TestMethod]
-        public async Task GetAttributesAsync_ExistingFile_DoesNotThrow()
-        {
-            var folder = await TestFolder.SetupFolderAsync();
-            await folder.GetAttributesAsync();
-            // Should not throw. We cannot know which attributes are present.
-        }
-
-        [TestMethod]
-        public async Task GetAttributesAsync_NonExistingFile_ThrowsFileNotFoundException()
+        public void ToString_ReturnsFullPathString()
         {
             var folder = TestFolder.GetFolder(Default.FolderName);
-            await Should.ThrowAsync<FileNotFoundException>(async () => await folder.GetAttributesAsync());
-        }
-
-        [TestMethod]
-        public async Task GetAttributesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
-        {
-            var folder = TestFolder.GetFolderWithNonExistingParent();
-            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAttributesAsync());
-        }
-
-        [TestMethod]
-        public async Task GetAttributesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
-        {
-            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
-            await Should.ThrowAsync<IOException>(async () => await folder.GetAttributesAsync());
-        }
-
-        #endregion
-
-        #region SetAttributesAsync Tests
-
-        [TestMethod]
-        public async Task SetAttributesAsync_ExistingFile_DoesNotThrow()
-        {
-            var folder = await TestFolder.SetupFolderAsync();
-            await folder.SetAttributesAsync(FileAttributes.Normal);
-            // Should not throw. We cannot know which attributes can be set.
-        }
-
-        [TestMethod]
-        public async Task SetAttributes_InvalidAttributeCombination_DoesNotThrow()
-        {
-            // Of course, there is no guarantee that this is invalid in every FS implementation.
-            // But in most, it should be.
-            var invalidAttributes = FileAttributes.Normal | FileAttributes.Directory;
-            var folder = await TestFolder.SetupFolderAsync();
-            await folder.SetAttributesAsync(invalidAttributes);
-        }
-
-        [TestMethod]
-        public async Task SetAttributesAsync_NonExistingFolderThrowsDirectoryNotFoundException()
-        {
-            var folder = TestFolder.GetFolder(Default.FolderName);
-            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.SetAttributesAsync(FileAttributes.Normal));
-        }
-
-        [TestMethod]
-        public async Task SetAttributesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
-        {
-            var folder = TestFolder.GetFolderWithNonExistingParent();
-            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.SetAttributesAsync(FileAttributes.Normal));
-        }
-
-        [TestMethod]
-        public async Task SetAttributesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
-        {
-            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
-            await Should.ThrowAsync<IOException>(async () => await folder.SetAttributesAsync(FileAttributes.Normal));
+            folder.ToString().ShouldBe(folder.Path.FullPath.ToString());
         }
 
         #endregion

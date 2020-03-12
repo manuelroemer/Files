@@ -42,6 +42,17 @@
         }
 
         /// <summary>
+        ///     Gets the root folder which contains the <see cref="TestFolder"/>.
+        ///     No I/O operations should be performed in this folder. Restrict tests on the root folder
+        ///     on read-only tests.
+        /// </summary>
+        protected StorageFolder RootFolder => 
+            FileSystem.GetFolder(
+                TestFolder.Path.FullPath.Root ??
+                throw new InvalidOperationException("Could not retrieve a root folder from the test folder path.")
+            );
+
+        /// <summary>
         ///     Initializes a new <see cref="FileSystemTestBase"/> instance using the specified
         ///     <paramref name="context"/> for testing a file system.
         /// </summary>
