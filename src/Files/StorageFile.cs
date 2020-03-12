@@ -19,7 +19,7 @@
         /// <returns>
         ///     A <see cref="StorageFolder"/> instance which represents the parent of this file.
         /// </returns>
-        public virtual StorageFolder GetParent()
+        public StorageFolder GetParent()
         {
             var parentPath = Path.FullPath.Parent;
 

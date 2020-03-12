@@ -21,7 +21,7 @@
         ///     <see langword="null"/> if this folder cannot possibly have a parent folder, i.e.
         ///     if it is a root folder.
         /// </returns>
-        public virtual StorageFolder? GetParent()
+        public StorageFolder? GetParent()
         {
             var parentPath = Path.FullPath.Parent;
             return parentPath is null
@@ -44,7 +44,7 @@
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="name"/> is <see langword="null"/>.
         /// </exception>
-        public virtual StorageFile GetFile(string name)
+        public StorageFile GetFile(string name)
         {
             _ = name ?? throw new ArgumentNullException(nameof(name));
             var path = Path.FullPath.Join(name);
@@ -66,7 +66,7 @@
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="name"/> is <see langword="null"/>.
         /// </exception>
-        public virtual StorageFolder GetFolder(string name)
+        public StorageFolder GetFolder(string name)
         {
             _ = name ?? throw new ArgumentNullException(nameof(name));
             var path = Path.FullPath.Join(name);
