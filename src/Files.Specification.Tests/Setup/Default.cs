@@ -18,10 +18,12 @@
         public static string ConflictingFileName => "conflictingFile.ext";
         public static string ConflictingFolderName => "conflictingFolder";
 
-        public static string SrcFolderName => "src";
-        public static string DstFolderName => "dst";
+        public static string SrcParentFolderName => "src";
+        public static string DstParentFolderName => "dst";
         public static string SrcFileName => "srcFile.ext";
         public static string DstFileName => "dstFile.ext";
+        public static string SrcFolderName => "srcFolder";
+        public static string DstFolderName => "dstFolder";
 
     }
 

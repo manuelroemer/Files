@@ -31,27 +31,92 @@
         }
 
         /// <summary>
-        ///     Sets up a default folder structure for tests which require a source and destination file using the <see cref="Default.SrcFolderName"/>,
-        ///     <see cref="Default.DstFolderName"/> and <see cref="Default.SrcFileName"/> names.
+        ///     Builds and returns a path to the <see cref="Default.DstParentFolderName"/>, 
+        ///     relative to the current folder.
+        ///     
+        ///     The path looks similar to this: <c>folder/dst</c>
+        /// </summary>
+        public static StoragePath GetDstParentFolderPath(this StorageFolder folder)
+        {
+            return folder.Path.FullPath / Default.DstParentFolderName;
+        }
+
+        /// <summary>
+        ///     Builds and returns a path to the <see cref="Default.DstFileName"/> contained within 
+        ///     the <see cref="Default.DstParentFolderName"/>, 
+        ///     relative to the current folder.
+        ///     
+        ///     The path looks similar to this: <c>folder/dst/dstFile.ext</c>
+        /// </summary>
+        public static StoragePath GetDstFilePath(this StorageFolder folder)
+        {
+            return folder.GetDstParentFolderPath() / Default.DstFileName;
+        }
+
+        /// <summary>
+        ///     Sets up a default folder structure for testing copy and move operations, i.e. a
+        ///     source and destination folder and a file within the source folder that can be
+        ///     copied or moved.
         ///     
         ///     The final structure looks similar to this:
         ///     
         ///     <code>
         ///     folder
         ///     |_ src
-        ///     |  |_ src.file
+        ///     |  |_ srcFile.ext
         ///     |_ dst
         ///     </code>
         /// </summary>
-        public static async Task<(StorageFolder SrcFolder, StorageFolder DstFolder, StorageFile SrcFile)> SetupSrcDstFileAsync(this StorageFolder folder)
+        public static async Task<(StorageFolder SrcParentFolder, StorageFolder DstParentFolder, StorageFile SrcFile)> SetupSrcDstForFileAsync(this StorageFolder folder)
         {
-            var (src, dst) = await folder.SetupFolderAsync(
-                basePath => basePath / Default.SrcFolderName,
-                basePath => basePath / Default.DstFolderName
-            ).ConfigureAwait(false);
-            var srcFile = await src.SetupFileAsync(basePath => basePath / Default.SrcFileName);
+            var (srcParentFolder, dstParentFolder) = await folder.SetupFolderAsync(
+                basePath => basePath / Default.SrcParentFolderName,
+                basePath => basePath / Default.DstParentFolderName
+            );
+            var srcFile = await srcParentFolder.SetupFileAsync(basePath => basePath / Default.SrcFileName);
+            return (srcParentFolder, dstParentFolder, srcFile);
+        }
 
-            return (src, dst, srcFile);
+        /// <summary>
+        ///     Sets up a default folder structure for testing copy and move operations, i.e. a
+        ///     source and destination folder and a folder within the source folder that can be
+        ///     copied or moved.
+        ///     
+        ///     The final structure looks similar to this:
+        ///     
+        ///     <code>
+        ///     folder
+        ///     |_ src
+        ///     |  |_ srcFolder
+        ///     |_ dst
+        ///     </code>
+        /// </summary>
+        public static async Task<(StorageFolder SrcParentFolder, StorageFolder DstParentFolder, StorageFolder SrcFolder)> SetupSrcDstForFolderAsync(this StorageFolder folder)
+        {
+            var (srcParentFolder, dstParentFolder, srcFolder) = await folder.SetupFolderAsync(
+                basePath => basePath / Default.SrcParentFolderName,
+                basePath => basePath / Default.DstParentFolderName,
+                basePath => basePath / Default.SrcParentFolderName / Default.SrcFolderName
+            );
+            return (srcParentFolder, dstParentFolder, srcFolder);
+        }
+
+        /// <summary>
+        ///     Sets up a source folder containing a source file for testing copy and move operations.
+        /// 
+        ///     The final structure looks similar to this:
+        ///     
+        ///     <code>
+        ///     folder
+        ///     |_ src
+        ///        |_ srcFile.ext
+        ///     </code>
+        /// </summary>
+        public static async Task<(StorageFolder SrcParentFolder, StorageFile SrcFile)> SetupSrcFileAsync(this StorageFolder folder)
+        {
+            var srcParentFolder = await folder.SetupFolderAsync(basePath => basePath / Default.SrcParentFolderName);
+            var srcFile = await srcParentFolder.SetupFileAsync(basePath => basePath / Default.SrcFileName);
+            return (srcParentFolder, srcFile);
         }
 
         /// <summary>
@@ -62,8 +127,8 @@
         ///     
         ///     <code>
         ///     folder
-        ///     |_ src.file
-        ///     |_ dst.file
+        ///     |_ srcFile.ext
+        ///     |_ dstFile.ext
         ///     </code>
         /// </summary>
         public static async Task<(StorageFile SrcFile, StorageFile ConflictingDstFile)> SetupTwoConflictingFilesAsync(this StorageFolder folder)
@@ -71,7 +136,7 @@
             var (src, dst) = await folder.SetupFileAsync(
                 basePath => basePath / Default.FileName,
                 basePath => basePath / Default.ConflictingFileName
-            ).ConfigureAwait(false);
+            );
             return (src, dst);
         }
 
@@ -114,7 +179,7 @@
         /// </param>
         public static async Task<StorageFile> SetupFileAsync(this StorageFolder folder, PathProvider pathProvider)
         {
-            var files = await folder.SetupFileAsync(new[] { pathProvider }).ConfigureAwait(false);
+            var files = await folder.SetupFileAsync(new[] { pathProvider });
             return files[0];
         }
 
@@ -134,7 +199,7 @@
 
             foreach (var fileToCreate in files)
             {
-                await fileToCreate.CreateAsync(recursive: true, options: CreationCollisionOption.Ignore).ConfigureAwait(false);
+                await fileToCreate.CreateAsync(recursive: true, options: CreationCollisionOption.Ignore);
             }
 
             return files;
@@ -157,7 +222,7 @@
         /// </param>
         public static async Task<StorageFolder> SetupFolderAsync(this StorageFolder folder, PathProvider pathProvider)
         {
-            var folders = await folder.SetupFolderAsync(new[] { pathProvider }).ConfigureAwait(false);
+            var folders = await folder.SetupFolderAsync(new[] { pathProvider });
             return folders[0];
         }
 
@@ -177,7 +242,7 @@
 
             foreach (var folderToCreate in folders)
             {
-                await folderToCreate.CreateAsync(recursive: true, options: CreationCollisionOption.Ignore).ConfigureAwait(false);
+                await folderToCreate.CreateAsync(recursive: true, options: CreationCollisionOption.Ignore);
             }
 
             return folders;

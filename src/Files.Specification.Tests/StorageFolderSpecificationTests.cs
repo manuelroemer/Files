@@ -150,6 +150,38 @@
 
         #endregion
 
+        #region ExistsAsync Tests
+
+        [TestMethod]
+        public async Task ExistsAsync_ExistingFolder_ReturnsTrue()
+        {
+            var folder = await TestFolder.SetupFolderAsync();
+            await folder.ShouldExistAsync();
+        }
+
+        [TestMethod]
+        public async Task ExistsAsync_NonExistingFolder_ReturnsFalse()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            await folder.ShouldNotExistAsync();
+        }
+
+        [TestMethod]
+        public async Task ExistsAsync_NonExistingParent_ReturnsFalse()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName).GetFolder(Default.FolderName);
+            await folder.ShouldNotExistAsync();
+        }
+
+        [TestMethod]
+        public async Task ExistsAsync_ConflictingFileExistsAtLocation_ReturnsFalse()
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            await folder.ShouldNotExistAsync();
+        }
+
+        #endregion
+
         #region GetPropertiesAsync Tests
 
         [TestMethod]
@@ -372,38 +404,6 @@
         {
             var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
             await Should.ThrowAsync<IOException>(async () => await folder.DeleteAsync(options));
-        }
-
-        #endregion
-
-        #region ExistsAsync Tests
-
-        [TestMethod]
-        public async Task ExistsAsync_ExistingFolder_ReturnsTrue()
-        {
-            var folder = await TestFolder.SetupFolderAsync();
-            await folder.ShouldExistAsync();
-        }
-
-        [TestMethod]
-        public async Task ExistsAsync_NonExistingFolder_ReturnsFalse()
-        {
-            var folder = TestFolder.GetFolder(Default.FolderName);
-            await folder.ShouldNotExistAsync();
-        }
-
-        [TestMethod]
-        public async Task ExistsAsync_NonExistingParent_ReturnsFalse()
-        {
-            var folder = TestFolder.GetFolder(Default.FolderName).GetFolder(Default.FolderName);
-            await folder.ShouldNotExistAsync();
-        }
-
-        [TestMethod]
-        public async Task ExistsAsync_ConflictingFileExistsAtLocation_ReturnsFalse()
-        {
-            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
-            await folder.ShouldNotExistAsync();
         }
 
         #endregion
