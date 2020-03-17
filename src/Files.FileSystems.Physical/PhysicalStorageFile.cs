@@ -136,7 +136,16 @@
             return Task.Run(() =>
             {
                 var overwrite = options.ToOverwriteBool();
-                File.Copy(_fullPath.ToString(), destinationPath.FullPath.ToString(), overwrite);
+
+                try
+                {
+                    File.Copy(_fullPath.ToString(), destinationPath.FullPath.ToString(), overwrite);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(ex);
+                }
+
                 return FileSystem.GetFile(destinationPath);
             });
         }
