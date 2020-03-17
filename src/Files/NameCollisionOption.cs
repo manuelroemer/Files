@@ -17,8 +17,8 @@
         ///     The existing file or folder should be overwritten or replaced.
         ///     
         ///     Specifying this flag only replaces elements of the same type.
-        ///     If a folder already exists in the location where a file is supposed to be created,
-        ///     the creation will fail (and vice versa).
+        ///     If a folder already exists in the location where a file is supposed to be copied or moved,
+        ///     the operation will fail (and vice versa).
         /// </summary>
         ReplaceExisting = CreationCollisionOption.ReplaceExisting,
 
