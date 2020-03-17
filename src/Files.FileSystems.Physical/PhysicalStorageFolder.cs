@@ -44,17 +44,17 @@
                 _directoryInfo.Refresh();
                 EnsureExists();
 
-                // Attempting to get the real file name can fail, e.g. the file might have been deleted in between.
+                // Attempting to get the real folder name can fail, e.g. the folder might have been deleted in between.
                 // In such a case, simply return the last fetched name. It will happen rarely and is good enough
                 // for such cases.
                 cancellationToken.ThrowIfCancellationRequested();
-                var realFileName = _directoryInfo.GetRealName() ?? _directoryInfo.Name;
+                var realFolderName = _directoryInfo.GetRealName() ?? _directoryInfo.Name;
                 var lastWriteTime = Directory.GetLastWriteTimeUtc(_fullPath.ToString());
 
                 return new StorageFolderProperties(
-                    realFileName,
-                    IOPath.GetFileNameWithoutExtension(realFileName),
-                    PathHelper.GetExtensionWithoutTrailingExtensionSeparator(realFileName)?.ToNullIfEmpty(),
+                    realFolderName,
+                    IOPath.GetFileNameWithoutExtension(realFolderName),
+                    PathHelper.GetExtensionWithoutTrailingExtensionSeparator(realFolderName)?.ToNullIfEmpty(),
                     _directoryInfo.CreationTimeUtc,
                     lastWriteTime
                 );
