@@ -1,6 +1,7 @@
 ﻿namespace Files
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using System.Text;
     using System.Threading;
@@ -10,6 +11,7 @@
     /// <summary>
     ///     An immutable representation of a file in a file system.
     /// </summary>
+    [DebuggerDisplay("StorageFile at {ToString()}")]
     public abstract class StorageFile : StorageElement
     {
 

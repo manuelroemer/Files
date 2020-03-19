@@ -150,11 +150,28 @@
             return Task.Run(async () =>
             {
                 var destination = FileSystem.GetFolder(destinationPath);
-                var overwrite = options.ToOverwriteBool();
 
-                if (overwrite && await destination.ExistsAsync(cancellationToken).ConfigureAwait(false))
+                // Specification requires DirectoryNotFoundException if the destination parent folder
+                // does not exist,
+                if (destination.GetParent() is PhysicalFolder destinationParent)
                 {
-                    await destination.DeleteAsync(DeletionOption.IgnoreMissing, cancellationToken).ConfigureAwait(false);
+                    destinationParent.EnsureExists();
+                }
+
+                // The case of an existing folder at destination must also be manually handled.
+                // The CopyDirectory utility function cannot easily do that using System.IO members,
+                // because methods like Directory.CreateDirectory() are recursive by default.
+                if (await destination.ExistsAsync(cancellationToken).ConfigureAwait(false))
+                {
+                    var overwrite = options.ToOverwriteBool();
+                    if (overwrite)
+                    {
+                        await destination.DeleteAsync(DeletionOption.IgnoreMissing, cancellationToken).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        throw new IOException(ExceptionStrings.Folder.CopyConflictingFolderExistsAtDestination());
+                    }
                 }
 
                 DirectoryHelper.CopyDirectory(_fullPath.ToString(), destinationPath.FullPath.ToString(), cancellationToken);

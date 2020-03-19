@@ -13,19 +13,20 @@
             var directories = Directory.GetDirectories(source);
             var files = Directory.GetFiles(source);
 
-            foreach (var fileSrc in files)
-            {
-                cancellationToken.ThrowIfCancellationRequested();
-                var fileDest = Path.Join(destination, Path.GetFileName(fileSrc));
-                File.Copy(fileSrc, fileDest);
-            }
+            Directory.CreateDirectory(destination);
 
             foreach (var dirSrc in directories)
             {
                 cancellationToken.ThrowIfCancellationRequested();
                 var dirDest = Path.Join(destination, Path.GetFileName(dirSrc));
-                Directory.CreateDirectory(dirDest);
                 CopyDirectory(dirSrc, dirDest, cancellationToken);
+            }
+
+            foreach (var fileSrc in files)
+            {
+                cancellationToken.ThrowIfCancellationRequested();
+                var fileDest = Path.Join(destination, Path.GetFileName(fileSrc));
+                File.Copy(fileSrc, fileDest);
             }
         }
 

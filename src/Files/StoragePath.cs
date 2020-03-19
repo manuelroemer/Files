@@ -1,6 +1,7 @@
 ﻿namespace Files
 {
     using System;
+    using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
     using Files.Resources;
 
@@ -268,6 +269,7 @@
         ///     The string representation with which this path has been initialized.
         ///     This value is never <see langword="null"/> or empty.
         /// </returns>
+        [DebuggerStepThrough]
         public sealed override string ToString() =>
             _underlyingString;
 

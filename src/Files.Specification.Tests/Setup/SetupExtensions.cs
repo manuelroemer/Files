@@ -13,29 +13,73 @@
     {
 
         /// <summary>
-        ///     Sets up a file and returns a folder which points to the same location as the created file.
-        ///     This can be used for testing how APIs behave when an element of another type exists
-        ///     at the same location.
+        ///     Recursively creates and returns a file relative to the specified folder, replacing
+        ///     previously existing files and folders, but instead of the file, returns a
+        ///     <see cref="StorageFolder"/> pointing to the newly created location, therefore
+        ///     allowing simple type conflict tests.
         /// </summary>
-        public static async Task<StorageFolder> SetupFileAndGetFolderAtSameLocation(
-            this StorageFolder folder, string name
+        /// <param name="pathSegments">
+        ///     An array of path segments which get joined with the specified folder's path, thus
+        ///     forming the path where the new file is ultimately located.
+        /// </param>
+        public static Task<StorageFolder> SetupFileAndGetFolderAtSameLocation(
+            this StorageFolder folder, params string[] pathSegments
         )
         {
-            await folder.SetupFileAsync(name);
-            return folder.GetFolder(name);
+            return folder.SetupFileAndGetFolderAtSameLocation(basePath => SegmentsToPath(basePath, pathSegments));
         }
 
         /// <summary>
-        ///     Sets up a folder and returns a file which points to the same location as the created folder.
-        ///     This can be used for testing how APIs behave when an element of another type exists
-        ///     at the same location.
+        ///     Recursively creates and returns a file relative to the specified folder, replacing
+        ///     previously existing files and folders, but instead of the file, returns a
+        ///     <see cref="StorageFolder"/> pointing to the newly created location, therefore
+        ///     allowing simple type conflict tests.
         /// </summary>
-        public static async Task<StorageFile> SetupFolderAndGetFileAtSameLocation(
-            this StorageFolder folder, string name
+        /// <param name="pathProvider">
+        ///     A function which, by receiving the specified folder's path, builds and returns a new
+        ///     path where the new file should be created.
+        /// </param>
+        public static async Task<StorageFolder> SetupFileAndGetFolderAtSameLocation(
+            this StorageFolder folder, PathProvider pathProvider
         )
         {
-            await folder.SetupFolderAsync(name);
-            return folder.GetFile(name);
+            await folder.SetupFileAsync(pathProvider);
+            return folder.GetFolder(pathProvider);
+        }
+
+        /// <summary>
+        ///     Recursively creates and returns a folder relative to the specified folder, replacing
+        ///     previously existing folders, but instead of the folder, returns a
+        ///     <see cref="StorageFile"/> pointing to the newly created location, therefore
+        ///     allowing simple type conflict tests.
+        /// </summary>
+        /// <param name="pathSegments">
+        ///     An array of path segments which get joined with the specified folder's path, thus
+        ///     forming the path where the new folder is ultimately located.
+        /// </param>
+        public static Task<StorageFile> SetupFolderAndGetFileAtSameLocation(
+            this StorageFolder folder, params string[] pathSegments
+        )
+        {
+            return folder.SetupFolderAndGetFileAtSameLocation(basePath => SegmentsToPath(basePath, pathSegments));
+        }
+
+        /// <summary>
+        ///     Recursively creates and returns a folder relative to the specified folder, replacing
+        ///     previously existing folders, but instead of the folder, returns a
+        ///     <see cref="StorageFile"/> pointing to the newly created location, therefore
+        ///     allowing simple type conflict tests.
+        /// </summary>
+        /// <param name="pathProvider">
+        ///     A function which, by receiving the specified folder's path, builds and returns a new
+        ///     path where the new folder should be created.
+        /// </param>
+        public static async Task<StorageFile> SetupFolderAndGetFileAtSameLocation(
+            this StorageFolder folder, PathProvider pathProvider
+        )
+        {
+            await folder.SetupFolderAsync(pathProvider);
+            return folder.GetFile(pathProvider);
         }
 
         /// <summary>

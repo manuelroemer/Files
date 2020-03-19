@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics;
     using System.IO;
     using System.Linq;
     using System.Threading;
@@ -10,6 +11,7 @@
     /// <summary>
     ///     An immutable representation of a folder in a file system.
     /// </summary>
+    [DebuggerDisplay("StorageFolder at {ToString()}")]
     public abstract class StorageFolder : StorageElement
     {
 
