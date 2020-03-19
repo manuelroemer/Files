@@ -36,7 +36,7 @@
         /// <summary>
         ///     The current user's profile folder.
         /// </summary>
-        UsersProfile = SpecialFolder.UserProfile,
+        UserProfile = SpecialFolder.UserProfile,
 
         /// <summary>
         ///     The folder in which the user's desktop data is located.
