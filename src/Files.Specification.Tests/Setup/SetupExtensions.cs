@@ -6,9 +6,8 @@
     using Files;
 
     /// <summary>
-    ///     Defines static extension methods for conveniently setting up common file system structures
-    ///     which are frequently used in tests.
-    ///     These structures use the names defined in <see cref="Default"/>.
+    ///     Defines static extension methods for conveniently setting up file system structures
+    ///     with a focus on simplifying the test cases.
     /// </summary>
     public static class SetupExtensions
     {
