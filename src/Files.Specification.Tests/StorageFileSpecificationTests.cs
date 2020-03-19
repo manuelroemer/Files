@@ -75,7 +75,7 @@
         [TestMethod]
         public async Task GetAttributesAsync_ExistingFile_DoesNotThrow()
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.GetAttributesAsync();
             // Should not throw. We cannot know which attributes are present.
         }
@@ -108,7 +108,7 @@
         [TestMethod]
         public async Task SetAttributesAsync_ExistingFile_DoesNotThrow()
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.SetAttributesAsync(FileAttributes.Normal);
             // Should not throw. We cannot know which attributes can be set.
         }
@@ -119,7 +119,7 @@
             // Of course, there is no guarantee that this is invalid in every FS implementation.
             // But in most, it should be.
             var invalidAttributes = FileAttributes.Normal | FileAttributes.Directory;
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.SetAttributesAsync(invalidAttributes);
         }
 
@@ -151,7 +151,7 @@
         [TestMethod]
         public async Task GetPropertiesAsync_ExistingFile_ReturnsNonNullProperties()
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             var props = await file.GetPropertiesAsync();
             props.ShouldNotBeNull();
             // Without any additional info, this is the best we can do.
@@ -216,7 +216,7 @@
         [TestMethod]
         public async Task ExistsAsync_ExistingFile_ReturnsTrue()
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.ShouldExistAsync();
         }
 
@@ -285,7 +285,7 @@
         [DataRow(false)]
         public async Task CreateAsync_FailAndExistingFile_ThrowsIOException(bool recursive)
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await Should.ThrowAsync<IOException>(async () => await file.CreateAsync(recursive, CreationCollisionOption.Fail));
         }
 
@@ -294,7 +294,7 @@
         [DataRow(false)]
         public async Task CreateAsync_ReplaceExistingAndExistingFile_ReplacesFile(bool recursive)
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.WriteTextAsync(Default.TextContent);
             
             await file.CreateAsync(recursive, CreationCollisionOption.ReplaceExisting);
@@ -308,7 +308,7 @@
         [DataRow(false)]
         public async Task CreateAsync_IgnoreAndExistingFile_DoesNothing(bool recursive)
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.WriteTextAsync(Default.TextContent);
             
             await file.CreateAsync(recursive, CreationCollisionOption.Ignore);
@@ -339,7 +339,7 @@
         [DataRow(DeletionOption.IgnoreMissing)]
         public async Task DeleteAsync_ExistingFile_DeletesFile(DeletionOption options)
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.DeleteAsync(options);
             await file.ShouldNotExistAsync();
         }
@@ -458,7 +458,7 @@
         {
             await TestFolder.SetupFolderAsync(Default.DstParentFolderName);
             await TestFolder.SetupFolderAsync(Default.SrcParentFolderName, Default.SharedFileFolderName);
-            var srcFile = TestFolder.GetFolder(Default.SrcParentFolderName).GetFile(Default.SharedFileFolderName);
+            var srcFile = TestFolder.GetFile(Default.SrcParentFolderName, Default.SharedFileFolderName);
             var destination = TestFolder.GetDstFilePath();
             await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(destination, options));
         }
@@ -499,7 +499,7 @@
         [DataRow(NameCollisionOption.ReplaceExisting)]
         public async Task CopyAsync_CopyToSameLocation_ThrowsIOException(NameCollisionOption options)
         {
-            var srcFile = await TestFolder.SetupFileAsync();
+            var srcFile = await TestFolder.SetupFileAsync(Default.FileName);
             var destination = srcFile.Path;
             await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(destination, options));
         }
@@ -511,14 +511,14 @@
         [TestMethod]
         public async Task WriteTextAsync_Throws_ArgumentNullException()
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await Should.ThrowAsync<ArgumentNullException>(async () => await file.WriteTextAsync(null!));
         }
 
         [TestMethod]
         public async Task Can_Read_Write_Text_With_Default_Encoding()
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.WriteTextAsync(Default.TextContent);
             await file.ShouldHaveContentAsync(Default.TextContent);
         }
@@ -526,7 +526,7 @@
         [TestMethod]
         public async Task Can_Read_Write_Text_With_Specified_Encoding()
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.WriteTextAsync(Default.TextContent, Encoding.ASCII);
             await file.ShouldHaveContentAsync(Default.TextContent, Encoding.ASCII);
         }
@@ -548,14 +548,14 @@
         [TestMethod]
         public async Task WriteTextAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
         {
-            var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
+            var file = TestFolder.GetFile(Default.FolderName, Default.FileName);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.WriteTextAsync(Default.TextContent));
         }
         
         [TestMethod]
         public async Task ReadTextAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
         {
-            var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
+            var file = TestFolder.GetFile(Default.FolderName, Default.FileName);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.ReadTextAsync());
         }
 
@@ -566,14 +566,14 @@
         [TestMethod]
         public async Task WriteBytesAsync_Throws_ArgumentNullException()
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await Should.ThrowAsync<ArgumentNullException>(async () => await file.WriteBytesAsync(null!));
         }
 
         [TestMethod]
         public async Task Can_Read_Write_Bytes()
         {
-            var file = await TestFolder.SetupFileAsync();
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.WriteBytesAsync(Default.ByteContent);
             await file.ShouldHaveContentAsync(Default.ByteContent);
         }
@@ -595,14 +595,14 @@
         [TestMethod]
         public async Task WriteBytesAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
         {
-            var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
+            var file = TestFolder.GetFile(Default.FolderName, Default.FileName);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.WriteBytesAsync(Default.ByteContent));
         }
 
         [TestMethod]
         public async Task ReadBytesAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
         {
-            var file = TestFolder.GetFolder(Default.FolderName).GetFile(Default.FileName);
+            var file = TestFolder.GetFile(Default.FolderName, Default.FileName);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.ReadBytesAsync());
         }
 

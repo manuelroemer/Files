@@ -1,6 +1,7 @@
 ﻿namespace Files.Specification.Tests.Setup
 {
     using System.Collections.Generic;
+    using System.IO.MemoryMappedFiles;
     using System.Linq;
     using System.Threading.Tasks;
     using Files;
@@ -18,7 +19,7 @@
         /// </summary>
         public static StorageFolder GetFolderWithNonExistingParent(this StorageFolder folder)
         {
-            return folder.GetFolder(Default.FolderName).GetFolder(Default.FolderName);
+            return folder.GetFolder(Default.FolderName, Default.FolderName);
         }
         
         /// <summary>
@@ -26,7 +27,7 @@
         /// </summary>
         public static StorageFile GetFileWithNonExistingParent(this StorageFolder folder)
         {
-            return folder.GetFolder(Default.FolderName).GetFile(Default.FileName);
+            return folder.GetFile(Default.FolderName, Default.FileName);
         }
 
         /// <summary>
@@ -159,16 +160,58 @@
         }
 
         /// <summary>
-        ///     Sets up and returns a file with the <see cref="Default.FileName"/> in the folder.
+        ///     Returns a file relative to the specified folder's path.
         /// </summary>
-        public static Task<StorageFile> SetupFileAsync(this StorageFolder folder)
+        /// <param name="pathSegments">
+        ///     An array of path segments which get joined with the specified folder's path, thus
+        ///     forming the path where the file to be retrieved is ultimately located.
+        /// </param>
+        public static StorageFile GetFile(this StorageFolder folder, params string[] pathSegments)
         {
-            return folder.SetupFileAsync(Default.FileName);
+            return folder.GetFile(basePath => ToPath(basePath, pathSegments));
         }
 
         /// <summary>
-        ///     Sets up and returns a file which is located at the specified folder's path, joined
-        ///     with each segment in the <paramref name="pathSegments"/> array.
+        ///     Returns a file relative to the specified folder's path.
+        /// </summary>
+        /// <param name="pathProvider">
+        ///     A function which, by receiving the specified folder's path, builds and returns a new
+        ///     path where the file to be retrieved is located.
+        /// </param>
+        public static StorageFile GetFile(this StorageFolder folder, PathProvider pathProvider)
+        {
+            var filePath = pathProvider.Invoke(folder.Path.FullPath);
+            return folder.FileSystem.GetFile(filePath);
+        }
+
+        /// <summary>
+        ///     Returns a folder relative to the specified folder's path.
+        /// </summary>
+        /// <param name="pathSegments">
+        ///     An array of path segments which get joined with the specified folder's path, thus
+        ///     forming the path where the folder to be retrieved is ultimately located.
+        /// </param>
+        public static StorageFolder GetFolder(this StorageFolder folder, params string[] pathSegments)
+        {
+            return folder.GetFolder(basePath => ToPath(basePath, pathSegments));
+        }
+
+        /// <summary>
+        ///     Returns a folder relative to the specified folder's path.
+        /// </summary>
+        /// <param name="pathProvider">
+        ///     A function which, by receiving the specified folder's path, builds and returns a new
+        ///     path where the folder to be retrieved is located.
+        /// </param>
+        public static StorageFolder GetFolder(this StorageFolder folder, PathProvider pathProvider)
+        {
+            var folderPath = pathProvider.Invoke(folder.Path.FullPath);
+            return folder.FileSystem.GetFolder(folderPath);
+        }
+
+        /// <summary>
+        ///     Recursively creates and returns a file relative to the specified folder, replacing
+        ///     previously existing files and folders.
         /// </summary>
         /// <param name="pathSegments">
         ///     An array of path segments which get joined with the specified folder's path, thus
@@ -189,11 +232,12 @@
         }
 
         /// <summary>
-        ///     Sets up and returns a file which is located by the <paramref name="pathProvider"/>.
-        ///     This also creates any non-existing parent folder.
+        ///     Recursively creates and returns a file relative to the specified folder, replacing
+        ///     previously existing files and folders.
         /// </summary>
         /// <param name="pathProvider">
-        ///     A function which returns the path of the file to be created, based on the initial folder.
+        ///     A function which, by receiving the specified folder's path, builds and returns a new
+        ///     path where the new file should be created.
         /// </param>
         /// <example>
         ///     <code>
@@ -204,43 +248,15 @@
         /// </example>
         public static async Task<StorageFile> SetupFileAsync(this StorageFolder folder, PathProvider pathProvider)
         {
-            var files = await folder.SetupFileAsync(new[] { pathProvider });
-            return files[0];
+            var newFilePath = pathProvider.Invoke(folder.Path.FullPath);
+            var newFile = folder.FileSystem.GetFile(newFilePath);
+            await newFile.CreateAsync(recursive: true, CreationCollisionOption.ReplaceExisting);
+            return newFile;
         }
 
         /// <summary>
-        ///     Sets up and returns multiple files which are located by the <paramref name="pathProviders"/>.
-        ///     This also creates any non-existing parent folders.
-        /// </summary>
-        /// <param name="pathProviders">
-        ///     Functions which return the path of the files to be created, based on the initial folder.
-        /// </param>
-        public static async Task<IList<StorageFile>> SetupFileAsync(this StorageFolder folder, params PathProvider[] pathProviders)
-        {
-            var files = pathProviders
-                .Select(pathFactory => pathFactory(folder.Path))
-                .Select(path => folder.FileSystem.GetFile(path))
-                .ToList();
-
-            foreach (var fileToCreate in files)
-            {
-                await fileToCreate.CreateAsync(recursive: true, options: CreationCollisionOption.Ignore);
-            }
-
-            return files;
-        }
-
-        /// <summary>
-        ///     Sets up and returns a file with the <see cref="Default.FolderName"/> in the folder.
-        /// </summary>
-        public static Task<StorageFolder> SetupFolderAsync(this StorageFolder folder)
-        {
-            return folder.SetupFolderAsync(Default.FolderName);
-        }
-
-        /// <summary>
-        ///     Sets up and returns a folder which is located at the specified folder's path, joined
-        ///     with each segment in the <paramref name="pathSegments"/> array.
+        ///     Recursively creates and returns a folder relative to the specified folder, replacing
+        ///     previously existing folders.
         /// </summary>
         /// <param name="pathSegments">
         ///     An array of path segments which get joined with the specified folder's path, thus
@@ -261,11 +277,12 @@
         }
 
         /// <summary>
-        ///     Sets up and returns a folder which is located by the <paramref name="pathProvider"/>.
-        ///     This also creates any non-existing parent folder.
+        ///     Recursively creates and returns a folder relative to the specified folder, replacing
+        ///     previously existing folders.
         /// </summary>
         /// <param name="pathProvider">
-        ///     A function which returns the path of the folder to be created, based on the initial folder.
+        ///     A function which, by receiving the specified folder's path, builds and returns a new
+        ///     path where the new folder should be created.
         /// </param>
         /// <example>
         ///     <code>
@@ -276,30 +293,15 @@
         /// </example>
         public static async Task<StorageFolder> SetupFolderAsync(this StorageFolder folder, PathProvider pathProvider)
         {
-            var folders = await folder.SetupFolderAsync(new[] { pathProvider });
-            return folders[0];
+            var newFolderPath = pathProvider.Invoke(folder.Path.FullPath);
+            var newFolder = folder.FileSystem.GetFolder(newFolderPath);
+            await newFolder.CreateAsync(recursive: true, CreationCollisionOption.ReplaceExisting);
+            return newFolder;
         }
-
-        /// <summary>
-        ///     Sets up and returns multiple folders which are located by the <paramref name="pathProviders"/>.
-        ///     This also creates any non-existing parent folders.
-        /// </summary>
-        /// <param name="pathProviders">
-        ///     Functions which return the path of the folders to be created, based on the initial folder.
-        /// </param>
-        public static async Task<IList<StorageFolder>> SetupFolderAsync(this StorageFolder folder, params PathProvider[] pathProviders)
+        
+        private static StoragePath ToPath(StoragePath basePath, IEnumerable<string> pathSegments)
         {
-            var folders = pathProviders
-                .Select(pathFactory => pathFactory(folder.Path))
-                .Select(path => folder.FileSystem.GetFolder(path))
-                .ToList();
-
-            foreach (var folderToCreate in folders)
-            {
-                await folderToCreate.CreateAsync(recursive: true, options: CreationCollisionOption.Ignore);
-            }
-
-            return folders;
+            return pathSegments.Aggregate(basePath, (currentPath, segment) => currentPath / segment);
         }
 
     }
