@@ -105,9 +105,7 @@
         /// </example>
         public static Task<StorageFile> SetupFileAsync(this StorageFolder folder, params string[] pathSegments)
         {
-            return folder.SetupFileAsync(basePath => 
-                pathSegments.Aggregate(basePath, (currentPath, segment) => currentPath / segment)
-            );
+            return folder.SetupFileAsync(basePath => SegmentsToPath(basePath, pathSegments));
         }
 
         /// <summary>
@@ -150,9 +148,7 @@
         /// </example>
         public static Task<StorageFolder> SetupFolderAsync(this StorageFolder folder, params string[] pathSegments)
         {
-            return folder.SetupFolderAsync(basePath =>
-                pathSegments.Aggregate(basePath, (currentPath, segment) => currentPath / segment)
-            );
+            return folder.SetupFolderAsync(basePath => SegmentsToPath(basePath, pathSegments));
         }
 
         /// <summary>
