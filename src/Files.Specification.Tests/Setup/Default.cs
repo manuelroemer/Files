@@ -18,12 +18,33 @@
         public static string ConflictingFileName => "conflictingFile.ext";
         public static string ConflictingFolderName => "conflictingFolder";
 
+        public static string NonExistingParentFolderName => "nonExistingParentFolder";
+        public static string FileWithNonExistingParentName => "fileWithoutParent.ext";
+        public static string FolderWithNonExistingParentName => "folderWithoutParent";
+
+        public static string[] FileWithNonExistingParentSegments => new[]
+        {
+            NonExistingParentFolderName,
+            FileWithNonExistingParentName
+        };
+
+        public static string[] FolderWithNonExistingParentSegments => new[] 
+        {
+            NonExistingParentFolderName,
+            FolderWithNonExistingParentName
+        };
+
         public static string SrcParentFolderName => "src";
         public static string DstParentFolderName => "dst";
         public static string SrcFileName => "srcFile.ext";
         public static string DstFileName => "dstFile.ext";
         public static string SrcFolderName => "srcFolder";
         public static string DstFolderName => "dstFolder";
+
+        public static string[] SrcFileSegments => new[] { SrcParentFolderName, SrcFileName };
+        public static string[] DstFileSegments => new[] { DstParentFolderName, DstFileName };
+        public static string[] SrcFolderSegments => new[] { SrcParentFolderName, SrcFolderName };
+        public static string[] DstFolderSegments => new[] { DstParentFolderName, DstFolderName };
 
     }
 

@@ -94,7 +94,7 @@
         [TestMethod]
         public async Task GetAttributesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
         {
-            var folder = TestFolder.GetFolderWithNonExistingParent();
+            var folder = TestFolder.GetFolder(Default.FolderWithNonExistingParentSegments);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAttributesAsync());
         }
 
@@ -137,7 +137,7 @@
         [TestMethod]
         public async Task SetAttributesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
         {
-            var folder = TestFolder.GetFolderWithNonExistingParent();
+            var folder = TestFolder.GetFolder(Default.FolderWithNonExistingParentSegments);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.SetAttributesAsync(FileAttributes.Normal));
         }
 
@@ -232,7 +232,7 @@
         [TestMethod]
         public async Task GetPropertiesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
         {
-            var folder = TestFolder.GetFolderWithNonExistingParent();
+            var folder = TestFolder.GetFolder(Default.FolderWithNonExistingParentSegments);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetPropertiesAsync());
         }
 
@@ -267,7 +267,7 @@
         [DataRow(CreationCollisionOption.Ignore)]
         public async Task CreateAsync_RecursiveAndNonExistingParent_CreatesFolderAndParent(CreationCollisionOption options)
         {
-            var folder = TestFolder.GetFolderWithNonExistingParent();
+            var folder = TestFolder.GetFolder(Default.FolderWithNonExistingParentSegments);
             await folder.CreateAsync(recursive: true, options: options);
             await folder.ShouldExistAsync();
         }
@@ -278,7 +278,7 @@
         [DataRow(CreationCollisionOption.Ignore)]
         public async Task CreateAsync_NotRecursiveAndNonExistingParent_ThrowsDirectoryNotFoundException(CreationCollisionOption options)
         {
-            var folder = TestFolder.GetFolderWithNonExistingParent();
+            var folder = TestFolder.GetFolder(Default.FolderWithNonExistingParentSegments);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.CreateAsync(recursive: false, options));
         }
 
@@ -379,7 +379,7 @@
         [TestMethod]
         public async Task DeleteAsync_FailAndNonExistingParent_ThrowsDirectoryNotFoundException()
         {
-            var folder = TestFolder.GetFolderWithNonExistingParent();
+            var folder = TestFolder.GetFolder(Default.FolderWithNonExistingParentSegments);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.DeleteAsync(DeletionOption.Fail));
         }
 
@@ -393,7 +393,7 @@
         [TestMethod]
         public async Task DeleteAsync_IgnoreMissingAndNonExistingParent_DoesNothing()
         {
-            var folder = TestFolder.GetFolderWithNonExistingParent();
+            var folder = TestFolder.GetFolder(Default.FolderWithNonExistingParentSegments);
             await folder.DeleteAsync(DeletionOption.IgnoreMissing);
         }
 

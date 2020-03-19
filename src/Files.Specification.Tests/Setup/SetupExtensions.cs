@@ -15,129 +15,6 @@
     {
 
         /// <summary>
-        ///     Returns a non-existing folder whose parent folder is also missing.
-        /// </summary>
-        public static StorageFolder GetFolderWithNonExistingParent(this StorageFolder folder)
-        {
-            return folder.GetFolder(Default.FolderName, Default.FolderName);
-        }
-        
-        /// <summary>
-        ///     Returns a non-existing folder whose parent folder is also missing.
-        /// </summary>
-        public static StorageFile GetFileWithNonExistingParent(this StorageFolder folder)
-        {
-            return folder.GetFile(Default.FolderName, Default.FileName);
-        }
-
-        /// <summary>
-        ///     Builds and returns a path to the <see cref="Default.DstParentFolderName"/>, 
-        ///     relative to the current folder.
-        ///     
-        ///     The path looks similar to this: <c>folder/dst</c>
-        /// </summary>
-        public static StoragePath GetDstParentFolderPath(this StorageFolder folder)
-        {
-            return folder.Path.FullPath / Default.DstParentFolderName;
-        }
-
-        /// <summary>
-        ///     Builds and returns a path to the <see cref="Default.DstFileName"/> contained within 
-        ///     the <see cref="Default.DstParentFolderName"/>, 
-        ///     relative to the current folder.
-        ///     
-        ///     The path looks similar to this: <c>folder/dst/dstFile.ext</c>
-        /// </summary>
-        public static StoragePath GetDstFilePath(this StorageFolder folder)
-        {
-            return folder.GetDstParentFolderPath() / Default.DstFileName;
-        }
-
-        /// <summary>
-        ///     Sets up a default folder structure for testing copy and move operations, i.e. a
-        ///     source and destination folder and a file within the source folder that can be
-        ///     copied or moved.
-        ///     
-        ///     The final structure looks similar to this:
-        ///     
-        ///     <code>
-        ///     folder
-        ///     |_ src
-        ///     |  |_ srcFile.ext
-        ///     |_ dst
-        ///     </code>
-        /// </summary>
-        public static async Task<(StorageFolder SrcParentFolder, StorageFolder DstParentFolder, StorageFile SrcFile)> SetupSrcDstForFileAsync(this StorageFolder folder)
-        {
-            return (
-                await folder.SetupFolderAsync(Default.SrcParentFolderName),
-                await folder.SetupFolderAsync(Default.DstParentFolderName),
-                await folder.SetupFileAsync(Default.SrcParentFolderName, Default.SrcFileName)
-            );
-        }
-
-        /// <summary>
-        ///     Sets up a default folder structure for testing copy and move operations, i.e. a
-        ///     source and destination folder and a folder within the source folder that can be
-        ///     copied or moved.
-        ///     
-        ///     The final structure looks similar to this:
-        ///     
-        ///     <code>
-        ///     folder
-        ///     |_ src
-        ///     |  |_ srcFolder
-        ///     |_ dst
-        ///     </code>
-        /// </summary>
-        public static async Task<(StorageFolder SrcParentFolder, StorageFolder DstParentFolder, StorageFolder SrcFolder)> SetupSrcDstForFolderAsync(this StorageFolder folder)
-        {
-            return (
-                await folder.SetupFolderAsync(Default.SrcParentFolderName),
-                await folder.SetupFolderAsync(Default.DstParentFolderName),
-                await folder.SetupFolderAsync(Default.SrcParentFolderName, Default.SrcFolderName)
-            );
-        }
-
-        /// <summary>
-        ///     Sets up a source folder containing a source file for testing copy and move operations.
-        /// 
-        ///     The final structure looks similar to this:
-        ///     
-        ///     <code>
-        ///     folder
-        ///     |_ src
-        ///        |_ srcFile.ext
-        ///     </code>
-        /// </summary>
-        public static async Task<(StorageFolder SrcParentFolder, StorageFile SrcFile)> SetupSrcFileAsync(this StorageFolder folder)
-        {
-            var srcParentFolder = await folder.SetupFolderAsync(Default.SrcParentFolderName);
-            var srcFile = await srcParentFolder.SetupFileAsync(Default.SrcFileName);
-            return (srcParentFolder, srcFile);
-        }
-
-        /// <summary>
-        ///     Sets up two files which can be used for testing file conflicts using the <see cref="Default.FileName"/>
-        ///     and <see cref="Default.ConflictingFileName"/> names.
-        ///     
-        ///     The final structure looks similar to this:
-        ///     
-        ///     <code>
-        ///     folder
-        ///     |_ srcFile.ext
-        ///     |_ dstFile.ext
-        ///     </code>
-        /// </summary>
-        public static async Task<(StorageFile SrcFile, StorageFile ConflictingDstFile)> SetupTwoConflictingFilesAsync(this StorageFolder folder)
-        {
-            return (
-                await folder.SetupFileAsync(Default.FileName),
-                await folder.SetupFileAsync(Default.ConflictingFileName)
-            );
-        }
-
-        /// <summary>
         ///     Sets up a file and returns a folder which points to the same location as the created file.
         ///     This can be used for testing how APIs behave when an element of another type exists
         ///     at the same location.
@@ -168,7 +45,7 @@
         /// </param>
         public static StorageFile GetFile(this StorageFolder folder, params string[] pathSegments)
         {
-            return folder.GetFile(basePath => ToPath(basePath, pathSegments));
+            return folder.GetFile(basePath => SegmentsToPath(basePath, pathSegments));
         }
 
         /// <summary>
@@ -180,7 +57,7 @@
         /// </param>
         public static StorageFile GetFile(this StorageFolder folder, PathProvider pathProvider)
         {
-            var filePath = pathProvider.Invoke(folder.Path.FullPath);
+            var filePath = folder.GetPath(pathProvider);
             return folder.FileSystem.GetFile(filePath);
         }
 
@@ -193,7 +70,7 @@
         /// </param>
         public static StorageFolder GetFolder(this StorageFolder folder, params string[] pathSegments)
         {
-            return folder.GetFolder(basePath => ToPath(basePath, pathSegments));
+            return folder.GetFolder(basePath => SegmentsToPath(basePath, pathSegments));
         }
 
         /// <summary>
@@ -205,7 +82,7 @@
         /// </param>
         public static StorageFolder GetFolder(this StorageFolder folder, PathProvider pathProvider)
         {
-            var folderPath = pathProvider.Invoke(folder.Path.FullPath);
+            var folderPath = folder.GetPath(pathProvider);
             return folder.FileSystem.GetFolder(folderPath);
         }
 
@@ -248,7 +125,7 @@
         /// </example>
         public static async Task<StorageFile> SetupFileAsync(this StorageFolder folder, PathProvider pathProvider)
         {
-            var newFilePath = pathProvider.Invoke(folder.Path.FullPath);
+            var newFilePath = folder.GetPath(pathProvider);
             var newFile = folder.FileSystem.GetFile(newFilePath);
             await newFile.CreateAsync(recursive: true, CreationCollisionOption.ReplaceExisting);
             return newFile;
@@ -293,13 +170,37 @@
         /// </example>
         public static async Task<StorageFolder> SetupFolderAsync(this StorageFolder folder, PathProvider pathProvider)
         {
-            var newFolderPath = pathProvider.Invoke(folder.Path.FullPath);
+            var newFolderPath = folder.GetPath(pathProvider);
             var newFolder = folder.FileSystem.GetFolder(newFolderPath);
             await newFolder.CreateAsync(recursive: true, CreationCollisionOption.ReplaceExisting);
             return newFolder;
         }
-        
-        private static StoragePath ToPath(StoragePath basePath, IEnumerable<string> pathSegments)
+
+        /// <summary>
+        ///     Returns a path relative to the specified element's path.
+        /// </summary>
+        /// <param name="pathSegments">
+        ///     An array of path segments which get joined with the specified element's path, thus
+        ///     forming the path to be returned.
+        /// </param>
+        public static StoragePath GetPath(this StorageElement element, params string[] pathSegments)
+        {
+            return element.GetPath(basePath => SegmentsToPath(basePath, pathSegments));
+        }
+
+        /// <summary>
+        ///     Returns a path relative to the specified element's path.
+        /// </summary>
+        /// <param name="pathProvider">
+        ///     A function which, by receiving the specified element's path, builds and returns the
+        ///     path to be returned.
+        /// </param>
+        public static StoragePath GetPath(this StorageElement element, PathProvider pathProvider)
+        {
+            return pathProvider.Invoke(element.Path.FullPath);
+        }
+
+        private static StoragePath SegmentsToPath(StoragePath basePath, IEnumerable<string> pathSegments)
         {
             return pathSegments.Aggregate(basePath, (currentPath, segment) => currentPath / segment);
         }
