@@ -11,7 +11,7 @@
         /// <summary>
         ///     The method should throw an exception if a file or folder already exists at the same location.
         /// </summary>
-        Fail = 0,
+        Fail,
 
         /// <summary>
         ///     The existing file or folder should be overwritten or replaced.
@@ -20,7 +20,7 @@
         ///     If a folder already exists in the location where a file is supposed to be created,
         ///     the creation will fail (and vice versa).
         /// </summary>
-        ReplaceExisting = 1,
+        ReplaceExisting,
 
         /// <summary>
         ///     The existing file or folder should be used instead of creating a new one.
@@ -31,7 +31,7 @@
         ///     If a folder already exists in the location where a file is supposed to be created,
         ///     the creation will fail (and vice versa).
         /// </summary>
-        Ignore = 2,
+        Ignore,
 
     }
 
