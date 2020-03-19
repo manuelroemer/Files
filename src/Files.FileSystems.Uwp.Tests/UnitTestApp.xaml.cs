@@ -7,7 +7,7 @@
     using Windows.UI.Xaml;
     using Windows.UI.Xaml.Controls;
 
-    public sealed partial class App : Application
+    public sealed partial class App
     {
 
         public App()

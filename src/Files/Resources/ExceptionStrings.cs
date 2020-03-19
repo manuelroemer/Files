@@ -1,6 +1,6 @@
 ﻿namespace Files.Resources
 {
-    internal static partial class ExceptionStrings
+    internal static class ExceptionStrings
     {
 
         public static class Path

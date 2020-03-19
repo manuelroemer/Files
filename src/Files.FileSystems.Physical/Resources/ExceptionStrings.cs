@@ -1,9 +1,6 @@
-﻿using System;
-using System.Runtime.Serialization;
-
-namespace Files.FileSystems.Physical.Resources
+﻿namespace Files.FileSystems.Physical.Resources
 {
-    internal static partial class ExceptionStrings
+    internal static class ExceptionStrings
     {
 
         internal static class Enum

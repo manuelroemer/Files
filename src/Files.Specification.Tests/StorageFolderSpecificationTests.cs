@@ -203,7 +203,7 @@
             var extSeparator = extension is null ? (char?)null : FileSystem.PathInformation.ExtensionSeparatorChar;
             var fullName = $"{name}{extSeparator}{extension}";
 
-            var folder = await TestFolder.SetupFolderAsync(basePath => basePath / fullName);
+            var folder = await TestFolder.SetupFolderAsync(fullName);
             var props = await folder.GetPropertiesAsync();
 
             // Test the props to the best of our abilities. Specialities:

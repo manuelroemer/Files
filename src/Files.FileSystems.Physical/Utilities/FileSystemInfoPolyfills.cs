@@ -5,7 +5,7 @@
     using System.Runtime.ExceptionServices;
     using IOPath = System.IO.Path;
 
-    internal static partial class FileSystemInfoPolyfills
+    internal static class FileSystemInfoPolyfills
     {
 
         public static void MoveTo(this DirectoryInfo directoryInfo, string destination, bool overwrite)

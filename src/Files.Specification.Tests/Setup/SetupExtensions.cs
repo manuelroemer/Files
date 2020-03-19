@@ -4,7 +4,6 @@
     using System.Linq;
     using System.Threading.Tasks;
     using Files;
-    using Files.Specification.Tests.Utilities;
 
     /// <summary>
     ///     Defines static extension methods for conveniently setting up common file system structures
@@ -69,12 +68,11 @@
         /// </summary>
         public static async Task<(StorageFolder SrcParentFolder, StorageFolder DstParentFolder, StorageFile SrcFile)> SetupSrcDstForFileAsync(this StorageFolder folder)
         {
-            var (srcParentFolder, dstParentFolder) = await folder.SetupFolderAsync(
-                basePath => basePath / Default.SrcParentFolderName,
-                basePath => basePath / Default.DstParentFolderName
+            return (
+                await folder.SetupFolderAsync(Default.SrcParentFolderName),
+                await folder.SetupFolderAsync(Default.DstParentFolderName),
+                await folder.SetupFileAsync(Default.SrcParentFolderName, Default.SrcFileName)
             );
-            var srcFile = await srcParentFolder.SetupFileAsync(basePath => basePath / Default.SrcFileName);
-            return (srcParentFolder, dstParentFolder, srcFile);
         }
 
         /// <summary>
@@ -93,12 +91,11 @@
         /// </summary>
         public static async Task<(StorageFolder SrcParentFolder, StorageFolder DstParentFolder, StorageFolder SrcFolder)> SetupSrcDstForFolderAsync(this StorageFolder folder)
         {
-            var (srcParentFolder, dstParentFolder, srcFolder) = await folder.SetupFolderAsync(
-                basePath => basePath / Default.SrcParentFolderName,
-                basePath => basePath / Default.DstParentFolderName,
-                basePath => basePath / Default.SrcParentFolderName / Default.SrcFolderName
+            return (
+                await folder.SetupFolderAsync(Default.SrcParentFolderName),
+                await folder.SetupFolderAsync(Default.DstParentFolderName),
+                await folder.SetupFolderAsync(Default.SrcParentFolderName, Default.SrcFolderName)
             );
-            return (srcParentFolder, dstParentFolder, srcFolder);
         }
 
         /// <summary>
@@ -114,8 +111,8 @@
         /// </summary>
         public static async Task<(StorageFolder SrcParentFolder, StorageFile SrcFile)> SetupSrcFileAsync(this StorageFolder folder)
         {
-            var srcParentFolder = await folder.SetupFolderAsync(basePath => basePath / Default.SrcParentFolderName);
-            var srcFile = await srcParentFolder.SetupFileAsync(basePath => basePath / Default.SrcFileName);
+            var srcParentFolder = await folder.SetupFolderAsync(Default.SrcParentFolderName);
+            var srcFile = await srcParentFolder.SetupFileAsync(Default.SrcFileName);
             return (srcParentFolder, srcFile);
         }
 
@@ -133,11 +130,10 @@
         /// </summary>
         public static async Task<(StorageFile SrcFile, StorageFile ConflictingDstFile)> SetupTwoConflictingFilesAsync(this StorageFolder folder)
         {
-            var (src, dst) = await folder.SetupFileAsync(
-                basePath => basePath / Default.FileName,
-                basePath => basePath / Default.ConflictingFileName
+            return (
+                await folder.SetupFileAsync(Default.FileName),
+                await folder.SetupFileAsync(Default.ConflictingFileName)
             );
-            return (src, dst);
         }
 
         /// <summary>
@@ -147,7 +143,7 @@
         /// </summary>
         public static async Task<StorageFolder> SetupFileAndGetFolderAtSameLocation(this StorageFolder folder)
         {
-            await folder.SetupFileAsync(basePath => basePath / Default.SharedFileFolderName);
+            await folder.SetupFileAsync(Default.SharedFileFolderName);
             return folder.GetFolder(Default.SharedFileFolderName);
         }
 
@@ -158,7 +154,7 @@
         /// </summary>
         public static async Task<StorageFile> SetupFolderAndGetFileAtSameLocation(this StorageFolder folder)
         {
-            await folder.SetupFolderAsync(basePath => basePath / Default.SharedFileFolderName);
+            await folder.SetupFolderAsync(Default.SharedFileFolderName);
             return folder.GetFile(Default.SharedFileFolderName);
         }
 
@@ -167,7 +163,29 @@
         /// </summary>
         public static Task<StorageFile> SetupFileAsync(this StorageFolder folder)
         {
-            return folder.SetupFileAsync(basePath => basePath / Default.FileName);
+            return folder.SetupFileAsync(Default.FileName);
+        }
+
+        /// <summary>
+        ///     Sets up and returns a file which is located at the specified folder's path, joined
+        ///     with each segment in the <paramref name="pathSegments"/> array.
+        /// </summary>
+        /// <param name="pathSegments">
+        ///     An array of path segments which get joined with the specified folder's path, thus
+        ///     forming the path where the new file is ultimately located.
+        /// </param>
+        /// <example>
+        ///     <code>
+        ///     var folder = fs.GetFolder("basePath");
+        ///     var file = folder.SetupFileAsync("foo", "bar.baz");
+        ///     // Path: basePath/foo/bar.baz
+        ///     </code>
+        /// </example>
+        public static Task<StorageFile> SetupFileAsync(this StorageFolder folder, params string[] pathSegments)
+        {
+            return folder.SetupFileAsync(basePath => 
+                pathSegments.Aggregate(basePath, (currentPath, segment) => currentPath / segment)
+            );
         }
 
         /// <summary>
@@ -177,6 +195,13 @@
         /// <param name="pathProvider">
         ///     A function which returns the path of the file to be created, based on the initial folder.
         /// </param>
+        /// <example>
+        ///     <code>
+        ///     var folder = fs.GetFolder("basePath");
+        ///     var file = folder.SetupFileAsync(basePath => basePath / "foo" / "bar.baz");
+        ///     // Path: basePath/foo/bar.baz
+        ///     </code>
+        /// </example>
         public static async Task<StorageFile> SetupFileAsync(this StorageFolder folder, PathProvider pathProvider)
         {
             var files = await folder.SetupFileAsync(new[] { pathProvider });
@@ -210,7 +235,29 @@
         /// </summary>
         public static Task<StorageFolder> SetupFolderAsync(this StorageFolder folder)
         {
-            return folder.SetupFolderAsync(basePath => basePath / Default.FolderName);
+            return folder.SetupFolderAsync(Default.FolderName);
+        }
+
+        /// <summary>
+        ///     Sets up and returns a folder which is located at the specified folder's path, joined
+        ///     with each segment in the <paramref name="pathSegments"/> array.
+        /// </summary>
+        /// <param name="pathSegments">
+        ///     An array of path segments which get joined with the specified folder's path, thus
+        ///     forming the path where the new folder is ultimately located.
+        /// </param>
+        /// <example>
+        ///     <code>
+        ///     var folder = fs.GetFolder("basePath");
+        ///     var file = folder.SetupFolderAsync("foo", "bar");
+        ///     // Path: basePath/foo/bar
+        ///     </code>
+        /// </example>
+        public static Task<StorageFolder> SetupFolderAsync(this StorageFolder folder, params string[] pathSegments)
+        {
+            return folder.SetupFolderAsync(basePath =>
+                pathSegments.Aggregate(basePath, (currentPath, segment) => currentPath / segment)
+            );
         }
 
         /// <summary>
@@ -220,6 +267,13 @@
         /// <param name="pathProvider">
         ///     A function which returns the path of the folder to be created, based on the initial folder.
         /// </param>
+        /// <example>
+        ///     <code>
+        ///     var folder = fs.GetFolder("basePath");
+        ///     var file = folder.SetupFolderAsync(basePath => basePath / "foo" / "bar");
+        ///     // Path: basePath/foo/bar
+        ///     </code>
+        /// </example>
         public static async Task<StorageFolder> SetupFolderAsync(this StorageFolder folder, PathProvider pathProvider)
         {
             var folders = await folder.SetupFolderAsync(new[] { pathProvider });
