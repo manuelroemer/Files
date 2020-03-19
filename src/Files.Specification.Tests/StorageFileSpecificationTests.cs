@@ -409,7 +409,7 @@
         public async Task CopyAsync_ExistingFileAndExistingDestinationFolder_CopiesFile(NameCollisionOption options)
         {
             var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
-            var dstFolder = await TestFolder.SetupFolderAsync(Default.DstFolderName);
+            var dstFolder = await TestFolder.SetupFolderAsync(Default.DstParentFolderName);
             var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
             await srcFile.WriteTextAsync(Default.TextContent);
 
@@ -447,8 +447,8 @@
         [DataRow(NameCollisionOption.ReplaceExisting)]
         public async Task CopyAsync_NonExistingDestinationFolder_ThrowsDirectoryNotFoundException(NameCollisionOption options)
         {
-            var srcFile = await TestFolder.SetupFileAsync(Default.SrcParentFolderName, Default.SrcFileName);
-            var destination = TestFolder.Path / Default.DstParentFolderName / Default.DstFileName;
+            var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
+            var destination = TestFolder.GetPath(Default.DstFileSegments);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await srcFile.CopyAsync(destination, options));
         }
         
@@ -458,8 +458,7 @@
         public async Task CopyAsync_ConflictingFolderExistsAtSource_ThrowsIOException(NameCollisionOption options)
         {
             await TestFolder.SetupFolderAsync(Default.DstParentFolderName);
-            await TestFolder.SetupFolderAsync(Default.SrcParentFolderName, Default.SharedFileFolderName);
-            var srcFile = TestFolder.GetFile(Default.SrcParentFolderName, Default.SharedFileFolderName);
+            var srcFile = TestFolder.GetFile(Default.SharedFileFolderInSrcSegments);
             var destination = TestFolder.GetPath(Default.DstFileSegments);
             await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(destination, options));
         }
@@ -469,8 +468,8 @@
         [DataRow(NameCollisionOption.ReplaceExisting)]
         public async Task CopyAsync_ConflictingFolderExistsAtDestination_ThrowsIOException(NameCollisionOption options)
         {
-            var conflictingFolder = await TestFolder.SetupFolderAsync(Default.DstParentFolderName, Default.SharedFileFolderName);
-            var srcFile = await TestFolder.SetupFileAsync(Default.SrcParentFolderName, Default.SharedFileFolderName);
+            var conflictingFolder = await TestFolder.SetupFolderAsync(Default.SharedFileFolderInDstSegments);
+            var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
             var destination = conflictingFolder.Path;
             await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(destination, options));
         }
@@ -478,17 +477,16 @@
         [TestMethod]
         public async Task CopyAsync_FailAndExistingFileAtDestination_ThrowsIOException()
         {
-            await TestFolder.SetupFileAsync(Default.DstParentFolderName, Default.DstFileName);
-            var srcFile = await TestFolder.SetupFileAsync(Default.SrcParentFolderName, Default.SrcFileName);
-            var destination = TestFolder.GetPath(Default.DstFileSegments);
-            await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(destination, NameCollisionOption.Fail));
+            var dstFile = await TestFolder.SetupFileAsync(Default.DstFileSegments);
+            var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
+            await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(dstFile.Path, NameCollisionOption.Fail));
         }
         
         [TestMethod]
         public async Task CopyAsync_ReplaceExistingAndExistingFileAtDestination_ReplacesExistingFile()
         {
-            await TestFolder.SetupFileAsync(Default.DstParentFolderName, Default.DstFileName);
-            var srcFile = await TestFolder.SetupFileAsync(Default.SrcParentFolderName, Default.SrcFileName);
+            await TestFolder.SetupFileAsync(Default.DstFileSegments);
+            var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
             var destination = TestFolder.GetPath(Default.DstFileSegments);
             await srcFile.WriteBytesAsync(Default.ByteContent);
             var dstFile = await srcFile.CopyAsync(destination, NameCollisionOption.ReplaceExisting);

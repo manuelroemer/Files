@@ -45,6 +45,8 @@
         public static string[] DstFileSegments => new[] { DstParentFolderName, DstFileName };
         public static string[] SrcFolderSegments => new[] { SrcParentFolderName, SrcFolderName };
         public static string[] DstFolderSegments => new[] { DstParentFolderName, DstFolderName };
+        public static string[] SharedFileFolderInSrcSegments => new[] { SrcParentFolderName, SharedFileFolderName };
+        public static string[] SharedFileFolderInDstSegments => new[] { DstParentFolderName, SharedFileFolderName };
 
     }
 
