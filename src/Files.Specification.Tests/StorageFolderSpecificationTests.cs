@@ -101,7 +101,7 @@
         [TestMethod]
         public async Task GetAttributesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
         {
-            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
             await Should.ThrowAsync<IOException>(async () => await folder.GetAttributesAsync());
         }
 
@@ -144,7 +144,7 @@
         [TestMethod]
         public async Task SetAttributesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
         {
-            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
             await Should.ThrowAsync<IOException>(async () => await folder.SetAttributesAsync(FileAttributes.Normal));
         }
 
@@ -176,7 +176,7 @@
         [TestMethod]
         public async Task ExistsAsync_ConflictingFileExistsAtLocation_ReturnsFalse()
         {
-            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
             await folder.ShouldNotExistAsync();
         }
 
@@ -239,7 +239,7 @@
         [TestMethod]
         public async Task GetPropertiesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
         {
-            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
             await Should.ThrowAsync<IOException>(async () => await folder.GetPropertiesAsync());
         }
 
@@ -328,7 +328,7 @@
         [DataRow(CreationCollisionOption.Ignore, false)]
         public async Task CreateAsync_ConflictingFileExistsAtLocation_ThrowsIOException(CreationCollisionOption options, bool recursive)
         {
-            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
             await Should.ThrowAsync<IOException>(async () => await folder.CreateAsync(recursive, options));
         }
 
@@ -338,7 +338,7 @@
         [DataRow(CreationCollisionOption.Ignore)]
         public async Task CreateAsync_RecursiveAndConflictingFileExistsAtParentLocation_ThrowsIOException(CreationCollisionOption options)
         {
-            var parentFolder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            var parentFolder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
             var thisFolder = parentFolder.GetFolder(Default.FolderName);
             await Should.ThrowAsync<IOException>(async () => await thisFolder.CreateAsync(recursive: true, options));
         }
@@ -402,7 +402,7 @@
         [DataRow(DeletionOption.IgnoreMissing)]
         public async Task DeleteAsync_ConflictingFileExistsAtLocation_ThrowsIOException(DeletionOption options)
         {
-            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation();
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
             await Should.ThrowAsync<IOException>(async () => await folder.DeleteAsync(options));
         }
 

@@ -1,7 +1,6 @@
 ﻿namespace Files.Specification.Tests.Setup
 {
     using System.Collections.Generic;
-    using System.IO.MemoryMappedFiles;
     using System.Linq;
     using System.Threading.Tasks;
     using Files;
@@ -19,10 +18,12 @@
         ///     This can be used for testing how APIs behave when an element of another type exists
         ///     at the same location.
         /// </summary>
-        public static async Task<StorageFolder> SetupFileAndGetFolderAtSameLocation(this StorageFolder folder)
+        public static async Task<StorageFolder> SetupFileAndGetFolderAtSameLocation(
+            this StorageFolder folder, string name
+        )
         {
-            await folder.SetupFileAsync(Default.SharedFileFolderName);
-            return folder.GetFolder(Default.SharedFileFolderName);
+            await folder.SetupFileAsync(name);
+            return folder.GetFolder(name);
         }
 
         /// <summary>
@@ -30,10 +31,12 @@
         ///     This can be used for testing how APIs behave when an element of another type exists
         ///     at the same location.
         /// </summary>
-        public static async Task<StorageFile> SetupFolderAndGetFileAtSameLocation(this StorageFolder folder)
+        public static async Task<StorageFile> SetupFolderAndGetFileAtSameLocation(
+            this StorageFolder folder, string name
+        )
         {
-            await folder.SetupFolderAsync(Default.SharedFileFolderName);
-            return folder.GetFile(Default.SharedFileFolderName);
+            await folder.SetupFolderAsync(name);
+            return folder.GetFile(name);
         }
 
         /// <summary>
