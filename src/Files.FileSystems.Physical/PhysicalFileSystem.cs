@@ -58,7 +58,7 @@
                 KnownFolder.RoamingApplicationData => GetSpecialFolder(ApplicationData),
                 KnownFolder.LocalApplicationData => GetSpecialFolder(LocalApplicationData),
                 KnownFolder.ProgramData => GetSpecialFolder(CommonApplicationData),
-                KnownFolder.UsersProfile => GetSpecialFolder(UserProfile),
+                KnownFolder.UserProfile => GetSpecialFolder(UserProfile),
                 KnownFolder.Desktop => GetSpecialFolder(Desktop),
                 KnownFolder.DocumentsLibrary => GetSpecialFolder(MyDocuments),
                 KnownFolder.PicturesLibrary => GetSpecialFolder(MyPictures),
