@@ -240,6 +240,10 @@
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
+                // Required for .NET Core/Unix.
+                // On Windows, Directory.Delete throws, but not on Unix.
+                EnsureNoConflictingFileExists();
+
                 if (options == DeletionOption.Fail)
                 {
                     EnsureExists();
