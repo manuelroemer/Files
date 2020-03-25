@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Linq;
     using System.Runtime.ExceptionServices;
     using System.Text;
     using System.Threading;
@@ -135,15 +136,23 @@
 
             return Task.Run(() =>
             {
+                var dstPathString = destinationPath.FullPath.ToString();
                 var overwrite = options.ToOverwriteBool();
 
                 try
                 {
-                    File.Copy(_fullPath.ToString(), destinationPath.FullPath.ToString(), overwrite);
+                    File.Copy(_fullPath.ToString(), dstPathString, overwrite);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(ex);
+                    RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(
+                        ex,
+                        potentialConflictingFolderPaths: new[]
+                        {
+                            _fullPath.ToString(),
+                            dstPathString,
+                        }
+                    );
                 }
 
                 return FileSystem.GetFile(destinationPath);
@@ -161,8 +170,27 @@
 
             return Task.Run(() =>
             {
+                EnsureExists(cancellationToken);
+
+                var dstPathString = destinationPath.FullPath.ToString();
                 var overwrite = options.ToOverwriteBool();
-                File.Move(_fullPath.ToString(), destinationPath.FullPath.ToString(), overwrite);
+
+                try
+                {
+                    File.Move(_fullPath.ToString(), dstPathString, overwrite);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(
+                        ex,
+                        potentialConflictingFolderPaths: new[]
+                        {
+                            _fullPath.ToString(),
+                            dstPathString,
+                        }
+                    );
+                }
+
                 return FileSystem.GetFile(destinationPath);
             });
         }
@@ -282,6 +310,18 @@
             }
         }
 
+        private void RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(
+            UnauthorizedAccessException originalException
+        )
+        {
+            // By default, we only check this element's location.
+            // This is enough for most methods like CreateAsync.
+            RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(
+                originalException,
+                potentialConflictingFolderPaths: new[] { _fullPath.ToString() }
+            );
+        }
+
         /// <summary>
         ///     Several methods in the <see cref="File"/> class throw an <see cref="UnauthorizedAccessException"/>
         ///     when a file operation (e.g. Create, Delete, ...) is executed on a directory.
@@ -290,13 +330,16 @@
         ///     To do this, we manually check if a directory exists in such a location.
         ///     If so, we certainly have access to the location and can throw the appropriate exception.
         /// </summary>
-        private void RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(UnauthorizedAccessException originalException)
+        private static void RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(
+            UnauthorizedAccessException originalException,
+            string[] potentialConflictingFolderPaths
+        )
         {
             bool hasConflictingDirectory;
 
             try
             {
-                hasConflictingDirectory = Directory.Exists(_fullPath.ToString());
+                hasConflictingDirectory = potentialConflictingFolderPaths.Any(path => Directory.Exists(path));
             }
             // Do not catch general exception types
             // Since this is only used for exception conversions, it's okay to fail.

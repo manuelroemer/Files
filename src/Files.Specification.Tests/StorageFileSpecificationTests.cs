@@ -428,8 +428,8 @@
         public async Task CopyAsync_NonExistingFile_ThrowsFileNotFoundException(NameCollisionOption options)
         {
             var file = TestFolder.GetFile(Default.FileName);
-            var destination = TestFolder.GetPath(Default.DstFileSegments);
-            await Should.ThrowAsync<FileNotFoundException>(async () => await file.CopyAsync(destination, options));
+            var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.CopyAsync(dstFilePath, options));
         }
 
         [TestMethod]
@@ -438,8 +438,8 @@
         public async Task CopyAsync_NonExistingParent_ThrowsDirectoryNotFoundException(NameCollisionOption options)
         {
             var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
-            var destination = TestFolder.GetPath(Default.DstFileSegments);
-            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.CopyAsync(destination, options));
+            var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.CopyAsync(dstFilePath, options));
         }
 
         [TestMethod]
@@ -448,8 +448,8 @@
         public async Task CopyAsync_NonExistingDestinationFolder_ThrowsDirectoryNotFoundException(NameCollisionOption options)
         {
             var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
-            var destination = TestFolder.GetPath(Default.DstFileSegments);
-            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await srcFile.CopyAsync(destination, options));
+            var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await srcFile.CopyAsync(dstFilePath, options));
         }
         
         [TestMethod]
@@ -459,8 +459,8 @@
         {
             await TestFolder.SetupFolderAsync(Default.DstParentFolderName);
             var srcFile = await TestFolder.SetupFolderAndGetFileAtSameLocation(Default.SharedFileFolderInSrcSegments);
-            var destination = TestFolder.GetPath(Default.DstFolderSegments);
-            await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(destination, options));
+            var dstFilePath = TestFolder.GetPath(Default.DstFolderSegments);
+            await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(dstFilePath, options));
         }
 
         [TestMethod]
@@ -470,8 +470,8 @@
         {
             await TestFolder.SetupFolderAsync(Default.SharedFileFolderInDstSegments);
             var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
-            var destination = TestFolder.GetPath(Default.SharedFileFolderInDstSegments);
-            await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(destination, options));
+            var dstFilePath = TestFolder.GetPath(Default.SharedFileFolderInDstSegments);
+            await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(dstFilePath, options));
         }
 
         [TestMethod]
@@ -487,9 +487,9 @@
         {
             await TestFolder.SetupFileAsync(Default.DstFileSegments);
             var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
-            var destination = TestFolder.GetPath(Default.DstFileSegments);
+            var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
             await srcFile.WriteBytesAsync(Default.ByteContent);
-            var dstFile = await srcFile.CopyAsync(destination, NameCollisionOption.ReplaceExisting);
+            var dstFile = await srcFile.CopyAsync(dstFilePath, NameCollisionOption.ReplaceExisting);
             await dstFile.ShouldHaveContentAsync(Default.ByteContent);
         }
 
@@ -499,12 +499,122 @@
         public async Task CopyAsync_CopyToSameLocation_ThrowsIOException(NameCollisionOption options)
         {
             var srcFile = await TestFolder.SetupFileAsync(Default.FileName);
-            var destination = srcFile.Path;
-            await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(destination, options));
+            var dstFilePath = srcFile.Path;
+            await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(dstFilePath, options));
         }
 
         #endregion
-        
+
+        #region MoveAsync Tests
+
+        [TestMethod]
+        public async Task MoveAsync_NullParameters_ThrowsArgumentNullException()
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            await Should.ThrowAsync<ArgumentNullException>(async () => await file.MoveAsync(destinationPath: null!));
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task MoveAsync_ExistingFileAndExistingDestinationFolder_MovesFile(NameCollisionOption options)
+        {
+            var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
+            var dstParentFolder = await TestFolder.SetupFolderAsync(Default.DstParentFolderName);
+            var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
+            await srcFile.WriteTextAsync(Default.TextContent);
+
+            var dstFile = await srcFile.MoveAsync(dstFilePath, options);
+
+            dstFile.GetParent().Path.ShouldBeEffectivelyEqualTo(dstParentFolder.Path);
+            await srcFile.ShouldNotExistAsync();
+            await dstFile.ShouldExistAsync();
+            await dstFile.ShouldHaveContentAsync(Default.TextContent);
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task MoveAsync_NonExistingFile_ThrowsFileNotFoundException(NameCollisionOption options)
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.MoveAsync(dstFilePath, options));
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task MoveAsync_NonExistingParent_ThrowsDirectoryNotFoundException(NameCollisionOption options)
+        {
+            var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
+            var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.MoveAsync(dstFilePath, options));
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task MoveAsync_NonExistingDestinationFolder_ThrowsDirectoryNotFoundException(NameCollisionOption options)
+        {
+            var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
+            var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await srcFile.MoveAsync(dstFilePath, options));
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task MoveAsync_ConflictingFolderExistsAtSource_ThrowsIOException(NameCollisionOption options)
+        {
+            await TestFolder.SetupFolderAsync(Default.DstParentFolderName);
+            var srcFile = await TestFolder.SetupFolderAndGetFileAtSameLocation(Default.SharedFileFolderInSrcSegments);
+            var dstFilePath = TestFolder.GetPath(Default.DstFolderSegments);
+            await Should.ThrowAsync<IOException>(async () => await srcFile.MoveAsync(dstFilePath, options));
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task MoveAsync_ConflictingFolderExistsAtDestination_ThrowsIOException(NameCollisionOption options)
+        {
+            await TestFolder.SetupFolderAsync(Default.SharedFileFolderInDstSegments);
+            var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
+            var dstFilePath = TestFolder.GetPath(Default.SharedFileFolderInDstSegments);
+            await Should.ThrowAsync<IOException>(async () => await srcFile.MoveAsync(dstFilePath, options));
+        }
+
+        [TestMethod]
+        public async Task MoveAsync_FailAndExistingFileAtDestination_ThrowsIOException()
+        {
+            var dstFile = await TestFolder.SetupFileAsync(Default.DstFileSegments);
+            var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
+            await Should.ThrowAsync<IOException>(async () => await srcFile.MoveAsync(dstFile.Path, NameCollisionOption.Fail));
+        }
+
+        [TestMethod]
+        public async Task MoveAsync_ReplaceExistingAndExistingFileAtDestination_ReplacesExistingFile()
+        {
+            await TestFolder.SetupFileAsync(Default.DstFileSegments);
+            var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
+            var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
+            await srcFile.WriteBytesAsync(Default.ByteContent);
+            var dstFile = await srcFile.MoveAsync(dstFilePath, NameCollisionOption.ReplaceExisting);
+            await dstFile.ShouldHaveContentAsync(Default.ByteContent);
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task MoveAsync_MoveToSameLocation_DoesNothing(NameCollisionOption options)
+        {
+            var srcFile = await TestFolder.SetupFileAsync(Default.FileName);
+            await srcFile.MoveAsync(srcFile.Path, options);
+            await srcFile.ShouldExistAsync();
+        }
+
+        #endregion
+
         #region ReadTextAsync / WriteTextAsync Tests
 
         [TestMethod]

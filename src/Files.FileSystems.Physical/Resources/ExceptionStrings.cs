@@ -37,7 +37,8 @@
                 "The specified path points to a root folder which cannot identify a file.";
 
             internal static string ConflictingFolderExistsAtFileLocation() =>
-                "The operation failed because a folder exists at the file's location.";
+                "The operation failed because a folder exists at the file's location (or at the " +
+                "destination folder if this was a copy or move operation).";
 
         }
 
