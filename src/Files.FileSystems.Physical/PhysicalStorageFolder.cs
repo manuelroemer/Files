@@ -241,7 +241,8 @@
             return Task.Run(() =>
             {
                 // Required for .NET Core/Unix.
-                // On Windows, Directory.Delete throws, but not on Unix.
+                // On Windows, Directory.Delete throws an IOException when a file exists at the same
+                // location, but not on Unix.
                 EnsureNoConflictingFileExists();
 
                 if (options == DeletionOption.Fail)
