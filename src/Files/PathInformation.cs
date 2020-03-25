@@ -67,6 +67,26 @@
         public string ParentDirectorySegment { get; }
 
         /// <summary>
+        ///     Gets the <see cref="StringComparison"/> which is, by default, used by this file system
+        ///     implementation to compare paths.
+        ///     
+        ///     Please be aware of the fact that this property is named "Default" for a reason and
+        ///     might, in certain situations, not reflect the real string comparison used in a file
+        ///     system.
+        ///     See remarks for details.
+        /// </summary>
+        /// <remarks>
+        ///     Depending on the file system implementation, it can very well happen that paths
+        ///     are compared with different string comparisons in different locations.
+        ///     This could, for example, be the case in a real, physical file system which mounts
+        ///     another file system which uses a different string comparison. In such cases, this
+        ///     property will lead to invalid comparisons.
+        ///     For that reason, information about path equality, even with this property, should
+        ///     always be treated with care.
+        /// </remarks>
+        public StringComparison DefaultStringComparison { get; }
+
+        /// <summary>
         ///     Initializes a new instance of the <see cref="PathInformation"/> class.
         /// </summary>
         /// <param name="invalidPathChars">
@@ -97,6 +117,10 @@
         ///     A string which is used by this file system implementation to refer to the
         ///     parent directory in a path.
         /// </param>
+        /// <param name="defaultStringComparison">
+        ///     The <see cref="StringComparison"/> which is, by default, used by this file system
+        ///     implementation to compare paths.
+        /// </param>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="invalidPathChars"/>, <paramref name="invalidFileNameChars"/>,
         ///     <paramref name="parentDirectorySegment"/> or <paramref name="currentDirectorySegment"/>
@@ -109,7 +133,8 @@
             char altDirectorySeparatorChar,
             char extensionSeparatorChar,
             string currentDirectorySegment,
-            string parentDirectorySegment)
+            string parentDirectorySegment,
+            StringComparison defaultStringComparison)
         {
             _ = invalidPathChars ?? throw new ArgumentNullException(nameof(invalidPathChars));
             _ = invalidFileNameChars ?? throw new ArgumentNullException(nameof(invalidFileNameChars));
@@ -123,6 +148,7 @@
             ExtensionSeparatorChar = extensionSeparatorChar;
             CurrentDirectorySegment = currentDirectorySegment;
             ParentDirectorySegment = parentDirectorySegment;
+            DefaultStringComparison = defaultStringComparison;
 
             DirectorySeparatorChars = new[] { DirectorySeparatorChar, AltDirectorySeparatorChar }
                 .Distinct()

@@ -11,8 +11,6 @@
     public abstract class StoragePath : IFileSystemElement, IEquatable<string?>, IEquatable<StoragePath?>
     {
 
-        private const StringComparison DefaultStringComparison = StringComparison.Ordinal;
-
         private readonly string _underlyingString;
 
         /// <inheritdoc/>
@@ -241,13 +239,13 @@
         };
 
         public bool Equals(StoragePath? path) =>
-            Equals(path?._underlyingString, DefaultStringComparison);
+            Equals(path?._underlyingString, FileSystem.PathInformation.DefaultStringComparison);
 
         public bool Equals(StoragePath? path, StringComparison stringComparison) =>
             Equals(path?._underlyingString, stringComparison);
 
         public bool Equals(string? path) =>
-            Equals(path, DefaultStringComparison);
+            Equals(path, FileSystem.PathInformation.DefaultStringComparison);
 
         public bool Equals(string? path, StringComparison stringComparison) =>
             ToString().Equals(path, stringComparison);

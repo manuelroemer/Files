@@ -4,6 +4,7 @@
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using Files;
+    using Files.FileSystems.Physical.Utilities;
     using static System.Environment;
     using static System.Environment.SpecialFolder;
 
@@ -17,7 +18,8 @@
             Path.AltDirectorySeparatorChar,
             extensionSeparatorChar: '.',
             currentDirectorySegment: ".",
-            parentDirectorySegment: ".."
+            parentDirectorySegment: "..",
+            defaultStringComparison: PathHelper.StringComparison
         );
 
         /// <summary>

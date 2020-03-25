@@ -202,11 +202,12 @@
                 // File.Move works perfectly well when moving a file to the same location.
                 // Directory.Move throws an IOException.
                 // We can do our best to follow the specification and not throw by manually comparing
-                // the full paths. After all, .NET Core does the same, just the other way around:
+                // the full paths using the assumed, file system specific case-sensitivity.
+                // After all, .NET Core does the same, just the other way around:
                 // https://source.dot.net/#System.IO.FileSystem/System/IO/Directory.cs,275
                 // 
                 // This handling is certainly not perfect. If this leads to bugs, it should be improved.
-                if (_fullPath.Equals(fullDstPath, PathHelper.StringComparison))
+                if (_fullPath == destinationPath.FullPath)
                 {
                     return destination;
                 }
