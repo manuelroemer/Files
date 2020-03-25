@@ -2,7 +2,6 @@
 {
     using System;
     using System.IO;
-    using System.Threading;
     using Files;
     using Files.FileSystems.Physical.Resources;
     using Files.FileSystems.Physical.Utilities;

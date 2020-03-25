@@ -190,8 +190,26 @@
 
             return Task.Run(async () =>
             {
+                // For whatever reason, Directory.Move moves files instead of throwing an exception.
+                // We've got to manually verify that the current location actually is a directory and not a file.
+                EnsureNoConflictingFileExists();
+
                 var destination = FileSystem.GetFolder(destinationPath);
+                var fullDstPath = destinationPath.FullPath.ToString();
                 var overwrite = options.ToOverwriteBool();
+
+                // .NET is inconsistent with the File.Move and Directory.Move APIs.
+                // File.Move works perfectly well when moving a file to the same location.
+                // Directory.Move throws an IOException.
+                // We can do our best to follow the specification and not throw by manually comparing
+                // the full paths. After all, .NET Core does the same, just the other way around:
+                // https://source.dot.net/#System.IO.FileSystem/System/IO/Directory.cs,275
+                // 
+                // This handling is certainly not perfect. If this leads to bugs, it should be improved.
+                if (_fullPath.Equals(fullDstPath, PathHelper.StringComparison))
+                {
+                    return destination;
+                }
 
                 if (overwrite && await destination.ExistsAsync(cancellationToken).ConfigureAwait(false))
                 {

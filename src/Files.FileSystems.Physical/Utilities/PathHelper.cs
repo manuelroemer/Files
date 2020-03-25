@@ -7,7 +7,7 @@
     using Files.Utilities;
     using IOPath = System.IO.Path;
 
-    internal static class PathHelper
+    internal static partial class PathHelper
     {
 
         internal static readonly char[] InvalidPathChars = IOPath.GetInvalidPathChars();
