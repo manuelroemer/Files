@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Threading;
     using Files;
     using Files.FileSystems.Physical.Resources;
     using Files.FileSystems.Physical.Utilities;
@@ -53,18 +54,15 @@
             EndsInDirectorySeparator = endsInDirectorySeparator;
 
             _rootLazy = new Lazy<StoragePath?>(
-                () => string.IsNullOrEmpty(rootPath) ? null : fileSystem.GetPath(rootPath),
-                isThreadSafe: false
+                () => string.IsNullOrEmpty(rootPath) ? null : fileSystem.GetPath(rootPath)
             );
 
             _parentLazy = new Lazy<StoragePath?>(
-                () => string.IsNullOrEmpty(directoryPath) ? null : fileSystem.GetPath(directoryPath),
-                isThreadSafe: false
+                () => string.IsNullOrEmpty(directoryPath) ? null : fileSystem.GetPath(directoryPath)
             );
 
             _fullPathLazy = new Lazy<StoragePath>(
-                () => fileSystem.GetPath(fullPath),
-                isThreadSafe: false
+                () => fileSystem.GetPath(fullPath)
             );
 
             _pathWithoutEndingDirectorySeparatorLazy = new Lazy<StoragePath>(
@@ -88,8 +86,7 @@
                             ex
                         );
                     }
-                },
-                isThreadSafe: false
+                }
             );
         }
 
