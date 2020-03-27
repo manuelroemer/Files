@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="Files.StorageFile">
-    <Position X="4.5" Y="5.25" Width="2.25" />
+    <Position X="4.75" Y="5.25" Width="2.5" />
     <TypeIdentifier>
       <HashCode>ACAAAAAAAAAAAQAAAAAAgAAARAAAgACIAAAAAAQAAEA=</HashCode>
       <FileName>StorageFile.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Files.StorageElement">
-    <Position X="6.25" Y="1" Width="2.25" />
+    <Position X="6.5" Y="1" Width="2.5" />
     <Compartments>
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
@@ -19,25 +19,25 @@
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Files.StorageFolder">
-    <Position X="8" Y="5.25" Width="2.25" />
+    <Position X="8.25" Y="5.25" Width="2.5" />
     <TypeIdentifier>
       <HashCode>ACAAAAAAAAAAAAAAAAAAgSAAUAAAgAAAAAAEAAQAAAA=</HashCode>
       <FileName>StorageFolder.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Files.StoragePath">
-    <Position X="11.5" Y="1" Width="2.25" />
+    <Position X="11.75" Y="1" Width="2.5" />
     <Compartments>
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>CCAAUACAAABAACgEwAQAQFRQQAAgAYAAAAABAAAAAiE=</HashCode>
+      <HashCode>CCAAUACAAABAACgEwAQAQFRQQAAgAYAAAAABAAAAAiA=</HashCode>
       <FileName>StoragePath.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Files.FileSystem">
-    <Position X="1.25" Y="1" Width="2.25" />
+    <Position X="1.25" Y="1" Width="2.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAAAAAAACAQAAACAAAQACAEAAAAAAA=</HashCode>
       <FileName>FileSystem.cs</FileName>
