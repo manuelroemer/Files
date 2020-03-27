@@ -5,6 +5,10 @@
     using System.Reflection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
+    /// <summary>
+    ///     Provides test data rows from an instance property or method of the test class,
+    ///     initialized via <see cref="Activator.CreateInstance(Type)"/>.
+    /// </summary>
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public sealed class DynamicInstanceDataAttribute : Attribute, ITestDataSource
     {
