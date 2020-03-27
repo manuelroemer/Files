@@ -270,21 +270,22 @@
                 catch (UnauthorizedAccessException ex)
                 {
                     ThrowIOExceptionIfConflictingFolderExists(ex);
-                    throw; // The method above throws. This will not be reached.
+                    throw;
                 }
             });
         }
 
-        public override Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
+        public override async Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
         {
-            return File.ReadAllBytesAsync(_fullPath.ToString(), cancellationToken);
-        }
-
-        public override Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
-        {
-            return encoding is null
-                ? File.ReadAllTextAsync(_fullPath.ToString(), cancellationToken)
-                : File.ReadAllTextAsync(_fullPath.ToString(), encoding, cancellationToken);
+            try
+            {
+                return await File.ReadAllBytesAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                await ThrowIOExceptionIfConflictingFolderExistsAsync(ex).ConfigureAwait(false);
+                throw;
+            }
         }
 
         public override async Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
@@ -293,6 +294,21 @@
             await EnsureExistsAsync(cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
             await File.WriteAllBytesAsync(_fullPath.ToString(), bytes, cancellationToken).ConfigureAwait(false);
+        }
+
+        public override async Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
+        {
+            try
+            {
+                return encoding is null
+                    ? await File.ReadAllTextAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false)
+                    : await File.ReadAllTextAsync(_fullPath.ToString(), encoding, cancellationToken).ConfigureAwait(false);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                await ThrowIOExceptionIfConflictingFolderExistsAsync(ex).ConfigureAwait(false);
+                throw;
+            }
         }
 
         public override async Task WriteTextAsync(
@@ -341,6 +357,9 @@
             }
         }
 
+        private Task ThrowIOExceptionIfConflictingFolderExistsAsync(UnauthorizedAccessException innerException) =>
+            Task.Run(() => ThrowIOExceptionIfConflictingFolderExists(innerException));
+
         /// <summary>
         ///     Several methods in the <see cref="File"/> class throw an <see cref="UnauthorizedAccessException"/>
         ///     when a file operation (e.g. Create, Delete, ...) is executed on a directory.
@@ -350,7 +369,7 @@
         ///     an IOException instead.
         /// </summary>
         private void ThrowIOExceptionIfConflictingFolderExists(
-            UnauthorizedAccessException originalException,
+            UnauthorizedAccessException innerException,
             string[]? potentialConflictingFolderPaths = null
         )
         {
@@ -373,7 +392,7 @@
 
             if (hasConflictingDirectory)
             {
-                throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation(), originalException);
+                throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation(), innerException);
             }
         }
 

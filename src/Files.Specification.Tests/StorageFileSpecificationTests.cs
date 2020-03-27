@@ -855,104 +855,218 @@
 
         #endregion
 
-        #region ReadTextAsync / WriteTextAsync Tests
+        #region ReadTextAsync Tests
 
         [TestMethod]
-        public async Task WriteTextAsync_Throws_ArgumentNullException()
-        {
-            var file = await TestFolder.SetupFileAsync(Default.FileName);
-            await Should.ThrowAsync<ArgumentNullException>(async () => await file.WriteTextAsync(null!));
-        }
-
-        [TestMethod]
-        public async Task Can_Read_Write_Text_With_Default_Encoding()
+        public async Task ReadTextAsync_ExistingFile_ReturnsText()
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.WriteTextAsync(Default.TextContent);
-            await file.ShouldHaveContentAsync(Default.TextContent);
+            var text = await file.ReadTextAsync();
+            text.ShouldBe(Default.TextContent);
         }
 
         [TestMethod]
-        public async Task Can_Read_Write_Text_With_Specified_Encoding()
+        public async Task ReadTextAsync_ExistingAndEmptyFile_ReturnsEmptyString()
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
-            await file.WriteTextAsync(Default.TextContent, Encoding.ASCII);
-            await file.ShouldHaveContentAsync(Default.TextContent, Encoding.ASCII);
+            var text = await file.ReadTextAsync();
+            text.ShouldBeEmpty();
         }
 
         [TestMethod]
-        public async Task WriteTextAsync_Throws_FileNotFoundException_If_File_Does_Not_Exist()
+        [DataRow(null)]
+        [DataRow("utf-8")]
+        [DataRow("utf-32")]
+        [DataRow("us-ascii")]
+        public async Task ReadTextAsync_ExistingFileAndDifferentEncodings_UsesEncoding(string? encodingName)
         {
-            var file = TestFolder.GetFile(Default.FileName);
-            await Should.ThrowAsync<FileNotFoundException>(async () => await file.WriteTextAsync(Default.TextContent));
+            var encoding = encodingName is null ? null : Encoding.GetEncoding(encodingName);
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.WriteTextAsync(Default.TextContent, encoding);
+
+            var content = await file.ReadTextAsync(encoding);
+            content.ShouldBe(Default.TextContent);
         }
-        
+
         [TestMethod]
-        public async Task ReadTextAsync_Throws_FileNotFoundException_If_File_Does_Not_Exist()
+        public async Task ReadTextAsync_NonExistingFile_ThrowsFileNotFoundException()
         {
             var file = TestFolder.GetFile(Default.FileName);
             await Should.ThrowAsync<FileNotFoundException>(async () => await file.ReadTextAsync());
         }
         
         [TestMethod]
-        public async Task WriteTextAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
+        public async Task ReadTextAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
         {
-            var file = TestFolder.GetFile(Default.FolderName, Default.FileName);
-            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.WriteTextAsync(Default.TextContent));
+            var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.ReadTextAsync());
         }
         
         [TestMethod]
-        public async Task ReadTextAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
+        public async Task ReadTextAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
         {
-            var file = TestFolder.GetFile(Default.FolderName, Default.FileName);
-            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.ReadTextAsync());
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation(Default.SharedFileFolderName);
+            await Should.ThrowAsync<IOException>(async () => await file.ReadTextAsync());
         }
 
         #endregion
 
-        #region ReadBytesAsync / WriteBytesAsync Tests
+        #region WriteTextAsync Tests
 
         [TestMethod]
-        public async Task WriteBytesAsync_Throws_ArgumentNullException()
+        public async Task WriteTextAsync_NullParameters_ThrowsArgumentNullException()
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
-            await Should.ThrowAsync<ArgumentNullException>(async () => await file.WriteBytesAsync(null!));
+            await Should.ThrowAsync<ArgumentNullException>(async () => await file.WriteTextAsync(null!));
         }
 
         [TestMethod]
-        public async Task Can_Read_Write_Bytes()
+        public async Task WriteTextAsync_ExistingFile_WritesText()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.WriteTextAsync(Default.TextContent);
+            var text = await file.ReadTextAsync();
+            text.ShouldBe(Default.TextContent);
+        }
+
+        [TestMethod]
+        public async Task WriteTextAsync_ExistingAndLongerContent_ReplacesExistingContent()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.WriteTextAsync(new string('x', Default.TextContent.Length * 2));
+            await file.WriteTextAsync(Default.TextContent);
+            var text = await file.ReadTextAsync();
+            text.ShouldBe(Default.TextContent);
+        }
+
+        [TestMethod]
+        [DataRow(null)]
+        [DataRow("utf-8")]
+        [DataRow("utf-32")]
+        [DataRow("us-ascii")]
+        public async Task WriteTextAsync_ExistingFileAndDifferentEncodings_UsesEncoding(string? encodingName)
+        {
+            var encoding = encodingName is null ? null : Encoding.GetEncoding(encodingName);
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.WriteTextAsync(Default.TextContent, encoding);
+
+            var content = await file.ReadTextAsync(encoding);
+            content.ShouldBe(Default.TextContent);
+        }
+
+        [TestMethod]
+        public async Task WriteTextAsync_NonExistingFile_ThrowsFileNotFoundException()
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.WriteTextAsync(Default.TextContent));
+        }
+
+        [TestMethod]
+        public async Task WriteTextAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.WriteTextAsync(Default.TextContent));
+        }
+
+        [TestMethod]
+        public async Task WriteTextAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        {
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation(Default.SharedFileFolderName);
+            await Should.ThrowAsync<IOException>(async () => await file.WriteTextAsync(Default.TextContent));
+        }
+
+        #endregion
+
+        #region ReadBytesAsync Tests
+
+        [TestMethod]
+        public async Task ReadBytesAsync_ExistingFile_ReturnsBytes()
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.WriteBytesAsync(Default.ByteContent);
-            await file.ShouldHaveContentAsync(Default.ByteContent);
+            var bytes = await file.ReadBytesAsync();
+            bytes.ShouldBe(Default.ByteContent);
         }
 
         [TestMethod]
-        public async Task WriteBytesAsync_Throws_FileNotFoundException_If_File_Does_Not_Exist()
+        public async Task ReadBytesAsync_ExistingAndEmptyFile_ReturnsEmptyByteArray()
         {
-            var file = TestFolder.GetFile(Default.FileName);
-            await Should.ThrowAsync<FileNotFoundException>(async () => await file.WriteBytesAsync(Default.ByteContent));
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            var bytes = await file.ReadBytesAsync();
+            bytes.ShouldBeEmpty();
         }
 
         [TestMethod]
-        public async Task ReadBytesAsync_Throws_FileNotFoundException_If_File_Does_Not_Exist()
+        public async Task ReadBytesAsync_NonExistingFile_ThrowsFileNotFoundException()
         {
             var file = TestFolder.GetFile(Default.FileName);
             await Should.ThrowAsync<FileNotFoundException>(async () => await file.ReadBytesAsync());
         }
 
         [TestMethod]
-        public async Task WriteBytesAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
+        public async Task ReadBytesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
         {
-            var file = TestFolder.GetFile(Default.FolderName, Default.FileName);
+            var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.ReadBytesAsync());
+        }
+
+        [TestMethod]
+        public async Task ReadBytesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        {
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation(Default.SharedFileFolderName);
+            await Should.ThrowAsync<IOException>(async () => await file.ReadBytesAsync());
+        }
+
+        #endregion
+
+        #region WriteBytesAsync Tests
+
+        [TestMethod]
+        public async Task WriteBytesAsync_NullParameters_ThrowsArgumentNullException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await Should.ThrowAsync<ArgumentNullException>(async () => await file.WriteBytesAsync(null!));
+        }
+
+        [TestMethod]
+        public async Task WriteBytesAsync_ExistingFile_WritesBytes()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.WriteBytesAsync(Default.ByteContent);
+            var bytes = await file.ReadBytesAsync();
+            bytes.ShouldBe(Default.ByteContent);
+        }
+
+        [TestMethod]
+        public async Task WriteBytesAsync_ExistingAndLongerContent_ReplacesExistingContent()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.WriteBytesAsync(new byte[Default.ByteContent.Length * 2]);
+            await file.WriteBytesAsync(Default.ByteContent);
+            var bytes = await file.ReadBytesAsync();
+            bytes.ShouldBe(Default.ByteContent);
+        }
+
+        [TestMethod]
+        public async Task WriteBytesAsync_NonExistingFile_ThrowsFileNotFoundException()
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.WriteBytesAsync(Default.ByteContent));
+        }
+
+        [TestMethod]
+        public async Task WriteBytesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.WriteBytesAsync(Default.ByteContent));
         }
 
         [TestMethod]
-        public async Task ReadBytesAsync_Throws_DirectoryNotFoundException_If_Parent_Does_Not_Exist()
+        public async Task WriteBytesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
         {
-            var file = TestFolder.GetFile(Default.FolderName, Default.FileName);
-            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.ReadBytesAsync());
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation(Default.SharedFileFolderName);
+            await Should.ThrowAsync<IOException>(async () => await file.WriteBytesAsync(Default.ByteContent));
         }
 
         #endregion
