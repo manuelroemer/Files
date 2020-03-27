@@ -3,7 +3,6 @@
     using System;
     using System.IO;
     using System.Linq;
-    using System.Runtime.ExceptionServices;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
@@ -129,7 +128,8 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(ex);
+                    ThrowIOExceptionIfConflictingFolderExists(ex);
+                    throw;
                 }
             });
         }
@@ -151,10 +151,11 @@
                 try
                 {
                     File.Copy(_fullPath.ToString(), dstPathString, overwrite);
+                    return FileSystem.GetFile(destinationPath);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(
+                    ThrowIOExceptionIfConflictingFolderExists(
                         ex,
                         potentialConflictingFolderPaths: new[]
                         {
@@ -162,9 +163,8 @@
                             dstPathString,
                         }
                     );
+                    throw;
                 }
-
-                return FileSystem.GetFile(destinationPath);
             });
         }
 
@@ -187,10 +187,11 @@
                 try
                 {
                     File.Move(_fullPath.ToString(), dstPathString, overwrite);
+                    return FileSystem.GetFile(destinationPath);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(
+                    ThrowIOExceptionIfConflictingFolderExists(
                         ex,
                         potentialConflictingFolderPaths: new[]
                         {
@@ -198,9 +199,8 @@
                             dstPathString,
                         }
                     );
+                    throw;
                 }
-
-                return FileSystem.GetFile(destinationPath);
             });
         }
 
@@ -252,7 +252,8 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(ex);
+                    ThrowIOExceptionIfConflictingFolderExists(ex);
+                    throw;
                 }
             });
         }
@@ -260,7 +261,18 @@
         public override Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run<Stream>(() => File.Open(_fullPath.ToString(), FileMode.Open, fileAccess));
+            return Task.Run<Stream>(() =>
+            {
+                try
+                {
+                    return File.Open(_fullPath.ToString(), FileMode.Open, fileAccess);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    ThrowIOExceptionIfConflictingFolderExists(ex);
+                    throw; // The method above throws. This will not be reached.
+                }
+            });
         }
 
         public override Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
@@ -329,31 +341,21 @@
             }
         }
 
-        private void RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(
-            UnauthorizedAccessException originalException
-        )
-        {
-            // By default, we only check this element's location.
-            // This is enough for most methods like CreateAsync.
-            RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(
-                originalException,
-                potentialConflictingFolderPaths: new[] { _fullPath.ToString() }
-            );
-        }
-
         /// <summary>
         ///     Several methods in the <see cref="File"/> class throw an <see cref="UnauthorizedAccessException"/>
         ///     when a file operation (e.g. Create, Delete, ...) is executed on a directory.
         ///     
         ///     Per library specification, the library should throw an IOException in such cases.
-        ///     To do this, we manually check if a directory exists in such a location.
-        ///     If so, we certainly have access to the location and can throw the appropriate exception.
+        ///     To do this, we manually check if a directory exists in such a location and throw
+        ///     an IOException instead.
         /// </summary>
-        private static void RethrowUnauthorizedAccessExceptionAsIOExceptionOnConflictingFolder(
+        private void ThrowIOExceptionIfConflictingFolderExists(
             UnauthorizedAccessException originalException,
-            string[] potentialConflictingFolderPaths
+            string[]? potentialConflictingFolderPaths = null
         )
         {
+            potentialConflictingFolderPaths ??= new[] { _fullPath.ToString() };
+
             bool hasConflictingDirectory;
 
             try
@@ -372,10 +374,6 @@
             if (hasConflictingDirectory)
             {
                 throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation(), originalException);
-            }
-            else
-            {
-                ExceptionDispatchInfo.Throw(originalException);
             }
         }
 

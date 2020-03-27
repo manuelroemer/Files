@@ -741,6 +741,120 @@
 
         #endregion
 
+        #region OpenAsync Tests
+
+        [TestMethod]
+        [DataRow(FileAccess.Read)]
+        [DataRow(FileAccess.Write)]
+        [DataRow(FileAccess.ReadWrite)]
+        public async Task OpenAsync_ExistingFile_OpensStream(FileAccess fileAccess)
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            using var stream = await file.OpenAsync(fileAccess);
+            stream.ShouldNotBeNull();
+        }
+
+        [TestMethod]
+        [DataRow(FileAccess.Read)]
+        [DataRow(FileAccess.ReadWrite)]
+        public async Task OpenAsync_ExistingFile_OpensStreamToCorrectFile(FileAccess fileAccess)
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.WriteTextAsync(Default.TextContent);
+
+            using var stream = await file.OpenAsync(fileAccess);
+            using var reader = new StreamReader(stream);
+            var content = await reader.ReadToEndAsync();
+
+            content.ShouldBe(Default.TextContent);
+        }
+
+        [TestMethod]
+        public async Task OpenAsync_ExistingFile_StreamCanBeUsedForReadingAndWriting()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            
+            using (var writeStream = await file.OpenAsync())
+            using (var streamWriter = new StreamWriter(writeStream))
+            {
+                await streamWriter.WriteAsync(Default.TextContent);
+                await streamWriter.FlushAsync();
+            }
+
+            using (var readStream = await file.OpenAsync())
+            using (var streamReader = new StreamReader(readStream))
+            {
+                var content = await streamReader.ReadToEndAsync();
+                content.ShouldBe(Default.TextContent);
+            }
+        }
+
+        [TestMethod]
+        public async Task OpenAsync_ExistingFileAndReadFileAccess_ReturnsReadableStream()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            using var stream = await file.OpenAsync(FileAccess.Read);
+            stream.CanRead.ShouldBeTrue();
+        }
+        
+        [TestMethod]
+        public async Task OpenAsync_ExistingFileAndWriteFileAccess_ReturnsWriteableStream()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            using var stream = await file.OpenAsync(FileAccess.Write);
+            stream.CanWrite.ShouldBeTrue();
+        }
+        
+        [TestMethod]
+        public async Task OpenAsync_ExistingFileAndReadWriteFileAccess_ReturnsReadableAndWriteableStream()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            using var stream = await file.OpenAsync(FileAccess.ReadWrite);
+            stream.CanRead.ShouldBeTrue();
+            stream.CanWrite.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        [DataRow(FileAccess.Read)]
+        [DataRow(FileAccess.Write)]
+        [DataRow(FileAccess.ReadWrite)]
+        public async Task OpenAsync_NonExistingFile_ThrowsFileNotFoundException(FileAccess fileAccess)
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            await Should.ThrowAsync<FileNotFoundException>(async () =>
+            {
+                using var stream = await file.OpenAsync(fileAccess);
+            });
+        }
+
+        [TestMethod]
+        [DataRow(FileAccess.Read)]
+        [DataRow(FileAccess.Write)]
+        [DataRow(FileAccess.ReadWrite)]
+        public async Task SetAttributesAsync_NonExistingParent_ThrowsDirectoryNotFoundException(FileAccess fileAccess)
+        {
+            var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () =>
+            {
+                using var stream = await file.OpenAsync(fileAccess);
+            });
+        }
+
+        [TestMethod]
+        [DataRow(FileAccess.Read)]
+        [DataRow(FileAccess.Write)]
+        [DataRow(FileAccess.ReadWrite)]
+        public async Task OpenAsync_ConflictingFolderExistsAtLocation_ThrowsIOException(FileAccess fileAccess)
+        {
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation(Default.SharedFileFolderName);
+            await Should.ThrowAsync<IOException>(async () =>
+            {
+                using var stream = await file.OpenAsync(fileAccess);
+            });
+        }
+
+        #endregion
+
         #region ReadTextAsync / WriteTextAsync Tests
 
         [TestMethod]
