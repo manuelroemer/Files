@@ -9,7 +9,6 @@
     /// </summary>
     public static class FileSystemElementExtensions
     {
-
         public static StorageFolder? GetParent(this StorageElement element) => element switch
         {
             StorageFile file => file.GetParent(),
@@ -20,12 +19,15 @@
         public static async Task<StorageElementProperties> GetPropertiesAsync(
             this StorageElement element,
             CancellationToken cancellationToken = default
-        ) => element switch
+        )
         {
-            StorageFile file => await file.GetPropertiesAsync(cancellationToken).ConfigureAwait(false),
-            StorageFolder folder => await folder.GetPropertiesAsync(cancellationToken).ConfigureAwait(false),
-            _ => throw new ArgumentNullException(nameof(element))
-        };
+            return element switch
+            {
+                StorageFile file => await file.GetPropertiesAsync(cancellationToken).ConfigureAwait(false),
+                StorageFolder folder => await folder.GetPropertiesAsync(cancellationToken).ConfigureAwait(false),
+                _ => throw new ArgumentNullException(nameof(element))
+            };
+        }
 
         public static Task CreateOrIgnoreAsync(
             this StorageElement element,
@@ -80,7 +82,5 @@
             _ = element ?? throw new ArgumentNullException(nameof(element));
             return element.DeleteAsync(DeletionOption.IgnoreMissing, cancellationToken);
         }
-
     }
-
 }

@@ -4,7 +4,6 @@
 
     internal static class FileNameUtils
     {
-
         public static string? GetRealName(this FileInfo fileInfo)
         {
             var realChildren = fileInfo.Directory.GetFiles(searchPattern: fileInfo.Name);
@@ -32,7 +31,5 @@
                 return realChildren[0].Name;
             }
         }
-
     }
-
 }

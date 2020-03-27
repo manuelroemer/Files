@@ -6,7 +6,6 @@
 
     internal static class OptionExtensions
     {
-
         public static bool ToOverwriteBool(this NameCollisionOption options) => options switch
         {
             NameCollisionOption.Fail => false,
@@ -21,7 +20,5 @@
             CreationCollisionOption.Ignore => FileMode.OpenOrCreate,
             _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
         };
-
     }
-
 }

@@ -10,7 +10,6 @@
     /// </summary>
     public sealed class PathInformation
     {
-
         /// <summary>
         ///     Gets a list of characters which are not allowed to appear in a path targeting this
         ///     file system implementation.
@@ -167,7 +166,5 @@
                 .ToList()
                 .AsReadOnly();
         }
-
     }
-
 }

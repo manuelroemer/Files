@@ -8,7 +8,6 @@
 
     internal static class SafeFileTransferOperation
     {
-
         public static void TransferAsync(
             Action<string> deleteElement,
             Action<string, string> moveElement,
@@ -70,7 +69,5 @@
                 cancellationToken.ThrowIfCancellationRequested();
             }
         }
-
     }
-
 }

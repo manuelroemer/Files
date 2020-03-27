@@ -7,7 +7,6 @@
     /// </summary>
     public static class Default
     {
-
         public static string TextContent => "Hello World! \n\n This is the default file content used during testing.";
         public static byte[] ByteContent => Encoding.UTF8.GetBytes(TextContent);
 
@@ -50,7 +49,5 @@
         public static string[] DstFolderSegments => new[] { DstParentFolderName, DstFolderName };
         public static string[] SharedFileFolderInSrcSegments => new[] { SrcParentFolderName, SharedFileFolderName };
         public static string[] SharedFileFolderInDstSegments => new[] { DstParentFolderName, SharedFileFolderName };
-
     }
-
 }

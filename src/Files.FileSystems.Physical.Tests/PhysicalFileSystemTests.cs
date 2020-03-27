@@ -6,9 +6,6 @@
     [TestClass]
     public sealed class PhysicalFileSystemTests : FileSystemSpecificationTests
     {
-
         public PhysicalFileSystemTests() : base(PhysicalFileSystemTestContext.Instance) { }
-
     }
-
 }

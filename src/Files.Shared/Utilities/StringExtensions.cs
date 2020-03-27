@@ -2,7 +2,6 @@
 {
     internal static class StringExtensions
     {
-
         public static string? ToNullIfEmpty(this string str)
         {
             return string.IsNullOrEmpty(str) ? null : str;
@@ -22,7 +21,5 @@
             }
             return false;
         }
-
     }
-
 }

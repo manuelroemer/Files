@@ -7,7 +7,6 @@
     [TestClass]
     public abstract class FileSystemSpecificationTests : FileSystemTestBase
     {
-
         /// <summary>
         ///     Gets a <see cref="KnownFolder"/> value which is not supported by the file system
         ///     implementation.
@@ -69,7 +68,5 @@
         }
 
         #endregion
-
     }
-
 }

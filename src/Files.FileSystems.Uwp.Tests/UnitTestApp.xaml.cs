@@ -9,7 +9,6 @@
 
     public sealed partial class App
     {
-
         public App()
         {
             InitializeComponent();
@@ -30,7 +29,5 @@
             Window.Current.Activate();
             UnitTestClient.Run(e.Arguments);
         }
-
     }
-
 }

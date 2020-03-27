@@ -4,11 +4,8 @@
 
     public abstract class FileSystemTestContext
     {
-
         public abstract FileSystem FileSystem { get; }
 
         public abstract Task<StorageFolder> GetTestFolderAsync();
-
     }
-
 }

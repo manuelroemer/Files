@@ -7,7 +7,6 @@
     /// </summary>
     public sealed class StorageFileProperties : StorageElementProperties
     {
-
         /// <summary>
         ///     Gets the file's size in bytes.
         /// </summary>
@@ -36,7 +35,5 @@
         {
             Size = size;
         }
-
     }
-
 }

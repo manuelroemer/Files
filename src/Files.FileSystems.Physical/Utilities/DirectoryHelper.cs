@@ -5,7 +5,6 @@
 
     internal static class DirectoryHelper
     {
-
         public static void CopyDirectory(string source, string destination, CancellationToken cancellationToken = default)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -29,7 +28,5 @@
                 File.Copy(fileSrc, fileDest);
             }
         }
-
     }
-
 }

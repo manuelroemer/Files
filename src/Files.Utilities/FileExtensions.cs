@@ -8,7 +8,6 @@
 
     public static class FileExtensions
     {
-
         public static Task<Stream> OpenReadAsync(this StorageFile file, CancellationToken cancellationToken = default)
         {
             _ = file ?? throw new ArgumentNullException(nameof(file));
@@ -20,7 +19,5 @@
             _ = file ?? throw new ArgumentNullException(nameof(file));
             return file.OpenAsync(FileAccess.Write, cancellationToken);
         }
-
     }
-
 }

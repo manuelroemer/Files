@@ -14,7 +14,6 @@
     [DebuggerDisplay("StorageFile at {ToString()}")]
     public abstract class StorageFile : StorageElement
     {
-
         /// <summary>
         ///     Returns this file's parent folder.
         /// </summary>
@@ -595,7 +594,5 @@
             Encoding? encoding,
             CancellationToken cancellationToken = default
         );
-
     }
-
 }

@@ -8,7 +8,6 @@
 
     internal sealed class PhysicalStoragePath : StoragePath
     {
-
         private readonly Lazy<StoragePath?> _rootLazy;
         private readonly Lazy<StoragePath?> _parentLazy;
         private readonly Lazy<StoragePath> _fullPathLazy;
@@ -155,7 +154,5 @@
 
         public override StoragePath TrimEndingDirectorySeparator() =>
             _pathWithoutEndingDirectorySeparatorLazy.Value;
-
     }
-
 }

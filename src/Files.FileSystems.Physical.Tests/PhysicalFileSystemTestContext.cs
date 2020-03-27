@@ -7,7 +7,6 @@
 
     public class PhysicalFileSystemTestContext : FileSystemTestContext
     {
-
         public static PhysicalFileSystemTestContext Instance { get; } = new PhysicalFileSystemTestContext();
 
         public override FileSystem FileSystem => PhysicalFileSystem.Default;
@@ -23,7 +22,5 @@
             await folder.CreateAsync(recursive: true, CreationCollisionOption.ReplaceExisting).ConfigureAwait(false);
             return folder;
         }
-
     }
-
 }

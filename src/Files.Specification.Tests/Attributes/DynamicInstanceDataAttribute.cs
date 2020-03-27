@@ -12,7 +12,6 @@
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true)]
     public sealed class DynamicInstanceDataAttribute : Attribute, ITestDataSource
     {
-
         public string DynamicDataSourceName { get; }
 
         public DynamicDataSourceType DynamicDataSourceType { get; }
@@ -56,7 +55,5 @@
             }
             return null;
         }
-
     }
-
 }

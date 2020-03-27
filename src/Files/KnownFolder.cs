@@ -7,7 +7,6 @@
     /// </summary>
     public enum KnownFolder
     {
-
         /// <summary>
         ///     A folder in which temporary data can be stored.
         ///     Temporary data may be erased at any point in time.
@@ -62,7 +61,5 @@
         ///     The folder in which the user's music is stored.
         /// </summary>
         MusicLibrary = SpecialFolder.MyMusic,
-
     }
-
 }

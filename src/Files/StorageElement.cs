@@ -14,7 +14,6 @@
     /// <seealso cref="StorageFolder"/>
     public abstract class StorageElement : IFileSystemElement
     {
-
         internal const CreationCollisionOption DefaultCreationCollisionOption = CreationCollisionOption.Fail;
         internal const NameCollisionOption DefaultNameCollisionOption = NameCollisionOption.Fail;
         internal const DeletionOption DefaultDeletionOption = DeletionOption.Fail;
@@ -359,7 +358,5 @@
         /// </summary>
         public sealed override string ToString() =>
             Path.FullPath.ToString();
-
     }
-
 }

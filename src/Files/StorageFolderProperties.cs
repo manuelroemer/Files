@@ -7,7 +7,6 @@
     /// </summary>
     public sealed class StorageFolderProperties : StorageElementProperties
     {
-
         // Keep this class even though there are currently no properties here.
         // This ensures that extension in the future is possible without having users of the library
         // replace 'FileSystemElementProperties' passages in their code.
@@ -30,7 +29,5 @@
             DateTimeOffset createdOn,
             DateTimeOffset? modifiedOn
         ) : base(name, nameWithoutExtension, extension, createdOn, modifiedOn) { }
-
     }
-
 }

@@ -9,7 +9,6 @@
 
     internal static partial class PathHelper
     {
-
         internal static readonly char[] InvalidPathChars = IOPath.GetInvalidPathChars();
         internal static readonly char[] InvalidFileNameChars = IOPath.GetInvalidFileNameChars();
         internal static readonly char[] InvalidPathOrFileNameChars = InvalidPathChars.Concat(InvalidFileNameChars).Distinct().ToArray();
@@ -55,7 +54,5 @@
 
         public static bool IsFileOrDirectoryNameOnly(string path) =>
             !path.Contains(PathSeparatorChars);
-
     }
-
 }

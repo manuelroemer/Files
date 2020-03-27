@@ -9,7 +9,6 @@
     /// <seealso cref="StorageFolderProperties"/>
     public abstract class StorageElementProperties
     {
-
         /// <summary>
         ///     Gets the real name of the element.
         /// </summary>
@@ -62,7 +61,5 @@
             CreatedOn = createdOn;
             ModifiedOn = modifiedOn;
         }
-
     }
-
 }

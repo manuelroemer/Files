@@ -14,7 +14,6 @@
 
     internal sealed class PhysicalStorageFile : StorageFile
     {
-
         private static readonly char[] InvalidNewNameChars =
             IOPath.GetInvalidPathChars()
                 .Concat(IOPath.GetInvalidFileNameChars())
@@ -395,7 +394,5 @@
                 throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation(), innerException);
             }
         }
-
     }
-
 }

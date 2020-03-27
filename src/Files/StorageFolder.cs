@@ -14,7 +14,6 @@
     [DebuggerDisplay("StorageFolder at {ToString()}")]
     public abstract class StorageFolder : StorageElement
     {
-
         /// <summary>
         ///     Returns this folder's parent folder or <see langword="null"/> if it is a root folder.
         /// </summary>
@@ -242,7 +241,5 @@
         public abstract Task<IEnumerable<StorageFile>> GetAllFilesAsync(CancellationToken cancellationToken = default);
 
         public abstract Task<IEnumerable<StorageFolder>> GetAllFoldersAsync(CancellationToken cancellationToken = default);
-
     }
-
 }

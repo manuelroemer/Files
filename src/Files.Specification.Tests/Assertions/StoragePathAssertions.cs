@@ -4,7 +4,6 @@
 
     public static class StoragePathAssertions
     {
-
         public static void ShouldBeEffectivelyEqualTo(this StoragePath? path, StoragePath? other)
         {
             PseudoNormalize(path).ShouldBe(PseudoNormalize(other));
@@ -35,7 +34,5 @@
                 return fullPath;
             }
         }
-
     }
-
 }

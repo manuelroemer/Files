@@ -10,7 +10,6 @@
     /// </summary>
     public abstract class StoragePath : IFileSystemElement, IEquatable<string?>, IEquatable<StoragePath?>
     {
-
         private readonly string _underlyingString;
 
         /// <inheritdoc/>
@@ -311,7 +310,5 @@
         [return: NotNullIfNotNull("path")]
         public static implicit operator string?(StoragePath? path) =>
             path?.ToString();
-
     }
-
 }

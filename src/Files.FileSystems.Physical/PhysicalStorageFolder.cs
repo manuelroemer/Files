@@ -14,7 +14,6 @@
 
     internal sealed class PhysicalFolder : StorageFolder
     {
-
         private static readonly char[] InvalidNewNameChars =
             IOPath.GetInvalidPathChars()
                 .Append(IOPath.DirectorySeparatorChar)
@@ -322,7 +321,5 @@
                 throw new IOException(ExceptionStrings.Folder.ConflictingFileExistsAtFolderLocation());
             }
         }
-
     }
-
 }

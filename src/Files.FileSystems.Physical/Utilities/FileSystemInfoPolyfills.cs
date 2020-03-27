@@ -7,7 +7,6 @@
 
     internal static class FileSystemInfoPolyfills
     {
-
         public static void MoveTo(this DirectoryInfo directoryInfo, string destination, bool overwrite)
         {
             ExceptionDispatchInfo? originalException = null;
@@ -67,7 +66,5 @@
         }
         
 #endif
-
     }
-
 }

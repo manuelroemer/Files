@@ -15,7 +15,6 @@
     [TestClass]
     public abstract class StorageFileSpecificationTests : FileSystemTestBase
     {
-
         private char[] InvalidNewNameChars =>
             FileSystem.PathInformation.InvalidPathChars
                 .Concat(FileSystem.PathInformation.InvalidFileNameChars)
@@ -1081,7 +1080,5 @@
         }
 
         #endregion
-
     }
-
 }

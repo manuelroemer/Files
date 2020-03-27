@@ -16,7 +16,6 @@
     [TestClass]
     public abstract class FileSystemTestBase
     {
-
         private StorageFolder? _testFolder;
 
         /// <summary>
@@ -29,13 +28,6 @@
         ///     <see cref="Context"/>. This simply exists for quickly accessing the file system.
         /// </summary>
         protected FileSystem FileSystem => Context.FileSystem;
-
-        /// <summary>
-        ///     Gets the value of the <see cref="FileSystem.PathInformation"/> property of the
-        ///     file system provided via the <see cref="Context"/>.
-        ///     This simply exists for quickly accessing the path information.
-        /// </summary>
-        protected PathInformation PathInformation => FileSystem.PathInformation;
 
         /// <summary>
         ///     Gets a folder in which all file system tests should operate.
@@ -101,7 +93,5 @@
                 // Should not be thrown, but it MAY happen if the underlying implementation is wrong.
             }
         }
-
     }
-
 }

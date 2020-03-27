@@ -23,7 +23,6 @@ namespace Files.FileSystems.Physical.Utilities
 
     internal static partial class PathHelper
     {
-
         internal static bool IsCaseSensitive { get; } = GetIsCaseSensitive();
 
         internal static StringComparison StringComparison => IsCaseSensitive 
@@ -71,7 +70,5 @@ namespace Files.FileSystems.Physical.Utilities
                 };
             }
         }
-
     }
-
 }

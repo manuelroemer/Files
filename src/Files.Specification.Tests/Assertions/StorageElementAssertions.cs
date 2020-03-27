@@ -5,7 +5,6 @@
 
     public static class StorageElementAssertions
     {
-
         public static async Task ShouldExistAsync(this StorageElement element)
         {
             var exists = await element.ExistsAsync();
@@ -17,7 +16,5 @@
             var exists = await element.ExistsAsync();
             exists.ShouldBeFalse($"The element at {element.Path} should not exist, but does.");
         }
-
     }
-
 }

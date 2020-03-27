@@ -10,7 +10,6 @@
 
     public sealed class PhysicalFileSystem : FileSystem
     {
-
         private static readonly PathInformation PhysicalPathInformation = new PathInformation(
             Path.GetInvalidPathChars(),
             Path.GetInvalidFileNameChars(),
@@ -75,7 +74,5 @@
             static string GetSpecialFolder(SpecialFolder specialFolder) =>
                 GetFolderPath(specialFolder, SpecialFolderOption.DoNotVerify);
         }
-
     }
-
 }

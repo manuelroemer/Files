@@ -6,7 +6,6 @@
 
     public static class StorageFileAssertions
     {
-
         public static async Task ShouldHaveContentAsync(this StorageFile file, string expectedContent, Encoding? encoding = null)
         {
             var content = await file.ReadTextAsync(encoding).ConfigureAwait(false);
@@ -42,7 +41,5 @@
             var content = await file.ReadBytesAsync();
             content.ShouldNotBeEmpty();
         }
-
     }
-
 }

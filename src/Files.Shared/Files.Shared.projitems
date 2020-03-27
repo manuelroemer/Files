@@ -9,7 +9,6 @@
     <Import_RootNamespace>Files</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="$(MSBuildThisFileDirectory)Utilities\DictionaryExtensions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\StringExtensions.cs" />
   </ItemGroup>
 </Project>

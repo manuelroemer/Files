@@ -13,7 +13,6 @@
 
     public abstract class StorageFolderSpecificationTests : FileSystemTestBase
     {
-        
         private char[] InvalidNewNameChars =>
             FileSystem.PathInformation.InvalidPathChars
                 .Concat(FileSystem.PathInformation.DirectorySeparatorChars)
@@ -886,7 +885,5 @@
         }
 
         #endregion
-
     }
-
 }

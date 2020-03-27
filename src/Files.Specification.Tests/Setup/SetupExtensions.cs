@@ -11,7 +11,6 @@
     /// </summary>
     public static class SetupExtensions
     {
-
         /// <summary>
         ///     Recursively creates and returns a file relative to the specified folder, replacing
         ///     previously existing files and folders, but instead of the file, returns a
@@ -246,7 +245,5 @@
         {
             return pathSegments.Aggregate(basePath, (currentPath, segment) => currentPath / segment);
         }
-
     }
-
 }

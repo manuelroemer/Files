@@ -9,7 +9,6 @@
     /// </summary>
     public abstract class FileSystem
     {
-
         /// <summary>
         ///     Gets a <see cref="PathInformation"/> instance which provides information about
         ///     the representation of a path in this file system implementation.
@@ -324,7 +323,5 @@
                 return false;
             }
         }
-
     }
-
 }
