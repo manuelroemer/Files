@@ -157,6 +157,7 @@
             DirectorySeparatorChar = directorySeparatorChar;
             AltDirectorySeparatorChar = altDirectorySeparatorChar;
             ExtensionSeparatorChar = extensionSeparatorChar;
+            VolumeSeparatorChar = volumeSeparatorChar;
             CurrentDirectorySegment = currentDirectorySegment;
             ParentDirectorySegment = parentDirectorySegment;
             DefaultStringComparison = defaultStringComparison;
