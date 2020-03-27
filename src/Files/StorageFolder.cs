@@ -117,9 +117,109 @@
             CancellationToken cancellationToken = default
         );
 
+        /// <summary>
+        ///     Renames the folder.
+        /// </summary>
+        /// <param name="newName">The new name of the folder.</param>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="StorageFolder"/> instance representing the new location of the renamed folder.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="newName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="newName"/> is empty or contains one or more invalid characters.
+        ///     Invalid characters are:
+        ///     
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <description>The (alt) directory separator character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>The volume separator character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>Any invalid path character</description>
+        ///         </item>
+        ///     </list>
+        ///     
+        ///     You can use the <see cref="FileSystem.PathInformation"/> property of this folder's
+        ///     <see cref="StorageElement.FileSystem"/> property to determine which characters are allowed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        ///     Access to the folder is restricted.
+        /// </exception>
+        /// <exception cref="IOException">
+        ///     An I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     One of the folder's parent folders does not exist.
+        ///     
+        ///     -or-
+        ///     
+        ///     The folder does not exist.
+        /// </exception>
         public Task<StorageFolder> RenameAsync(string newName, CancellationToken cancellationToken = default) =>
             RenameAsync(newName, DefaultNameCollisionOption, cancellationToken);
 
+        /// <summary>
+        ///     Renames the folder.
+        /// </summary>
+        /// <param name="newName">The new name of the folder.</param>
+        /// <param name="options">
+        ///     Defines how to react if another folder with a conflicting name already exists in the
+        ///     current folder.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="StorageFolder"/> instance representing the new location of the renamed folder.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="newName"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="newName"/> is empty or contains one or more invalid characters.
+        ///     Invalid characters are:
+        ///     
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <description>The (alt) directory separator character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>The volume separator character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>Any invalid path character</description>
+        ///         </item>
+        ///     </list>
+        ///     
+        ///     You can use the <see cref="FileSystem.PathInformation"/> property of this folder's
+        ///     <see cref="StorageElement.FileSystem"/> property to determine which characters are allowed.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        ///     Access to the folder is restricted.
+        /// </exception>
+        /// <exception cref="IOException">
+        ///     An I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     One of the folder's parent folders does not exist.
+        ///     
+        ///     -or-
+        ///     
+        ///     The folder does not exist.
+        /// </exception>
         public abstract Task<StorageFolder> RenameAsync(
             string newName,
             NameCollisionOption options,

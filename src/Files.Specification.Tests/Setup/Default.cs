@@ -18,6 +18,9 @@
         public static string ConflictingFileName => "conflictingFile.ext";
         public static string ConflictingFolderName => "conflictingFolder";
 
+        public static string RenamedFileName => "renamedFile.ext";
+        public static string RenamedFolderName => "renamedFolder";
+
         public static string NonExistingParentFolderName => "nonExistingParentFolder";
         public static string FileWithNonExistingParentName => "fileWithoutParent.ext";
         public static string FolderWithNonExistingParentName => "folderWithoutParent";

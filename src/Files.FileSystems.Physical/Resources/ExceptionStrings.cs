@@ -40,6 +40,17 @@
                 "The operation failed because a folder exists at the file's location (or at the " +
                 "destination folder if this was a copy or move operation).";
 
+            internal static string NewNameContainsInvalidChar() =>
+                $"The specified name contains one or more invalid characters. " +
+                $"Invalid characters are:\n" +
+                $"- The (alt) directory separator character\n" +
+                $"- The volume separator character\n" +
+                $"- Any invalid path character\n" +
+                $"- Any invalid file name character\n" +
+                $"\n" +
+                $"You can use the {nameof(FileSystem)}.{nameof(FileSystem.PathInformation)} property " +
+                $"of this file's {nameof(FileSystem)} property to determine which characters are allowed.";
+
         }
 
         internal static class Folder
@@ -53,6 +64,20 @@
 
             internal static string CopyConflictingFolderExistsAtDestination() =>
                 "Another folder already exists at the destination.";
+
+            internal static string RenameAsyncMovesFileOutOfFolder() =>
+                "The specified name is invalid, because it would move the folder out of its current folder. " +
+                "Please use a normal folder name without path segments.";
+
+            internal static string NewNameContainsInvalidChar() =>
+                $"The specified name contains one or more invalid characters. " +
+                $"Invalid characters are:\n" +
+                $"- The (alt) directory separator character\n" +
+                $"- The volume separator character\n" +
+                $"- Any invalid path character\n" +
+                $"\n" +
+                $"You can use the {nameof(FileSystem)}.{nameof(FileSystem.PathInformation)} property " +
+                $"of this folder's {nameof(FileSystem)} property to determine which characters are allowed.";
 
         }
 

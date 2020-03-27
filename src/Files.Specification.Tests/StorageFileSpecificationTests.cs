@@ -1,10 +1,13 @@
 ﻿namespace Files.Specification.Tests
 {
     using System;
+    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Text;
     using System.Threading.Tasks;
     using Files.Specification.Tests.Assertions;
+    using Files.Specification.Tests.Attributes;
     using Files.Specification.Tests.Setup;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Shouldly;
@@ -12,6 +15,14 @@
     [TestClass]
     public abstract class StorageFileSpecificationTests : FileSystemTestBase
     {
+
+        private char[] InvalidNewNameChars =>
+            FileSystem.PathInformation.InvalidPathChars
+                .Concat(FileSystem.PathInformation.InvalidFileNameChars)
+                .Concat(FileSystem.PathInformation.DirectorySeparatorChars)
+                .Append(FileSystem.PathInformation.VolumeSeparatorChar)
+                .Distinct()
+                .ToArray();
 
         public StorageFileSpecificationTests(FileSystemTestContext context)
             : base(context) { }
@@ -611,6 +622,121 @@
             var srcFile = await TestFolder.SetupFileAsync(Default.FileName);
             await srcFile.MoveAsync(srcFile.Path, options);
             await srcFile.ShouldExistAsync();
+        }
+
+        #endregion
+
+        #region RenameAsync Tests
+
+        public IEnumerable<object[]> RenameAsyncInvalidNewNamesData
+        {
+            get
+            {
+                yield return new[] { "" };
+
+                foreach (var invalidName in InvalidNewNameChars.Select(invalidChar => invalidChar + Default.FileName))
+                {
+                    yield return new[] { invalidName };
+                }
+            }
+        }
+
+        [TestMethod]
+        public async Task RenameAsync_NullParameters_ThrowsArgumentNullException()
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            await Should.ThrowAsync<ArgumentNullException>(async () => await file.RenameAsync(newName: null!));
+        }
+
+        [TestMethod]
+        [DynamicInstanceData(nameof(RenameAsyncInvalidNewNamesData))]
+        public async Task RenameAsync_InvalidName_ThrowsArgumentException(string newName)
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            await Should.ThrowAsync<ArgumentException>(async () => await file.RenameAsync(newName));
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task RenameAsync_ExistingFile_RenamesFile(NameCollisionOption options)
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.WriteTextAsync(Default.TextContent);
+
+            var renamed = await file.RenameAsync(Default.RenamedFileName, options);
+
+            await file.ShouldNotExistAsync();
+            await renamed.ShouldExistAsync();
+            await renamed.ShouldHaveContentAsync(Default.TextContent);
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task RenameAsync_NonExistingFile_ThrowsFileNotFoundException(NameCollisionOption options)
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            await Should.ThrowAsync<FileNotFoundException>(async () => await file.RenameAsync(Default.RenamedFileName, options));
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task RenameAsync_NonExistingParent_ThrowsDirectoryNotFoundException(NameCollisionOption options)
+        {
+            var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.RenameAsync(Default.RenamedFileName, options));
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task RenameAsync_ConflictingFolderExistsAtLocation_ThrowsIOException(NameCollisionOption options)
+        {
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation(Default.SharedFileFolderName);
+            await Should.ThrowAsync<IOException>(async () => await file.RenameAsync(Default.RenamedFileName, options));
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task MoveAsync_ConflictingFolderExistsAtRenameDestination_ThrowsIOException(NameCollisionOption options)
+        {
+            await TestFolder.SetupFolderAsync(Default.SharedFileFolderName);
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await Should.ThrowAsync<IOException>(async () => await file.RenameAsync(Default.SharedFileFolderName, options));
+        }
+
+        [TestMethod]
+        public async Task RenameAsync_FailAndExistingFileAtRenameDestination_ThrowsIOException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await TestFolder.SetupFileAsync(Default.RenamedFileName);
+            await Should.ThrowAsync<IOException>(async () => await file.RenameAsync(Default.RenamedFileName, NameCollisionOption.Fail));
+        }
+
+        [TestMethod]
+        public async Task RenameAsync_ReplaceExistingAndExistingFileAtRenameDestination_ReplacesExistingFile()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            var conflictingFile = await TestFolder.SetupFileAsync(Default.RenamedFileName);
+            await conflictingFile.WriteTextAsync(Default.TextContent);
+
+            await file.RenameAsync(Default.RenamedFileName, NameCollisionOption.ReplaceExisting);
+
+            await file.ShouldNotExistAsync();
+            await conflictingFile.ShouldHaveEmptyContentAsync();
+        }
+
+        [TestMethod]
+        [DataRow(NameCollisionOption.Fail)]
+        [DataRow(NameCollisionOption.ReplaceExisting)]
+        public async Task RenameAsync_SameName_DoesNothing(NameCollisionOption options)
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.RenameAsync(Default.FileName, options);
+            await file.ShouldExistAsync();
         }
 
         #endregion

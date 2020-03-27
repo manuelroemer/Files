@@ -17,6 +17,7 @@
             Path.DirectorySeparatorChar,
             Path.AltDirectorySeparatorChar,
             extensionSeparatorChar: '.',
+            Path.VolumeSeparatorChar,
             currentDirectorySegment: ".",
             parentDirectorySegment: "..",
             defaultStringComparison: PathHelper.StringComparison

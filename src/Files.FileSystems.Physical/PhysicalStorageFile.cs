@@ -16,6 +16,15 @@
     internal sealed class PhysicalStorageFile : StorageFile
     {
 
+        private static readonly char[] InvalidNewNameChars =
+            IOPath.GetInvalidPathChars()
+                .Concat(IOPath.GetInvalidFileNameChars())
+                .Append(IOPath.DirectorySeparatorChar)
+                .Append(IOPath.AltDirectorySeparatorChar)
+                .Append(IOPath.VolumeSeparatorChar)
+                .Distinct()
+                .ToArray();
+
         private readonly StoragePath _path;
         private readonly StoragePath _fullPath;
         private readonly StoragePath _fullParentPath;
@@ -202,6 +211,16 @@
         )
         {
             _ = newName ?? throw new ArgumentNullException(nameof(newName));
+            if (newName.Length == 0)
+            {
+                throw new ArgumentException(ExceptionStrings.String.CannotBeEmpty(), nameof(newName));
+            }
+
+            if (newName.Contains(InvalidNewNameChars))
+            {
+                throw new ArgumentException(ExceptionStrings.File.NewNameContainsInvalidChar(), nameof(newName));
+            }
+
             cancellationToken.ThrowIfCancellationRequested();
             var destinationPath = _fullParentPath.Join(newName);
             return MoveAsync(destinationPath, options, cancellationToken);

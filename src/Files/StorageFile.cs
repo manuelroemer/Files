@@ -249,10 +249,29 @@
         ///     A <see cref="StorageFile"/> instance representing the new location of the renamed file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="newName"/>
+        ///     <paramref name="newName"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="newName"/> has an invalid format.
+        ///     <paramref name="newName"/> is empty or contains one or more invalid characters.
+        ///     Invalid characters are:
+        ///     
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <description>The (alt) directory separator character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>The volume separator character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>Any invalid path character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>Any invalid file name character</description>
+        ///         </item>
+        ///     </list>
+        ///     
+        ///     You can use the <see cref="FileSystem.PathInformation"/> property of this file's
+        ///     <see cref="StorageElement.FileSystem"/> to determine which characters are allowed.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -277,8 +296,8 @@
         /// </summary>
         /// <param name="newName">The new name of the file.</param>
         /// <param name="options">
-        ///     Defines how to react if another element with a conflicting name already exists in the
-        ///     file's current folder.
+        ///     Defines how to react if another file with a conflicting name already exists in the
+        ///     current folder.
         /// </param>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
@@ -287,10 +306,29 @@
         ///     A <see cref="StorageFile"/> instance representing the new location of the renamed file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="newName"/>
+        ///     <paramref name="newName"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="newName"/> has an invalid format.
+        ///     <paramref name="newName"/> is empty or contains one or more invalid characters.
+        ///     Invalid characters are:
+        ///     
+        ///     <list type="bullet">
+        ///         <item>
+        ///             <description>The (alt) directory separator character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>The volume separator character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>Any invalid path character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>Any invalid file name character</description>
+        ///         </item>
+        ///     </list>
+        ///     
+        ///     You can use the <see cref="FileSystem.PathInformation"/> property of this file's
+        ///     <see cref="StorageElement.FileSystem"/> property to determine which characters are allowed.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.

@@ -53,6 +53,12 @@
         public char ExtensionSeparatorChar { get; }
 
         /// <summary>
+        ///     Gets a character which is used by this file system implementation to separate
+        ///     a volume from the rest of the path.
+        /// </summary>
+        public char VolumeSeparatorChar { get; }
+
+        /// <summary>
         ///     Gets a string which is used by this file system implementation to refer to the
         ///     current directory in a path.
         ///     In most file system implementations, this is the <c>"."</c> string.
@@ -109,6 +115,10 @@
         ///     A character which is used by this file system implementation to separate a
         ///     file name from a file extension.
         /// </param>
+        /// <param name="volumeSeparatorChar">
+        ///     A character which is used by this file system implementation to separate
+        ///     a volume from the rest of the path.
+        /// </param>
         /// <param name="currentDirectorySegment">
         ///     A string which is used by this file system implementation to refer to the
         ///     current directory in a path.
@@ -132,6 +142,7 @@
             char directorySeparatorChar,
             char altDirectorySeparatorChar,
             char extensionSeparatorChar,
+            char volumeSeparatorChar,
             string currentDirectorySegment,
             string parentDirectorySegment,
             StringComparison defaultStringComparison)
