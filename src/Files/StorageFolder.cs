@@ -31,7 +31,7 @@
         }
 
         /// <summary>
-        ///     Returns a file relative to this folder by joining this folder's full path with specified
+        ///     Returns a file relative to this folder by joining this folder's full path with the specified
         ///     <paramref name="name"/> and returning a new <see cref="StorageFile"/> instance created from
         ///     the resulting path.
         /// </summary>
@@ -53,7 +53,7 @@
         }
 
         /// <summary>
-        ///     Returns a folder relative to this folder by joining this folder's full path with specified
+        ///     Returns a folder relative to this folder by joining this folder's full path with the specified
         ///     <paramref name="name"/> and returning a new <see cref="StorageFolder"/> instance created from
         ///     the resulting path.
         /// </summary>

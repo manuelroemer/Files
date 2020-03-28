@@ -82,5 +82,19 @@
             _ = element ?? throw new ArgumentNullException(nameof(element));
             return element.DeleteAsync(DeletionOption.IgnoreMissing, cancellationToken);
         }
+
+        public static StorageFile AsFile(this StorageElement element) => element switch
+        {
+            StorageFile file => file,
+            StorageFolder folder => folder.FileSystem.GetFile(folder.Path),
+            _ => throw new ArgumentNullException(nameof(element)),
+        };
+
+        public static StorageFolder AsFolder(this StorageElement element) => element switch
+        {
+            StorageFile file => file.FileSystem.GetFolder(file.Path),
+            StorageFolder folder => folder,
+            _ => throw new ArgumentNullException(nameof(element)),
+        };
     }
 }

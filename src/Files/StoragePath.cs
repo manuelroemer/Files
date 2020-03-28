@@ -76,7 +76,7 @@
         ///     The string on which this <see cref="StoragePath"/> instance is based.
         /// </param>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="path"/>
+        ///     <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
         ///     <paramref name="path"/> is an empty string.

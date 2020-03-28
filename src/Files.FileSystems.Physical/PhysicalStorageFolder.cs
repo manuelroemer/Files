@@ -73,9 +73,17 @@
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
-                EnsureNoConflictingFileExists();
-                cancellationToken.ThrowIfCancellationRequested();
-                return File.GetAttributes(_fullPath.ToString());
+                try
+                {
+                    EnsureNoConflictingFileExists();
+                    cancellationToken.ThrowIfCancellationRequested();
+                    return File.GetAttributes(_fullPath.ToString());
+                }
+                catch (FileNotFoundException ex)
+                {
+                    // Since we're using a File API, we must manually convert the FileNotFoundException.
+                    throw new DirectoryNotFoundException(message: null, ex);
+                }
             });
         }
 
@@ -289,6 +297,9 @@
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
+                // Use GetFiles() instead of EnumerateFiles() for two reasons:
+                // - We're inside of a Task.Run. The retrieval should run/finish on that task.
+                // - GetFiles immediately throws. The Enumerate version delays until the first enumeration.
                 return Directory
                     .GetFiles(_fullPath.ToString())
                     .Select(path => FileSystem.GetFile(path));
@@ -300,6 +311,9 @@
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
+                // Use GetDirectories() instead of EnumerateDirectories() for two reasons:
+                // - We're inside of a Task.Run. The retrieval should run/finish on that task.
+                // - GetDirectories immediately throws. The Enumerate version delays until the first enumeration.
                 return Directory
                     .GetDirectories(_fullPath.ToString())
                     .Select(path => FileSystem.GetFolder(path));

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Data;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -83,10 +84,227 @@
 
         #endregion
 
+        #region GetFile Tests
+
+        public IEnumerable<object[]> GetFileAllowedNamesData => new[]
+        {
+            new[] { "" },
+            new[] { Default.FileName },
+            new[] { FileSystem.PathInformation.CurrentDirectorySegment },
+            new[] { FileSystem.PathInformation.ParentDirectorySegment },
+            new[] { Default.FolderName + FileSystem.PathInformation.DirectorySeparatorChar + Default.FileName },
+            new[]
+            {
+                FileSystem.PathInformation.ParentDirectorySegment +
+                FileSystem.PathInformation.DirectorySeparatorChar +
+                Default.FileName
+            },
+        };
+
+        [TestMethod]
+        public void GetFile_NullParameters_ThrowsArgumentNullException()
+        {
+            Should.Throw<ArgumentNullException>(() => TestFolder.GetFile(null!));
+        }
+
+        [TestMethod]
+        [DynamicInstanceData(nameof(GetFileAllowedNamesData))]
+        public void GetFile_StandardFolder_ReturnsFile(string fileName)
+        {
+            // Get a file in another folder for relative parent segment tests.
+            var parentFolder = TestFolder.GetFolder(Default.FolderName);
+            var file = parentFolder.GetFile(fileName);
+            var expectedPath = parentFolder.Path / fileName;
+            file.Path.ShouldBeEffectivelyEqualTo(expectedPath);
+        }
+
+        #endregion
+
+        #region GetFolder Tests
+
+        public IEnumerable<object[]> GetFolderAllowedNamesData => new[]
+        {
+            new[] { "" },
+            new[] { Default.FileName },
+            new[] { FileSystem.PathInformation.CurrentDirectorySegment },
+            new[] { FileSystem.PathInformation.ParentDirectorySegment },
+            new[] { Default.FolderName + FileSystem.PathInformation.DirectorySeparatorChar + Default.FileName },
+            new[]
+            {
+                FileSystem.PathInformation.ParentDirectorySegment +
+                FileSystem.PathInformation.DirectorySeparatorChar +
+                Default.FileName
+            },
+        };
+
+        [TestMethod]
+        public void GetFolder_NullParameters_ThrowsArgumentNullException()
+        {
+            Should.Throw<ArgumentNullException>(() => TestFolder.GetFolder(null!));
+        }
+
+        [TestMethod]
+        [DynamicInstanceData(nameof(GetFileAllowedNamesData))]
+        public void GetFolder_StandardFolder_ReturnsFolder(string fileName)
+        {
+            // Get a folder in another folder for relative parent segment tests.
+            var parentFolder = TestFolder.GetFolder(Default.FolderName);
+            var file = parentFolder.GetFile(fileName);
+            var expectedPath = parentFolder.Path / fileName;
+            file.Path.ShouldBeEffectivelyEqualTo(expectedPath);
+        }
+
+        #endregion
+
+        #region GetAllFilesAsync Tests
+
+        [TestMethod]
+        public async Task GetAllFilesAsync_ExistingFolder_ReturnsContainedFiles()
+        {
+            await TestFolder.SetupFileAsync($"1 {Default.FileName}");
+            await TestFolder.SetupFileAsync($"2 {Default.FileName}");
+            await TestFolder.SetupFileAsync(Default.FolderName, $"3 {Default.FileName}");
+
+            var files = await TestFolder.GetAllFilesAsync();
+            files.ShouldContain(file => file.Path.Name == $"1 {Default.FileName}");
+            files.ShouldContain(file => file.Path.Name == $"2 {Default.FileName}");
+            files.ShouldNotContain(file => file.Path.Name == $"3 {Default.FileName}");
+        }
+
+        [TestMethod]
+        public async Task GetAllFilesAsync_EmptyFolder_ReturnsEmptyEnumerable()
+        {
+            var files = await TestFolder.GetAllFilesAsync();
+            files.ShouldBeEmpty();
+        }
+
+        [TestMethod]
+        public async Task GetAllFilesAsync_NonExistingFolder_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAllFilesAsync());
+        }
+        
+        [TestMethod]
+        public async Task GetAllFilesAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderWithNonExistingParentSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAllFilesAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAllFilesAsync_ConflictingFileExistsAtLocation_ThrowsIOException()
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
+            await Should.ThrowAsync<IOException>(async () => await folder.GetAllFilesAsync());
+        }
+
+        #endregion
+
+        #region GetAllFoldersAsync Tests
+
+        [TestMethod]
+        public async Task GetAllFoldersAsync_ExistingFolder_ReturnsContainedFolders()
+        {
+            await TestFolder.SetupFolderAsync($"1 {Default.FolderName}");
+            await TestFolder.SetupFolderAsync($"2 {Default.FolderName}");
+            await TestFolder.SetupFolderAsync(Default.FolderName, $"3 {Default.FolderName}");
+            await TestFolder.SetupFileAsync(Default.FileName);
+
+            var folders = await TestFolder.GetAllFoldersAsync();
+            folders.ShouldContain(folder => folder.Path.Name == Default.FolderName);
+            folders.ShouldContain(folder => folder.Path.Name == $"2 {Default.FolderName}");
+            folders.ShouldContain(folder => folder.Path.Name == $"2 {Default.FolderName}");
+            folders.ShouldNotContain(folder => folder.Path.Name == $"3 {Default.FolderName}");
+        }
+
+        [TestMethod]
+        public async Task GetAllFoldersAsync_EmptyFolder_ReturnsEmptyEnumerable()
+        {
+            var folders = await TestFolder.GetAllFoldersAsync();
+            folders.ShouldBeEmpty();
+        }
+
+        [TestMethod]
+        public async Task GetAllFoldersAsync_NonExistingFolder_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAllFoldersAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAllFoldersAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderWithNonExistingParentSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAllFoldersAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAllFoldersAsync_ConflictingFileExistsAtLocation_ThrowsIOException()
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
+            await Should.ThrowAsync<IOException>(async () => await folder.GetAllFoldersAsync());
+        }
+
+        #endregion
+
+        #region GetAllChildrenAsync Tests
+
+        [TestMethod]
+        public async Task GetAllChildrenAsync_ExistingFolder_ReturnsContainedChildren()
+        {
+            await TestFolder.SetupFileAsync($"1 {Default.FileName}");
+            await TestFolder.SetupFileAsync($"2 {Default.FileName}");
+            await TestFolder.SetupFileAsync(Default.FolderName, $"3 {Default.FileName}");
+            await TestFolder.SetupFolderAsync($"1 {Default.FolderName}");
+            await TestFolder.SetupFolderAsync($"2 {Default.FolderName}");
+            await TestFolder.SetupFolderAsync(Default.FolderName, $"3 {Default.FolderName}");
+            await TestFolder.SetupFileAsync(Default.FileName);
+
+            var children = await TestFolder.GetAllChildrenAsync();
+            children.ShouldContain(element => element.Path.Name == $"1 {Default.FileName}");
+            children.ShouldContain(element => element.Path.Name == $"2 {Default.FileName}");
+            children.ShouldContain(element => element.Path.Name == Default.FolderName);
+            children.ShouldContain(element => element.Path.Name == $"2 {Default.FolderName}");
+            children.ShouldContain(element => element.Path.Name == $"2 {Default.FolderName}");
+            children.ShouldNotContain(element => element.Path.Name == $"3 {Default.FileName}");
+            children.ShouldNotContain(element => element.Path.Name == $"3 {Default.FolderName}");
+        }
+
+        [TestMethod]
+        public async Task GetAllChildrenAsync_EmptyFolder_ReturnsEmptyEnumerable()
+        {
+            var folders = await TestFolder.GetAllChildrenAsync();
+            folders.ShouldBeEmpty();
+        }
+
+        [TestMethod]
+        public async Task GetAllChildrenAsync_NonExistingFolder_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAllChildrenAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAllChildrenAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
+        {
+            var folder = TestFolder.GetFolder(Default.FolderWithNonExistingParentSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAllChildrenAsync());
+        }
+
+        [TestMethod]
+        public async Task GetAllChildrenAsync_ConflictingFileExistsAtLocation_ThrowsIOException()
+        {
+            var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
+            await Should.ThrowAsync<IOException>(async () => await folder.GetAllChildrenAsync());
+        }
+
+        #endregion
+
         #region GetAttributesAsync Tests
 
         [TestMethod]
-        public async Task GetAttributesAsync_ExistingFile_DoesNotThrow()
+        public async Task GetAttributesAsync_ExistingFolder_DoesNotThrow()
         {
             var folder = await TestFolder.SetupFolderAsync(Default.FolderName);
             await folder.GetAttributesAsync();
@@ -94,10 +312,10 @@
         }
 
         [TestMethod]
-        public async Task GetAttributesAsync_NonExistingFile_ThrowsFileNotFoundException()
+        public async Task GetAttributesAsync_NonExistingFolder_ThrowsDirectoryNotFoundException()
         {
             var folder = TestFolder.GetFolder(Default.FolderName);
-            await Should.ThrowAsync<FileNotFoundException>(async () => await folder.GetAttributesAsync());
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.GetAttributesAsync());
         }
 
         [TestMethod]
@@ -108,7 +326,7 @@
         }
 
         [TestMethod]
-        public async Task GetAttributesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        public async Task GetAttributesAsync_ConflictingFileExistsAtLocation_ThrowsIOException()
         {
             var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
             await Should.ThrowAsync<IOException>(async () => await folder.GetAttributesAsync());
@@ -119,7 +337,7 @@
         #region SetAttributesAsync Tests
 
         [TestMethod]
-        public async Task SetAttributesAsync_ExistingFile_DoesNotThrow()
+        public async Task SetAttributesAsync_ExistingFolder_DoesNotThrow()
         {
             var folder = await TestFolder.SetupFolderAsync(Default.FolderName);
             await folder.SetAttributesAsync(FileAttributes.Normal);
@@ -137,7 +355,7 @@
         }
 
         [TestMethod]
-        public async Task SetAttributesAsync_NonExistingFolderThrowsDirectoryNotFoundException()
+        public async Task SetAttributesAsync_NonExistingFolder_ThrowsDirectoryNotFoundException()
         {
             var folder = TestFolder.GetFolder(Default.FolderName);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await folder.SetAttributesAsync(FileAttributes.Normal));
@@ -151,7 +369,7 @@
         }
 
         [TestMethod]
-        public async Task SetAttributesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        public async Task SetAttributesAsync_ConflictingFileExistsAtLocation_ThrowsIOException()
         {
             var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
             await Should.ThrowAsync<IOException>(async () => await folder.SetAttributesAsync(FileAttributes.Normal));
@@ -246,7 +464,7 @@
         }
 
         [TestMethod]
-        public async Task GetPropertiesAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
+        public async Task GetPropertiesAsync_ConflictingFileExistsAtLocation_ThrowsIOException()
         {
             var folder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);
             await Should.ThrowAsync<IOException>(async () => await folder.GetPropertiesAsync());

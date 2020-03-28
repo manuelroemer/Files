@@ -25,11 +25,10 @@
         ///     A <see cref="StoragePath"/> instance created from the specified <see cref="string"/>.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="path"/>
+        ///     <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The <paramref name="path"/> had an invalid format which is not compatible with this
-        ///     file system implementation.
+        ///     <paramref name="path"/> is an empty string or has an otherwise invalid path format.
         /// </exception>
         public abstract StoragePath GetPath(string path);
 
@@ -117,11 +116,10 @@
         ///     <see cref="StoragePath"/> instance obtained through the <see cref="GetPath(string)"/> method.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="path"/>
+        ///     <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The <paramref name="path"/> had an invalid format which is not compatible with this
-        ///     file system implementation.
+        ///     <paramref name="path"/> is an empty string or has an otherwise invalid path format.
         /// </exception>
         public virtual StorageFile GetFile(string path) =>
             GetFile(GetPath(path));
@@ -202,11 +200,10 @@
         ///     <see cref="StoragePath"/> instance obtained through the <see cref="GetPath(string)"/> method.
         /// </remarks>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="path"/>
+        ///     <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     The <paramref name="path"/> had an invalid format which is not compatible with this
-        ///     file system implementation.
+        ///     <paramref name="path"/> is an empty string or has an otherwise invalid path format.
         /// </exception>
         public virtual StorageFolder GetFolder(string path) =>
             GetFolder(GetPath(path));
