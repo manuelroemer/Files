@@ -16,8 +16,17 @@
         private StoragePath ParentDirectoryPath => FileSystem.GetPath(PathInformation.ParentDirectorySegment);
         private StoragePath AbsolutePath => CurrentDirectoryPath.FullPath;
 
+        // Shortcuts for the separator, because typing PathInformation.DirectorySeparatorChar.ToString()
+        // adds too much noise in the test data below.
+        private readonly string Sep;
+        private readonly string AltSep;
+
         public StoragePathSpecificationTests(FileSystemTestContext context)
-            : base(context) { }
+            : base(context)
+        {
+            Sep = PathInformation.DirectorySeparatorChar.ToString();
+            AltSep = PathInformation.DirectorySeparatorChar.ToString();
+        }
 
         #region Kind Tests
 
@@ -118,8 +127,8 @@
         public virtual IEnumerable<object[]> ParentPathsWithoutParentData => new[]
         {
             new[] { AbsolutePath.Root!.ToString() },
-            new[] { PathInformation.DirectorySeparatorChar.ToString() },
-            new[] { PathInformation.AltDirectorySeparatorChar.ToString() },
+            new[] { Sep },
+            new[] { AltSep },
         };
 
         [TestMethod]
@@ -203,36 +212,36 @@
             },
             new[]
             {
-                PathInformation.DirectorySeparatorChar.ToString(),
+                Sep,
                 "",
             },
             new[]
             {
-                PathInformation.AltDirectorySeparatorChar.ToString(),
+                AltSep,
                 "",
             },
             new[]
             {
                 // A single trailing separator is ignored.
-                Default.PathName + PathInformation.DirectorySeparatorChar,
+                Default.PathName + Sep,
                 Default.PathName,
             },
             new[]
             {
                 // A single trailing separator is ignored.
-                Default.PathName + PathInformation.AltDirectorySeparatorChar,
+                Default.PathName + AltSep,
                 Default.PathName,
             },
             new[]
             {
                 // Multiple trailing separators lead to empty name.
-                Default.PathName + PathInformation.DirectorySeparatorChar + PathInformation.DirectorySeparatorChar,
+                Default.PathName + Sep + Sep,
                 "",
             },
             new[]
             {
                 // Multiple trailing separators lead to empty name.
-                Default.PathName + PathInformation.AltDirectorySeparatorChar + PathInformation.AltDirectorySeparatorChar,
+                Default.PathName + AltSep + AltSep,
                 "",
             },
         };
@@ -278,36 +287,36 @@
             },
             new[]
             {
-                PathInformation.DirectorySeparatorChar.ToString(),
+                Sep,
                 "",
             },
             new[]
             {
-                PathInformation.AltDirectorySeparatorChar.ToString(),
+                AltSep,
                 "",
             },
             new[]
             {
                 // A single trailing separator is ignored.
-                AbsolutePath / Default.PathName + PathInformation.DirectorySeparatorChar,
+                (AbsolutePath / Default.PathName).ToString() + Sep,
                 Default.PathNameWithoutExtension,
             },
             new[]
             {
                 // A single trailing separator is ignored.
-                Default.PathName + PathInformation.AltDirectorySeparatorChar,
+                Default.PathName + AltSep,
                 Default.PathNameWithoutExtension,
             },
             new[]
             {
                 // Multiple trailing separators lead to empty name.
-                Default.PathName + PathInformation.DirectorySeparatorChar + PathInformation.DirectorySeparatorChar,
+                Default.PathName + Sep + Sep,
                 "",
             },
             new[]
             {
                 // Multiple trailing separators lead to empty name.
-                Default.PathName + PathInformation.AltDirectorySeparatorChar + PathInformation.AltDirectorySeparatorChar,
+                Default.PathName + AltSep + AltSep,
                 "",
             },
         };
@@ -334,13 +343,13 @@
             new[]
             {
                 // A single trailing separator is ignored.
-                Default.PathName + PathInformation.DirectorySeparatorChar,
+                Default.PathName + Sep,
                 Default.PathNameExtension,
             },
             new[]
             {
                 // A single trailing separator is ignored.
-                Default.PathName + PathInformation.AltDirectorySeparatorChar,
+                Default.PathName + AltSep,
                 Default.PathNameExtension,
             },
         };
@@ -351,10 +360,10 @@
             new[] { Default.PathNameWithoutExtension + PathInformation.ExtensionSeparatorChar },
             new[] { PathInformation.CurrentDirectorySegment },
             new[] { PathInformation.ParentDirectorySegment },
-            new[] { PathInformation.DirectorySeparatorChar.ToString() },
-            new[] { PathInformation.AltDirectorySeparatorChar.ToString() },
-            new[] { Default.PathName + PathInformation.DirectorySeparatorChar + PathInformation.DirectorySeparatorChar },
-            new[] { Default.PathName + PathInformation.AltDirectorySeparatorChar + PathInformation.AltDirectorySeparatorChar },
+            new[] { Sep },
+            new[] { AltSep },
+            new[] { Default.PathName + Sep + Sep },
+            new[] { Default.PathName + AltSep + AltSep },
         };
 
         [TestMethod]
@@ -380,17 +389,17 @@
 
         public virtual IEnumerable<object[]> EndsInDirectorySeparatorPathsWithTrailingDirectorySeparatorData => new[]
         {
-            new[] { PathInformation.DirectorySeparatorChar.ToString() },
-            new[] { PathInformation.AltDirectorySeparatorChar.ToString() },
-            new[] { Default.PathName + PathInformation.DirectorySeparatorChar },
-            new[] { Default.PathName + PathInformation.AltDirectorySeparatorChar },
+            new[] { Sep },
+            new[] { AltSep },
+            new[] { Default.PathName + Sep },
+            new[] { Default.PathName + AltSep },
         };
 
         public virtual IEnumerable<object[]> EndsInDirectorySeparatorPathsWithoutTrailingDirectorySeparatorData => new[]
         {
             new[] { Default.PathName },
-            new[] { Default.PathName + PathInformation.DirectorySeparatorChar + " " },
-            new[] { Default.PathName + PathInformation.AltDirectorySeparatorChar + " " },
+            new[] { Default.PathName + Sep + " " },
+            new[] { Default.PathName + AltSep + " " },
         };
 
         [TestMethod]
@@ -415,21 +424,21 @@
 
         public virtual IEnumerable<object[]> TrimEndingDirectorySeparatorPathsWithTrailingDirectorySeparatorData => new[]
         {
-            new[] { Default.PathName + PathInformation.DirectorySeparatorChar },
-            new[] { Default.PathName + PathInformation.AltDirectorySeparatorChar },
+            new[] { Default.PathName + Sep },
+            new[] { Default.PathName + AltSep },
         };
 
         public virtual IEnumerable<object[]> TrimEndingDirectorySeparatorPathsWithoutTrailingDirectorySeparatorData => new[]
         {
             new[] { Default.PathName },
-            new[] { Default.PathName + PathInformation.DirectorySeparatorChar + " " },
-            new[] { Default.PathName + PathInformation.AltDirectorySeparatorChar + " " },
+            new[] { Default.PathName + Sep + " " },
+            new[] { Default.PathName + AltSep + " " },
         };
 
         public virtual IEnumerable<object[]> TrimEndingDirectorySeparatorUntrimmablePathsData => new[]
         {
-            new[] { PathInformation.DirectorySeparatorChar.ToString() },
-            new[] { PathInformation.AltDirectorySeparatorChar.ToString() },
+            new[] { Sep },
+            new[] { AltSep },
         };
 
         [TestMethod]
@@ -519,26 +528,26 @@
             new[]
             {
                 Default.PathName,
-                PathInformation.DirectorySeparatorChar.ToString(),
-                Default.PathName + PathInformation.DirectorySeparatorChar,
+                Sep,
+                Default.PathName + Sep,
             },
             new[]
             {
                 Default.PathName,
-                PathInformation.AltDirectorySeparatorChar.ToString(),
-                Default.PathName + PathInformation.AltDirectorySeparatorChar,
+                AltSep,
+                Default.PathName + AltSep,
             },
             new[]
             {
                 Default.PathName,
-                PathInformation.DirectorySeparatorChar.ToString() + PathInformation.DirectorySeparatorChar,
-                Default.PathName + PathInformation.DirectorySeparatorChar + PathInformation.DirectorySeparatorChar,
+                Sep + Sep,
+                Default.PathName + Sep + Sep,
             },
             new[]
             {
                 Default.PathName,
-                PathInformation.AltDirectorySeparatorChar.ToString() + PathInformation.AltDirectorySeparatorChar,
-                Default.PathName + PathInformation.AltDirectorySeparatorChar + PathInformation.AltDirectorySeparatorChar,
+                AltSep + AltSep,
+                Default.PathName + AltSep + AltSep,
             },
         };
 
@@ -610,19 +619,19 @@
             {
                 Default.PathName,
                 Default.PathName,
-                Default.PathName + PathInformation.DirectorySeparatorChar + Default.PathName,
+                Default.PathName + Sep + Default.PathName,
             },
             new[]
             {
-                Default.PathName + PathInformation.DirectorySeparatorChar,
+                Default.PathName + Sep,
                 Default.PathName,
-                Default.PathName + PathInformation.DirectorySeparatorChar + Default.PathName,
+                Default.PathName + Sep + Default.PathName,
             },
             new[]
             {
-                Default.PathName + PathInformation.AltDirectorySeparatorChar,
+                Default.PathName + AltSep,
                 Default.PathName,
-                Default.PathName + PathInformation.AltDirectorySeparatorChar + Default.PathName,
+                Default.PathName + AltSep + Default.PathName,
             },
             new[]
             {
@@ -701,40 +710,40 @@
             {
                 Default.PathName,
                 Default.PathName,
-                Default.PathName + PathInformation.DirectorySeparatorChar + Default.PathName,
+                Default.PathName + Sep + Default.PathName,
             },
             new[]
             {
-                Default.PathName + PathInformation.DirectorySeparatorChar,
+                Default.PathName + Sep,
                 Default.PathName,
-                Default.PathName + PathInformation.DirectorySeparatorChar + Default.PathName,
+                Default.PathName + Sep + Default.PathName,
             },
             new[]
             {
-                Default.PathName + PathInformation.AltDirectorySeparatorChar,
+                Default.PathName + AltSep,
                 Default.PathName,
-                Default.PathName + PathInformation.AltDirectorySeparatorChar + Default.PathName,
+                Default.PathName + AltSep + Default.PathName,
             },
             new[]
             {
                 // Join doesn't merge two separators.
-                Default.PathName + PathInformation.DirectorySeparatorChar,
-                PathInformation.DirectorySeparatorChar.ToString() + Default.PathName,
-                Default.PathName + PathInformation.DirectorySeparatorChar + PathInformation.DirectorySeparatorChar + Default.PathName,
+                Default.PathName + Sep,
+                Sep + Default.PathName,
+                Default.PathName + Sep + Sep + Default.PathName,
             },
             new[]
             {
                 // Join preserves any separators >= 2.
-                Default.PathName + PathInformation.DirectorySeparatorChar + PathInformation.DirectorySeparatorChar,
-                PathInformation.DirectorySeparatorChar.ToString() + PathInformation.DirectorySeparatorChar.ToString() + Default.PathName,
-                Default.PathName + new string(PathInformation.DirectorySeparatorChar, 4) + Default.PathName,
+                Default.PathName + Sep + Sep,
+                Sep + Sep + Default.PathName,
+                Default.PathName + Sep + Sep + Sep + Sep + Default.PathName,
             },
             new[]
             {
                 // Join doesn't discard rooted paths.
                 (AbsolutePath / "Foo").ToString(),
                 (AbsolutePath / "Bar").ToString(),
-                (AbsolutePath / "Foo").ToString() + PathInformation.DirectorySeparatorChar + (AbsolutePath / "Bar").ToString(),
+                FakeJoin((AbsolutePath / "Foo").ToString(), (AbsolutePath / "Bar").ToString()),
             },
         };
         public abstract IEnumerable<object[]> JoinPathsWithInvalidOthersData { get; }
@@ -796,5 +805,22 @@
         }
 
         #endregion
+
+        private string FakeJoin(string path1, string path2)
+        {
+            if (!EndsWithSeparator(path1) && !StartsWithSeparator(path2))
+            {
+                return path1 + Sep + path2;
+            }
+            return path1 + path2;
+
+            bool StartsWithSeparator(string str) =>
+                   str.StartsWith(Sep)
+                || str.StartsWith(AltSep);
+
+            bool EndsWithSeparator(string str) =>
+                   str.EndsWith(Sep)
+                || str.EndsWith(AltSep);
+        }
     }
 }
