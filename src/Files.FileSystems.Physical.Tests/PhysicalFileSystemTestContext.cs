@@ -4,6 +4,7 @@
     using System.Threading.Tasks;
     using Files;
     using Files.Specification.Tests;
+    using Files.Specification.Tests.Setup;
 
     public class PhysicalFileSystemTestContext : FileSystemTestContext
     {
@@ -11,7 +12,10 @@
 
         public override FileSystem FileSystem => PhysicalFileSystem.Default;
 
-        private PhysicalFileSystemTestContext() { }
+        private PhysicalFileSystemTestContext()
+        {
+            Default.Setup(FileSystem);
+        }
 
         public override async Task<StorageFolder> GetTestFolderAsync()
         {

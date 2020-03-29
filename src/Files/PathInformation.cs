@@ -13,12 +13,20 @@
         /// <summary>
         ///     Gets a list of characters which are not allowed to appear in a path targeting this
         ///     file system implementation.
+        ///     
+        ///     Depending on the underlying file system implementation, including such an invalid
+        ///     character in a path will either throw during the creation of a <see cref="StoragePath"/>
+        ///     or while performing file I/O with that path.
         /// </summary>
         public IReadOnlyList<char> InvalidPathChars { get; }
 
         /// <summary>
         ///     Gets a list of characters which are not allowed to appear in the file name part of
         ///     a path targeting this file system implementation.
+        ///     
+        ///     Depending on the underlying file system implementation, including such an invalid
+        ///     character in a path will either throw during the creation of a <see cref="StoragePath"/>
+        ///     or while performing file I/O with that path.
         /// </summary>
         public IReadOnlyList<char> InvalidFileNameChars { get; }
 

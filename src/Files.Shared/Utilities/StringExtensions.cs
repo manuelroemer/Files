@@ -9,17 +9,7 @@
 
         public static bool Contains(this string str, char[] characters)
         {
-            foreach (var actualChar in str)
-            {
-                foreach (var searchedChar in characters)
-                {
-                    if (actualChar == searchedChar)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
+            return str.IndexOfAny(characters) >= 0;
         }
     }
 }

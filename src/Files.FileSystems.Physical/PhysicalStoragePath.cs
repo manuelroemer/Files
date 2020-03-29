@@ -8,6 +8,10 @@
 
     internal sealed class PhysicalStoragePath : StoragePath
     {
+        // All properties which return a StoragePath are wrapped in a Lazy<T> in order to not fully
+        // expand/walk a path tree whenever a path is initialized.
+        // Consider for example the path foo/bar/baz.
+        // Without Lazy<T>, three path instances would be created immediately through the Parent property.
         private readonly Lazy<StoragePath?> _rootLazy;
         private readonly Lazy<StoragePath?> _parentLazy;
         private readonly Lazy<StoragePath> _fullPathLazy;
@@ -39,7 +43,7 @@
             var pathWithoutTrailingSeparator = Path.TrimEndingDirectorySeparator(path);
             var directoryPath = Path.GetDirectoryName(pathWithoutTrailingSeparator);
             var name = Path.GetFileName(pathWithoutTrailingSeparator);
-            var nameWithoutExtension = Path.GetFileNameWithoutExtension(pathWithoutTrailingSeparator);
+            var nameWithoutExtension = GetNameWithoutExtension(name);
             var extension = PathHelper.GetExtensionWithoutTrailingExtensionSeparator(pathWithoutTrailingSeparator);
             var isPathFullyQualified = Path.IsPathFullyQualified(path);
             var endsInDirectorySeparator = Path.EndsInDirectorySeparator(path);
@@ -63,59 +67,44 @@
                 () => fileSystem.GetPath(fullPath)
             );
 
-            _pathWithoutEndingDirectorySeparatorLazy = new Lazy<StoragePath>(
-                () =>
+            _pathWithoutEndingDirectorySeparatorLazy = new Lazy<StoragePath>(TrimEndingDirectorySeparatorImpl);
+
+            static string GetFullPathOrThrow(string path)
+            {
+                // Path rules are incredibly complex depending on the current OS. It's best to not try
+                // and emulate these rules here, but to actually use the OS/FS APIs directly.
+                // One way to do this is by calling GetFullPath() and checking whether that throws.
+                // If not, the path is good.
+                // It certainly looks nasty, but it is the most reliant way to get this right.
+
+                try
                 {
-                    if (!EndsInDirectorySeparator)
-                    {
-                        return this;
-                    }
-
-                    var trimmedPath = Path.TrimEndingDirectorySeparator(ToString());
-
-                    try
-                    {
-                        return FileSystem.GetPath(trimmedPath);
-                    }
-                    catch (ArgumentException ex)
-                    {
-                        throw new InvalidOperationException(
-                            ExceptionStrings.Path.TrimmingResultsInInvalidPath(),
-                            ex
-                        );
-                    }
+                    return Path.GetFullPath(path);
                 }
-            );
-        }
-
-        /// <summary>
-        ///     Converts the specified path to a full path and throws an appropriate exception
-        ///     if that is not possible due to an invalid path format.
-        ///     This is both used for path string validation and full path retrieval.
-        /// </summary>
-        private static string GetFullPathOrThrow(string path)
-        {
-            // Path rules are incredibly complex depending on the current OS. It's best to not try
-            // and emulate these rules here, but to actually use the OS/FS APIs directly.
-            // One way to do this is by calling GetFullPath() and checking whether that throws.
-            // If not, the path is good.
-            // It certainly looks nasty, but it is the most reliant way to get this right.
-
-            try
-            {
-                return Path.GetFullPath(path);
+                catch (Exception ex) when (
+                       ex is ArgumentException
+                    || ex is NotSupportedException
+                    || ex is PathTooLongException
+                )
+                {
+                    throw new ArgumentException(
+                        ExceptionStrings.Path.InvalidFormat(),
+                        nameof(path),
+                        ex
+                    );
+                }
             }
-            catch (Exception ex) when (
-                   ex is ArgumentException
-                || ex is NotSupportedException
-                || ex is PathTooLongException
-            )
+
+            static string GetNameWithoutExtension(string name)
             {
-                throw new ArgumentException(
-                    ExceptionStrings.Path.InvalidFormat(),
-                    nameof(path),
-                    ex
-                );
+                // Specification requires special handling for these two directories.
+                // Without this code, we'd return "" and ".", because Path.GetFileNameWithoutExtension
+                // trims one dot.
+                if (name == "." || name == "..")
+                {
+                    return name;
+                }
+                return Path.GetFileNameWithoutExtension(name);
             }
         }
 
@@ -154,5 +143,34 @@
 
         public override StoragePath TrimEndingDirectorySeparator() =>
             _pathWithoutEndingDirectorySeparatorLazy.Value;
+
+        private StoragePath TrimEndingDirectorySeparatorImpl()
+        {
+            if (!EndsInDirectorySeparator)
+            {
+                return this;
+            }
+
+            // Path.TrimEndingDirectorySeparator doesn't trim a one character string.
+            // We must manually throw here. Trimming isn't possible because StoragePaths cannot be empty strings.
+            if (Length == 1)
+            {
+                throw new InvalidOperationException(ExceptionStrings.Path.TrimmingResultsInEmptyPath());
+            }
+
+            var trimmedPath = Path.TrimEndingDirectorySeparator(ToString());
+
+            try
+            {
+                return FileSystem.GetPath(trimmedPath);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new InvalidOperationException(
+                    ExceptionStrings.Path.TrimmingResultsInInvalidPath(),
+                    ex
+                );
+            }
+        }
     }
 }

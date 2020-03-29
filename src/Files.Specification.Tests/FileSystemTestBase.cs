@@ -30,6 +30,12 @@
         protected FileSystem FileSystem => Context.FileSystem;
 
         /// <summary>
+        ///     Gets the value of the <see cref="FileSystem.PathInformation"/> property.
+        ///     This simply exists for quickly accessing the file system.
+        /// </summary>
+        protected PathInformation PathInformation => Context.FileSystem.PathInformation;
+
+        /// <summary>
         ///     Gets a folder in which all file system tests should operate.
         ///     By only interacting with items in this folder, the tests are deterministic.
         /// </summary>

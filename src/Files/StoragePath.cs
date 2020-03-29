@@ -137,7 +137,7 @@
                 result = null;
                 return false;
             }
-            
+
             try
             {
                 result = Append(part);
@@ -272,20 +272,21 @@
 
         public static StoragePath operator /(StoragePath path1, StoragePath path2)
         {
+            // The called overload validates for null.
             return path1 / path2?._underlyingString!;
         }
 
         public static StoragePath operator /(StoragePath path1, string path2)
         {
             _ = path1 ?? throw new ArgumentNullException(nameof(path1));
-            // JoinWith should validate path2.
+            _ = path2 ?? throw new ArgumentNullException(nameof(path2));
             return path1.Join(path2);
         }
 
         public static StoragePath operator +(StoragePath path, string part)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            // Append should validate part.
+            _ = part ?? throw new ArgumentNullException(nameof(part));
             return path.Append(part);
         }
 
