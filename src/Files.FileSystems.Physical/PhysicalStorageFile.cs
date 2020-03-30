@@ -275,64 +275,77 @@
             });
         }
 
-        public override async Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
+        public override Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
         {
-            try
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.Run(async () =>
             {
-                return await FilePolyfills.ReadAllBytesAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                await ThrowIOExceptionIfConflictingFolderExistsAsync(ex).ConfigureAwait(false);
-                throw;
-            }
+                try
+                {
+                    return await FilePolyfills.ReadAllBytesAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    await ThrowIOExceptionIfConflictingFolderExistsAsync(ex).ConfigureAwait(false);
+                    throw;
+                }
+            });
         }
 
-        public override async Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
+        public override Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
         {
             _ = bytes ?? throw new ArgumentNullException(nameof(bytes));
-            await EnsureExistsAsync(cancellationToken).ConfigureAwait(false);
+
             cancellationToken.ThrowIfCancellationRequested();
-            await FilePolyfills.WriteAllBytesAsync(_fullPath.ToString(), bytes, cancellationToken).ConfigureAwait(false);
+            return Task.Run(async () =>
+            {
+                EnsureExists(cancellationToken);
+                await FilePolyfills.WriteAllBytesAsync(_fullPath.ToString(), bytes, cancellationToken).ConfigureAwait(false);
+            });
         }
 
-        public override async Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
+        public override Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
         {
-            try
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.Run(async () =>
             {
-                return encoding is null
-                    ? await FilePolyfills.ReadAllTextAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false)
-                    : await FilePolyfills.ReadAllTextAsync(_fullPath.ToString(), encoding, cancellationToken).ConfigureAwait(false);
-            }
-            catch (UnauthorizedAccessException ex)
-            {
-                await ThrowIOExceptionIfConflictingFolderExistsAsync(ex).ConfigureAwait(false);
-                throw;
-            }
+                try
+                {
+                    return encoding is null
+                        ? await FilePolyfills.ReadAllTextAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false)
+                        : await FilePolyfills.ReadAllTextAsync(_fullPath.ToString(), encoding, cancellationToken).ConfigureAwait(false);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    await ThrowIOExceptionIfConflictingFolderExistsAsync(ex).ConfigureAwait(false);
+                    throw;
+                }
+            });
         }
 
-        public override async Task WriteTextAsync(
+        public override Task WriteTextAsync(
             string text,
             Encoding? encoding,
             CancellationToken cancellationToken = default
         )
         {
             _ = text ?? throw new ArgumentNullException(nameof(text));
-            await EnsureExistsAsync(cancellationToken).ConfigureAwait(false);
 
             cancellationToken.ThrowIfCancellationRequested();
-            if (encoding is null)
+            return Task.Run(async () =>
             {
-                await FilePolyfills.WriteAllTextAsync(_fullPath.ToString(), text, cancellationToken).ConfigureAwait(false);
-            }
-            else
-            {
-                await FilePolyfills.WriteAllTextAsync(_fullPath.ToString(), text, encoding, cancellationToken).ConfigureAwait(false);
-            }
-        }
+                EnsureExists(cancellationToken);
 
-        private Task EnsureExistsAsync(CancellationToken cancellationToken) =>
-            Task.Run(() => EnsureExists(cancellationToken));
+                if (encoding is null)
+                {
+                    await FilePolyfills.WriteAllTextAsync(_fullPath.ToString(), text, cancellationToken).ConfigureAwait(false);
+                }
+                else
+                {
+                    await FilePolyfills.WriteAllTextAsync(_fullPath.ToString(), text, encoding, cancellationToken).ConfigureAwait(false);
+                }
+            });
+        }
 
         private void EnsureExists(CancellationToken cancellationToken)
         {
