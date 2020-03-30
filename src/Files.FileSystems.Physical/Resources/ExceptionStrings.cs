@@ -46,10 +46,6 @@
             internal static string CopyConflictingFolderExistsAtDestination() =>
                 "Another folder already exists at the destination.";
 
-            internal static string RenameAsyncMovesFileOutOfFolder() =>
-                "The specified name is invalid, because it would move the folder out of its current folder. " +
-                "Please use a normal folder name without path segments.";
-
             internal static string NewNameContainsInvalidChar() =>
                 $"The specified name contains one or more invalid characters. " +
                 $"Invalid characters are:\n" +

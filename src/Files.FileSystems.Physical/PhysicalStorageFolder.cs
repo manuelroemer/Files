@@ -251,7 +251,7 @@
 
             if (newName.Contains(InvalidNewNameChars))
             {
-                throw new ArgumentException(ExceptionStrings.File.NewNameContainsInvalidChar(), nameof(newName));
+                throw new ArgumentException(ExceptionStrings.Folder.NewNameContainsInvalidChar(), nameof(newName));
             }
 
             cancellationToken.ThrowIfCancellationRequested();
