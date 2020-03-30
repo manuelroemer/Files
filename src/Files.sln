@@ -35,7 +35,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Files.FileSystems.Physical.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Files.FileSystems.Uwp.Tests", "Files.FileSystems.Uwp.Tests\Files.FileSystems.Uwp.Tests.csproj", "{B5EDFFE1-B61F-4B40-AE0A-75E7FCAD4884}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Files.Tests", "Files.Tests\Files.Tests.csproj", "{221A0D21-E3A3-4737-9AEB-06BEAD6CE1CB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Files.Tests", "Files.Tests\Files.Tests.csproj", "{221A0D21-E3A3-4737-9AEB-06BEAD6CE1CB}"
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
