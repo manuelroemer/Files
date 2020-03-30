@@ -47,13 +47,13 @@
 
             var fullPath = GetFullPathOrThrow(path);
             var rootPath = Path.GetPathRoot(ToString());
-            var pathWithoutTrailingSeparator = Path.TrimEndingDirectorySeparator(path);
+            var pathWithoutTrailingSeparator = PathPolyfills.TrimEndingDirectorySeparator(path);
             var directoryPath = Path.GetDirectoryName(pathWithoutTrailingSeparator);
             var name = Path.GetFileName(pathWithoutTrailingSeparator);
             var nameWithoutExtension = GetNameWithoutExtension(name);
             var extension = PhysicalPathHelper.GetExtensionWithoutTrailingExtensionSeparator(pathWithoutTrailingSeparator);
             var isPathFullyQualified = Path.IsPathFullyQualified(path);
-            var endsInDirectorySeparator = Path.EndsInDirectorySeparator(path);
+            var endsInDirectorySeparator = PathPolyfills.EndsInDirectorySeparator(path);
 
             FileSystem = fileSystem;
             Kind = isPathFullyQualified ? PathKind.Absolute : PathKind.Relative;
@@ -166,7 +166,7 @@
                 throw new InvalidOperationException(ExceptionStrings.PhysicalStoragePath.TrimmingResultsInEmptyPath());
             }
 
-            var trimmedPath = Path.TrimEndingDirectorySeparator(ToString());
+            var trimmedPath = PathPolyfills.TrimEndingDirectorySeparator(ToString());
 
             try
             {

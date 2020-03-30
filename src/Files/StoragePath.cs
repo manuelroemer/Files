@@ -105,9 +105,7 @@
                 result = TrimEndingDirectorySeparator();
                 return true;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch
-#pragma warning restore CA1031
             {
                 result = null;
                 return false;
@@ -143,9 +141,7 @@
                 result = Append(part);
                 return true;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch
-#pragma warning restore CA1031
             {
                 result = null;
                 return false;
@@ -186,9 +182,7 @@
                 result = Combine(other);
                 return true;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch
-#pragma warning restore CA1031
             {
                 result = null;
                 return false;
@@ -216,9 +210,7 @@
                 result = Join(other);
                 return true;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch
-#pragma warning restore CA1031
             {
                 result = null;
                 return false;

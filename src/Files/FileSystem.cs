@@ -72,9 +72,7 @@
                 result = GetPath(path!);
                 return true;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch
-#pragma warning restore CA1031
             {
                 result = null;
                 return false;
@@ -155,9 +153,7 @@
                 result = GetFile(path!);
                 return true;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch
-#pragma warning restore CA1031
             {
                 result = null;
                 return false;
@@ -178,9 +174,7 @@
                 result = GetFile(path!);
                 return true;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch
-#pragma warning restore CA1031
             {
                 result = null;
                 return false;
@@ -259,9 +253,7 @@
                 result = GetFolder(path!);
                 return true;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch
-#pragma warning restore CA1031
             {
                 result = null;
                 return false;
@@ -282,9 +274,7 @@
                 result = GetFolder(path!);
                 return true;
             }
-#pragma warning disable CA1031 // Do not catch general exception types
             catch
-#pragma warning restore CA1031
             {
                 result = null;
                 return false;

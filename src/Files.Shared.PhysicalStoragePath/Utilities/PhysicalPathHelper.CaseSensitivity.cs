@@ -38,12 +38,12 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
             // We enhance that logic with a look at the current platform, since we can usually assume
             // that Windows is case-insensitive, while Unix platforms are not.
             return GetViaTemporaryFile()
-                ?? GetViaPlatformEnvironment()
+                ?? GetViaPlatform()
                 ?? false;
 
             static bool? GetViaTemporaryFile()
             {
-#pragma warning disable CA1031, CA1305, CA1308
+#pragma warning disable CA1305, CA1308
                 try
                 {
                     var pathWithUpperCase = Path.Combine(Path.GetTempPath(), "CASESENSITIVETEST" + Guid.NewGuid().ToString("N"));
@@ -60,9 +60,9 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
 #pragma warning restore
             }
 
-            static bool? GetViaPlatformEnvironment()
+            static bool? GetViaPlatform()
             {
-                return Environment.OSVersion.Platform switch
+                return Platform.Current switch
                 {
                     PlatformID.Win32NT => false,
                     PlatformID.Unix => true,

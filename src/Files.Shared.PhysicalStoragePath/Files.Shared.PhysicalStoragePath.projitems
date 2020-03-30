@@ -9,12 +9,11 @@
     <Import_RootNamespace>Files.Shared.PhysicalStoragePath</Import_RootNamespace>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\PathPolyfills.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\PhysicalPathHelper.CaseSensitivity.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\PhysicalPathHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PhysicalStoragePath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\ExceptionStrings.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="$(MSBuildThisFileDirectory)Utilities\" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\Platform.cs" />
   </ItemGroup>
 </Project>

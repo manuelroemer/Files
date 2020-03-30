@@ -186,7 +186,7 @@
 
                 try
                 {
-                    File.Move(_fullPath.ToString(), dstPathString, overwrite);
+                    FilePolyfills.Move(_fullPath.ToString(), dstPathString, overwrite);
                     return FileSystem.GetFile(destinationPath);
                 }
                 catch (UnauthorizedAccessException ex)
@@ -383,12 +383,10 @@
             }
             // Do not catch general exception types
             // Since this is only used for exception conversions, it's okay to fail.
-#pragma warning disable CA1031
             catch
             {
                 hasConflictingDirectory = false;
             }
-#pragma warning restore CA1031
 
             if (hasConflictingDirectory)
             {
