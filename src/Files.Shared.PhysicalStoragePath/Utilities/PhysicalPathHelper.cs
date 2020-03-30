@@ -29,7 +29,7 @@
 
             static string? TrimTrailingExtensionSeparator(string? extension)
             {
-                if (string.IsNullOrEmpty(extension) || !extension.StartsWith(ExtensionSeparatorChar))
+                if (string.IsNullOrEmpty(extension) || !extension!.StartsWith(ExtensionSeparatorChar))
                 {
                     return extension;
                 }

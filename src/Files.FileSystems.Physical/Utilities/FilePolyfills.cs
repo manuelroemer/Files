@@ -4,7 +4,7 @@
 
     internal static class FilePolyfills
     {
-#if NETSTANDARD2_1
+#if NETSTANDARD2_1 || NETCOREAPP2_2
         internal static void Move(string sourceFileName, string destFileName, bool overwrite)
         {
             if (overwrite)
