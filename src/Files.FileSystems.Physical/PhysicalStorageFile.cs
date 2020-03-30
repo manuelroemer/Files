@@ -11,7 +11,6 @@
     using Files.FileSystems.Physical.Utilities;
     using Files.Shared.PhysicalStoragePath;
     using Files.Shared.PhysicalStoragePath.Utilities;
-    using Files.Utilities;
     using IOPath = System.IO.Path;
 
     internal sealed class PhysicalStorageFile : StorageFile
