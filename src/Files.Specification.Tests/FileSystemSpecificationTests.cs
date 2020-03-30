@@ -115,6 +115,20 @@
             Should.Throw<ArgumentException>(() => FileSystem.GetFile(invalidPathString));
         }
 
+        [TestMethod]
+        public void GetFile_StoragePath_RootFolderPath_ThrowsArgumentException()
+        {
+            var rootPath = TestFolder.Path.Root!;
+            Should.Throw<ArgumentException>(() => FileSystem.GetFile(rootPath));
+        }
+        
+        [TestMethod]
+        public void GetFile_String_RootFolderPath_ThrowsArgumentException()
+        {
+            var rootPath = TestFolder.Path.Root!.ToString();
+            Should.Throw<ArgumentException>(() => FileSystem.GetFile(rootPath));
+        }
+
         #endregion
 
         #region TryGetFile Tests
@@ -160,6 +174,24 @@
         public void TryGetFile_String_InvalidPathString_ReturnsFalseAndNull(string invalidPathString)
         {
             var result = FileSystem.TryGetFile(invalidPathString, out var file);
+            result.ShouldBeFalse();
+            file.ShouldBeNull();
+        }
+
+        [TestMethod]
+        public void TryGetFile_StoragePath_RootFolderPath_ReturnsFalseAndNull()
+        {
+            var rootPath = TestFolder.Path.Root!;
+            var result = FileSystem.TryGetFile(rootPath, out var file);
+            result.ShouldBeFalse();
+            file.ShouldBeNull();
+        }
+
+        [TestMethod]
+        public void TryGetFile_String_RootFolderPath_ReturnsFalseAndNull()
+        {
+            var rootPath = TestFolder.Path.Root!.ToString();
+            var result = FileSystem.TryGetFile(rootPath, out var file);
             result.ShouldBeFalse();
             file.ShouldBeNull();
         }

@@ -1,8 +1,0 @@
-File Constructor / FileSystem.GetFile
-
-* Verify Exception if root folder path is passed (e.g. "C:\") should throw. 
-
-
-Path
-
-* Should throw ArgumentException for invalid characters
