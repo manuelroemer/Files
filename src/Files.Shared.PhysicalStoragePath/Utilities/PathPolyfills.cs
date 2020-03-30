@@ -15,17 +15,102 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
 
     internal static class PathPolyfills
     {
-#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1
+#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1 || NETCOREAPP2_0 || NETSTANDARD2_0
         private const int WindowsDevicePrefixLength = 4;
         private const int WindowsUncPrefixLength = 2;
         private const int WindowsUncExtendedPrefixLength = 8;
 #endif
 
-#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1
+#if NETCOREAPP2_0 || NETSTANDARD2_0
+        // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/Path.cs#L419
+        // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/Path.cs#L643
+        internal static string Join(string path1, string path2)
+        {
+            if (path1.Length == 0)
+            {
+                return path2;
+            }
+            
+            if (path2.Length == 0)
+            {
+                return path1;
+            }
+
+            var hasSeparator = IsDirectorySeparator(path1[path1.Length - 1]) || IsDirectorySeparator(path2[0]);
+            return hasSeparator
+                ? $"{path1}{path2}"
+                : $"{path1}{Path.DirectorySeparatorChar}{path2}";
+        }
+#else
+        internal static string Join(string path1, string path2)
+        {
+            return Path.Join(path1, path2);
+        }
+#endif
+
+#if NETCOREAPP2_0 || NETSTANDARD2_0
+        // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/Path.cs#L282
+        internal static bool IsPathFullyQualified(string path)
+        {
+            return !IsPartiallyQualified(path);
+        }
+#else
+        internal static bool IsPathFullyQualified(string path)
+        {
+            return Path.IsPathFullyQualified(path);
+        }
+#endif
+
+#if NETCOREAPP2_0 || NETSTANDARD2_0
+        internal static bool IsPartiallyQualified(string path)
+        {
+            return Platform.Current switch
+            {
+                PlatformID.Win32NT => WindowsImpl(path),
+                PlatformID.Unix => UnixImpl(path),
+                _ => throw new PlatformNotSupportedException(),
+            };
+
+            // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.Windows.cs#L271
+            static bool WindowsImpl(string path)
+            {
+                if (path.Length < 2)
+                {
+                    // It isn't fixed, it must be relative.  There is no way to specify a fixed
+                    // path with one character (or less).
+                    return true;
+                }
+
+                if (IsDirectorySeparator(path[0]))
+                {
+                    // There is no valid way to specify a relative path with two initial slashes or
+                    // \? as ? isn't valid for drive relative paths and \??\ is equivalent to \\?\
+                    return !(path[1] == '?' || IsDirectorySeparator(path[1]));
+                }
+
+                // The only way to specify a fixed path that doesn't begin with two slashes
+                // is the drive, colon, slash format- i.e. C:\
+                return !((path.Length >= 3)
+                    && (path[1] == Path.VolumeSeparatorChar)
+                    && IsDirectorySeparator(path[2])
+                    // To match old behavior we'll check the drive character for validity as the path is technically
+                    // not qualified if you don't have a valid drive. "=:\" is the "=" file's default data stream.
+                    && WindowsIsValidDriveChar(path[0]));
+            }
+
+            // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.Unix.cs#L77
+            static bool UnixImpl(string path)
+            {
+                return !Path.IsPathRooted(path);
+            }
+        }
+#endif
+
+#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1 || NETCOREAPP2_0 || NETSTANDARD2_0
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L21
         internal static bool EndsInDirectorySeparator(string path)
         {
-            return path.Length != 0 && WindowsIsDirectorySeparator(path[path.Length - 1]);
+            return path.Length != 0 && IsDirectorySeparator(path[path.Length - 1]);
         }
 #else
         internal static bool EndsInDirectorySeparator(string path)
@@ -34,7 +119,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
         }
 #endif
 
-#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1
+#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1 || NETCOREAPP2_0 || NETSTANDARD2_0
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L226
         internal static string TrimEndingDirectorySeparator(string path)
         {
@@ -54,7 +139,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
         }
 #endif
 
-#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1
+#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1 || NETCOREAPP2_0 || NETSTANDARD2_0
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L28
         private static bool IsRoot(string path)
         {
@@ -79,10 +164,10 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
                 var deviceSyntax = IsDevice(path);
                 var deviceUnc = deviceSyntax && WindowsIsDeviceUNC(path);
 
-                if ((!deviceSyntax || deviceUnc) && pathLength > 0 && WindowsIsDirectorySeparator(path[0]))
+                if ((!deviceSyntax || deviceUnc) && pathLength > 0 && IsDirectorySeparator(path[0]))
                 {
                     // UNC or simple rooted path (e.g. "\foo", NOT "\\?\C:\foo")
-                    if (deviceUnc || (pathLength > 1 && WindowsIsDirectorySeparator(path[1])))
+                    if (deviceUnc || (pathLength > 1 && IsDirectorySeparator(path[1])))
                     {
                         // UNC (\\?\UNC\ or \\), scan past server\share
 
@@ -91,7 +176,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
 
                         // Skip two separators at most
                         var n = 2;
-                        while (i < pathLength && (!WindowsIsDirectorySeparator(path[i]) || --n > 0))
+                        while (i < pathLength && (!IsDirectorySeparator(path[i]) || --n > 0))
                             i++;
                     }
                     else
@@ -105,12 +190,12 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
                     // Device path (e.g. "\\?\.", "\\.\")
                     // Skip any characters following the prefix that aren't a separator
                     i = WindowsDevicePrefixLength;
-                    while (i < pathLength && !WindowsIsDirectorySeparator(path[i]))
+                    while (i < pathLength && !IsDirectorySeparator(path[i]))
                         i++;
 
                     // If there is another separator take it, as long as we have had at least one
                     // non-separator after the prefix (e.g. don't take "\\?\\", but take "\\?\a\")
-                    if (i < pathLength && i > WindowsDevicePrefixLength && WindowsIsDirectorySeparator(path[i]))
+                    if (i < pathLength && i > WindowsDevicePrefixLength && IsDirectorySeparator(path[i]))
                         i++;
                 }
                 else if (
@@ -123,7 +208,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
                     i = 2;
 
                     // If the colon is followed by a directory separator, move past it (e.g "C:\")
-                    if (pathLength > 2 && WindowsIsDirectorySeparator(path[2]))
+                    if (pathLength > 2 && IsDirectorySeparator(path[2]))
                         i++;
                 }
 
@@ -133,13 +218,13 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
             // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.Unix.cs#L22
             static int UnixImpl(string path)
             {
-                return path.Length > 0 && WindowsIsDirectorySeparator(path[0]) ? 1 : 0;
+                return path.Length > 0 && IsDirectorySeparator(path[0]) ? 1 : 0;
             }
         }
 
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.Windows.cs#L301
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        private static bool WindowsIsDirectorySeparator(char c)
+        private static bool IsDirectorySeparator(char c)
         {
             return c == Path.DirectorySeparatorChar || c == Path.AltDirectorySeparatorChar;
         }
@@ -152,10 +237,10 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
             return WindowsIsExtended(path) ||
                 (
                        path.Length >= WindowsDevicePrefixLength
-                    && WindowsIsDirectorySeparator(path[0])
-                    && WindowsIsDirectorySeparator(path[1])
+                    && IsDirectorySeparator(path[0])
+                    && IsDirectorySeparator(path[1])
                     && (path[2] == '.' || path[2] == '?')
-                    && WindowsIsDirectorySeparator(path[3])
+                    && IsDirectorySeparator(path[3])
                 );
         }
 
@@ -176,7 +261,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
         {
             return path.Length >= WindowsUncExtendedPrefixLength
                 && IsDevice(path)
-                && WindowsIsDirectorySeparator(path[7])
+                && IsDirectorySeparator(path[7])
                 && path[4] == 'U'
                 && path[5] == 'N'
                 && path[6] == 'C';

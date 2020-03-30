@@ -279,7 +279,7 @@
         {
             try
             {
-                return await File.ReadAllBytesAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false);
+                return await FilePolyfills.ReadAllBytesAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -293,7 +293,7 @@
             _ = bytes ?? throw new ArgumentNullException(nameof(bytes));
             await EnsureExistsAsync(cancellationToken).ConfigureAwait(false);
             cancellationToken.ThrowIfCancellationRequested();
-            await File.WriteAllBytesAsync(_fullPath.ToString(), bytes, cancellationToken).ConfigureAwait(false);
+            await FilePolyfills.WriteAllBytesAsync(_fullPath.ToString(), bytes, cancellationToken).ConfigureAwait(false);
         }
 
         public override async Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
@@ -301,8 +301,8 @@
             try
             {
                 return encoding is null
-                    ? await File.ReadAllTextAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false)
-                    : await File.ReadAllTextAsync(_fullPath.ToString(), encoding, cancellationToken).ConfigureAwait(false);
+                    ? await FilePolyfills.ReadAllTextAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false)
+                    : await FilePolyfills.ReadAllTextAsync(_fullPath.ToString(), encoding, cancellationToken).ConfigureAwait(false);
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -323,11 +323,11 @@
             cancellationToken.ThrowIfCancellationRequested();
             if (encoding is null)
             {
-                await File.WriteAllTextAsync(_fullPath.ToString(), text, cancellationToken).ConfigureAwait(false);
+                await FilePolyfills.WriteAllTextAsync(_fullPath.ToString(), text, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await File.WriteAllTextAsync(_fullPath.ToString(), text, encoding, cancellationToken).ConfigureAwait(false);
+                await FilePolyfills.WriteAllTextAsync(_fullPath.ToString(), text, encoding, cancellationToken).ConfigureAwait(false);
             }
         }
 

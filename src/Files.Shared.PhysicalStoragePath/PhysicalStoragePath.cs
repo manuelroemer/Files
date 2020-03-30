@@ -52,7 +52,7 @@
             var name = Path.GetFileName(pathWithoutTrailingSeparator);
             var nameWithoutExtension = GetNameWithoutExtension(name);
             var extension = PhysicalPathHelper.GetExtensionWithoutTrailingExtensionSeparator(pathWithoutTrailingSeparator);
-            var isPathFullyQualified = Path.IsPathFullyQualified(path);
+            var isPathFullyQualified = PathPolyfills.IsPathFullyQualified(path);
             var endsInDirectorySeparator = PathPolyfills.EndsInDirectorySeparator(path);
 
             FileSystem = fileSystem;
@@ -146,7 +146,7 @@
                 return this;
             }
 
-            return FileSystem.GetPath(Path.Join(ToString(), other));
+            return FileSystem.GetPath(PathPolyfills.Join(ToString(), other));
         }
 
         public override StoragePath TrimEndingDirectorySeparator() =>

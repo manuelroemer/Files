@@ -2,6 +2,7 @@
 {
     using System.IO;
     using System.Threading;
+    using Files.Shared.PhysicalStoragePath.Utilities;
 
     internal static class FsHelper
     {
@@ -17,14 +18,14 @@
             foreach (var dirSrc in directories)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var dirDest = Path.Join(destination, Path.GetFileName(dirSrc));
+                var dirDest = PathPolyfills.Join(destination, Path.GetFileName(dirSrc));
                 CopyDirectory(dirSrc, dirDest, cancellationToken);
             }
 
             foreach (var fileSrc in files)
             {
                 cancellationToken.ThrowIfCancellationRequested();
-                var fileDest = Path.Join(destination, Path.GetFileName(fileSrc));
+                var fileDest = PathPolyfills.Join(destination, Path.GetFileName(fileSrc));
                 File.Copy(fileSrc, fileDest);
             }
         }

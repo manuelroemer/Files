@@ -1,10 +1,84 @@
 ﻿namespace Files.FileSystems.Physical.Utilities
 {
     using System.IO;
+    using System.Text;
+    using System.Threading;
+    using System.Threading.Tasks;
 
     internal static class FilePolyfills
     {
-#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1
+#if NETSTANDARD2_0
+        // For the following methods, we're simply using Task.Run, because the alternatives are harder
+        // to implement/maintain than one might think.
+        // See for example the implementation of ReadAllBytesAsync:
+        // https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.IO.FileSystem/src/System/IO/File.cs#L762
+        // 
+        // Using Task.Run is certainly not good etiquette, but until it actually poses any problems,
+        // we can go with it.
+        // This is just a polyfill after all - ideally, this library is used from .NET Core 3.0+.
+
+        internal static Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => File.ReadAllBytes(path), cancellationToken);
+        }
+
+        internal static Task WriteAllBytesAsync(string path, byte[] bytes, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => File.WriteAllBytes(path, bytes), cancellationToken);
+        }
+
+        internal static Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => File.ReadAllText(path), cancellationToken);
+        }
+
+        internal static Task<string> ReadAllTextAsync(string path, Encoding encoding, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => File.ReadAllText(path, encoding), cancellationToken);
+        }
+
+        internal static Task WriteAllTextAsync(string path, string contents, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => File.WriteAllText(path, contents), cancellationToken);
+        }
+
+        internal static Task WriteAllTextAsync(string path, string contents, Encoding encoding, CancellationToken cancellationToken)
+        {
+            return Task.Run(() => File.WriteAllText(path, contents, encoding), cancellationToken);
+        }
+#else
+        internal static Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken)
+        {
+            return File.ReadAllBytesAsync(path, cancellationToken);
+        }
+
+        internal static Task WriteAllBytesAsync(string path, byte[] bytes, CancellationToken cancellationToken)
+        {
+            return File.WriteAllBytesAsync(path, bytes, cancellationToken);
+        }
+
+        internal static Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken)
+        {
+            return File.ReadAllTextAsync(path, cancellationToken);
+        }
+
+        internal static Task<string> ReadAllTextAsync(string path, Encoding encoding, CancellationToken cancellationToken)
+        {
+            return File.ReadAllTextAsync(path, encoding, cancellationToken);
+        }
+
+        internal static Task WriteAllTextAsync(string path, string contents, CancellationToken cancellationToken)
+        {
+            return File.WriteAllTextAsync(path, contents, cancellationToken);
+        }
+
+        internal static Task WriteAllTextAsync(string path, string contents, Encoding encoding, CancellationToken cancellationToken)
+        {
+            return File.WriteAllTextAsync(path, contents, encoding, cancellationToken);
+        }
+#endif
+
+#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1 || NETCOREAPP2_0 || NETSTANDARD2_0
         internal static void Move(string sourceFileName, string destFileName, bool overwrite)
         {
             if (overwrite)
