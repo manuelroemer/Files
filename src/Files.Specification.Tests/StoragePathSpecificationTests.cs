@@ -633,13 +633,6 @@
                 Default.PathName,
                 Default.PathName + AltSep + Default.PathName,
             },
-            new[]
-            {
-                // Combine discards first rooted path.
-                (AbsolutePath / "Foo").ToString(),
-                (AbsolutePath / "Bar").ToString(),
-                (AbsolutePath / "Bar").ToString(),
-            },
         };
 
         public abstract IEnumerable<object[]> CombinePathsWithInvalidOthersData { get; }
@@ -665,6 +658,15 @@
         {
             var path = FileSystem.GetPath(initialPathString);
             Should.Throw<ArgumentException>(() => path.Combine(other));
+        }
+
+        [TestMethod]
+        public void Combine_TwoAbsolutePaths_ReturnsSecondPath()
+        {
+            var path1 = AbsolutePath / "Foo";
+            var path2 = AbsolutePath / "Bar";
+            var combinedPath = path1.Combine(path2);
+            combinedPath.ToString().ShouldBe(path2.ToString());
         }
 
         #endregion
@@ -698,6 +700,20 @@
             var result = path.TryCombine(other, out var finalPath);
             result.ShouldBeFalse();
             finalPath.ShouldBeNull();
+        }
+
+        [TestMethod]
+        public void TryCombine_TwoAbsolutePaths_ReturnsSecondPath()
+        {
+            var path1 = AbsolutePath / "Foo";
+            var path2 = AbsolutePath / "Bar";
+
+            // Depending on whether two concatenated absolute paths are considered valid or not,
+            // Join is also allowed to return false.
+            var result = path1.TryCombine(path2, out var combinedPath);
+            result.ShouldBeTrue();
+            combinedPath.ShouldNotBeNull();
+            combinedPath!.ToString().ShouldBe(path2.ToString());
         }
 
         #endregion
@@ -738,14 +754,8 @@
                 Sep + Sep + Default.PathName,
                 Default.PathName + Sep + Sep + Sep + Sep + Default.PathName,
             },
-            new[]
-            {
-                // Join doesn't discard rooted paths.
-                (AbsolutePath / "Foo").ToString(),
-                (AbsolutePath / "Bar").ToString(),
-                FakeJoin((AbsolutePath / "Foo").ToString(), (AbsolutePath / "Bar").ToString()),
-            },
         };
+
         public abstract IEnumerable<object[]> JoinPathsWithInvalidOthersData { get; }
 
         [TestMethod]
@@ -769,6 +779,25 @@
         {
             var path = FileSystem.GetPath(initialPathString);
             Should.Throw<ArgumentException>(() => path.Join(other));
+        }
+
+        [TestMethod]
+        public void Join_TwoAbsolutePaths_JoinsOrConcatenatesPaths()
+        {
+            var path1 = AbsolutePath / "Foo";
+            var path2 = AbsolutePath / "Bar";
+            var expected = FakeJoin(path1.ToString(), path2.ToString());
+
+            // Depending on whether two concatenated absolute paths are considered valid or not,
+            // we allow ArgumentExceptions with Join.
+            try
+            {
+                var result = path1.Join(path2);
+                result.ToString().ShouldBe(expected);
+            }
+            catch (ArgumentException)
+            {
+            }
         }
 
         #endregion
@@ -802,6 +831,27 @@
             var result = path.TryJoin(other, out var finalPath);
             result.ShouldBeFalse();
             finalPath.ShouldBeNull();
+        }
+
+        [TestMethod]
+        public void TryJoin_TwoAbsolutePaths_ReturnsExpectedPath()
+        {
+            var path1 = AbsolutePath / "Foo";
+            var path2 = AbsolutePath / "Bar";
+            var expected = FakeJoin(path1.ToString(), path2.ToString());
+
+            // Depending on whether two concatenated absolute paths are considered valid or not,
+            // Join is also allowed to return false.
+            var result = path1.TryJoin(path2, out var joinedPath);
+            
+            if (result)
+            {
+                joinedPath!.ToString().ShouldBe(expected);
+            }
+            else
+            {
+                joinedPath.ShouldBeNull();
+            }
         }
 
         #endregion
