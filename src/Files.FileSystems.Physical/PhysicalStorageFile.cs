@@ -66,7 +66,7 @@
                 // In such a case, simply return the last fetched name. It will happen rarely and is good enough
                 // for such cases.
                 cancellationToken.ThrowIfCancellationRequested();
-                var realFileName = _fileInfo.GetRealName() ?? _fileInfo.Name;
+                var realFileName = FsHelper.GetRealFileName(_fullPath.ToString()) ?? _fileInfo.Name;
                 var lastWriteTime = File.GetLastWriteTimeUtc(_fullPath.ToString());
 
                 return new StorageFileProperties(

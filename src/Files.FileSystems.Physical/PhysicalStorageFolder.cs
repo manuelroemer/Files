@@ -27,7 +27,6 @@
         private readonly StoragePath _path;
         private readonly StoragePath _fullPath;
         private readonly StoragePath? _fullParentPath;
-        private readonly DirectoryInfo _directoryInfo;
 
         public override FileSystem FileSystem { get; }
 
@@ -42,7 +41,6 @@
             _path = path;
             _fullPath = path.FullPath;
             _fullParentPath = path.FullPath.Parent;
-            _directoryInfo = new DirectoryInfo(_fullPath);
         }
 
         public override Task<StorageFolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
@@ -50,21 +48,20 @@
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
-                _directoryInfo.Refresh();
                 EnsureExists();
 
                 // Attempting to get the real folder name can fail, e.g. the folder might have been deleted in between.
                 // In such a case, simply return the last fetched name. It will happen rarely and is good enough
                 // for such cases.
                 cancellationToken.ThrowIfCancellationRequested();
-                var realFolderName = _directoryInfo.GetRealName() ?? _directoryInfo.Name;
+                var realFolderName = FsHelper.GetRealDirectoryName(_fullPath.ToString()) ?? Path.Name;
                 var lastWriteTime = Directory.GetLastWriteTimeUtc(_fullPath.ToString());
 
                 return new StorageFolderProperties(
                     realFolderName,
                     IOPath.GetFileNameWithoutExtension(realFolderName),
                     PhysicalPathHelper.GetExtensionWithoutTrailingExtensionSeparator(realFolderName)?.ToNullIfEmpty(),
-                    _directoryInfo.CreationTimeUtc,
+                    Directory.GetCreationTimeUtc(_fullPath.ToString()),
                     lastWriteTime
                 );
             });
@@ -191,7 +188,7 @@
                     }
                 }
 
-                DirectoryHelper.CopyDirectory(_fullPath.ToString(), destinationPath.FullPath.ToString(), cancellationToken);
+                FsHelper.CopyDirectory(_fullPath.ToString(), destinationPath.FullPath.ToString(), cancellationToken);
                 return destination;
             });
         }

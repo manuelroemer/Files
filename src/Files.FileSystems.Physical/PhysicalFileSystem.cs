@@ -5,6 +5,7 @@
     using System.IO;
     using Files;
     using Files.Shared.PhysicalStoragePath;
+    using Files.Shared.PhysicalStoragePath.Utilities;
     using static System.Environment;
     using static System.Environment.SpecialFolder;
 
