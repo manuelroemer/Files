@@ -15,13 +15,13 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
 
     internal static class PathPolyfills
     {
-#if NETSTANDARD2_1 || NETCOREAPP2_2
+#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1
         private const int WindowsDevicePrefixLength = 4;
         private const int WindowsUncPrefixLength = 2;
         private const int WindowsUncExtendedPrefixLength = 8;
 #endif
 
-#if NETSTANDARD2_1 || NETCOREAPP2_2
+#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L21
         internal static bool EndsInDirectorySeparator(string path)
         {
@@ -34,7 +34,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
         }
 #endif
 
-#if NETSTANDARD2_1 || NETCOREAPP2_2
+#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L226
         internal static string TrimEndingDirectorySeparator(string path)
         {
@@ -54,7 +54,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
         }
 #endif
 
-#if NETSTANDARD2_1 || NETCOREAPP2_2
+#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L28
         private static bool IsRoot(string path)
         {
