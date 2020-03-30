@@ -19,8 +19,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Files", "Files\Files.csproj
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Files.FileSystems.Physical", "Files.FileSystems.Physical\Files.FileSystems.Physical.csproj", "{3D021281-698D-4C79-9944-6113D534F7FD}"
 EndProject
-Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Files.Shared", "Files.Shared\Files.Shared.shproj", "{90C16440-B281-4C5F-ABA3-645F89C7820A}"
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Lib", "Lib", "{173D21E9-7F5D-450A-9955-04BFB1294026}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{291E310C-2C0B-4FE6-85AC-09660224D1C9}"
@@ -41,7 +39,6 @@ Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Files.Shared.PhysicalStorag
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Files.Shared\Files.Shared.projitems*{90c16440-b281-4c5f-aba3-645f89c7820a}*SharedItemsImports = 13
 		Files.Shared.PhysicalStoragePath\Files.Shared.PhysicalStoragePath.projitems*{fd470c52-aebe-4967-8252-ebc1b586d6b2}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -214,7 +211,6 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{87876E3A-8BD4-4D47-ABBC-84086CE81201} = {173D21E9-7F5D-450A-9955-04BFB1294026}
 		{3D021281-698D-4C79-9944-6113D534F7FD} = {173D21E9-7F5D-450A-9955-04BFB1294026}
-		{90C16440-B281-4C5F-ABA3-645F89C7820A} = {173D21E9-7F5D-450A-9955-04BFB1294026}
 		{A926CE4F-0515-49E1-B0A6-F54D3D3C6B69} = {377863EE-6739-4F63-BCF5-1C7BF7C7BD9E}
 		{617E1479-7F5E-4568-955A-EE8CBB311E98} = {173D21E9-7F5D-450A-9955-04BFB1294026}
 		{742E602B-F1CC-4AA5-AFAF-CE612E3C9B61} = {291E310C-2C0B-4FE6-85AC-09660224D1C9}

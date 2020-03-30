@@ -1,4 +1,4 @@
-﻿namespace Files.Utilities
+﻿namespace Files.FileSystems.Physical.Utilities
 {
     internal static class StringExtensions
     {
