@@ -1,6 +1,6 @@
 ﻿// Parts of this file are copied from the source files of the dotnet/runtime repository and adapted/enhanced.
-// The relevant file can be found at:
-// https://github.com/dotnet/runtime/tree/master/src/libraries/System.Private.CoreLib/src/System/IO
+// The relevant files can be found at:
+// https://github.com/dotnet/runtime
 //
 // The code is licensed by the .NET Foundation with the following license header:
 // > Licensed to the .NET Foundation under one or more agreements.
@@ -15,12 +15,6 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
 
     internal static class PathPolyfills
     {
-#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1 || NETCOREAPP2_0 || NETSTANDARD2_0
-        private const int WindowsDevicePrefixLength = 4;
-        private const int WindowsUncPrefixLength = 2;
-        private const int WindowsUncExtendedPrefixLength = 8;
-#endif
-
 #if NETCOREAPP2_0 || NETSTANDARD2_0
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/Path.cs#L419
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/Path.cs#L643
@@ -41,85 +35,78 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
                 ? $"{path1}{path2}"
                 : $"{path1}{Path.DirectorySeparatorChar}{path2}";
         }
+
+        // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/Path.cs#L282
+        internal static bool IsPathFullyQualified(string path)
+        {
+            return !IsPartiallyQualified(path);
+
+            static bool IsPartiallyQualified(string path)
+            {
+                return Platform.Current switch
+                {
+                    PlatformID.Win32NT => WindowsImpl(path),
+                    PlatformID.Unix => UnixImpl(path),
+                    _ => throw new PlatformNotSupportedException(),
+                };
+
+                // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.Windows.cs#L271
+                static bool WindowsImpl(string path)
+                {
+                    if (path.Length < 2)
+                    {
+                        // It isn't fixed, it must be relative.  There is no way to specify a fixed
+                        // path with one character (or less).
+                        return true;
+                    }
+
+                    if (IsDirectorySeparator(path[0]))
+                    {
+                        // There is no valid way to specify a relative path with two initial slashes or
+                        // \? as ? isn't valid for drive relative paths and \??\ is equivalent to \\?\
+                        return !(path[1] == '?' || IsDirectorySeparator(path[1]));
+                    }
+
+                    // The only way to specify a fixed path that doesn't begin with two slashes
+                    // is the drive, colon, slash format- i.e. C:\
+                    return !((path.Length >= 3)
+                        && (path[1] == Path.VolumeSeparatorChar)
+                        && IsDirectorySeparator(path[2])
+                        // To match old behavior we'll check the drive character for validity as the path is technically
+                        // not qualified if you don't have a valid drive. "=:\" is the "=" file's default data stream.
+                        && WindowsIsValidDriveChar(path[0]));
+                }
+
+                // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.Unix.cs#L77
+                static bool UnixImpl(string path)
+                {
+                    return !Path.IsPathRooted(path);
+                }
+            }
+        }
 #else
         internal static string Join(string path1, string path2)
         {
             return Path.Join(path1, path2);
         }
-#endif
 
-#if NETCOREAPP2_0 || NETSTANDARD2_0
-        // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/Path.cs#L282
-        internal static bool IsPathFullyQualified(string path)
-        {
-            return !IsPartiallyQualified(path);
-        }
-#else
         internal static bool IsPathFullyQualified(string path)
         {
             return Path.IsPathFullyQualified(path);
         }
 #endif
 
-#if NETCOREAPP2_0 || NETSTANDARD2_0
-        internal static bool IsPartiallyQualified(string path)
-        {
-            return Platform.Current switch
-            {
-                PlatformID.Win32NT => WindowsImpl(path),
-                PlatformID.Unix => UnixImpl(path),
-                _ => throw new PlatformNotSupportedException(),
-            };
-
-            // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.Windows.cs#L271
-            static bool WindowsImpl(string path)
-            {
-                if (path.Length < 2)
-                {
-                    // It isn't fixed, it must be relative.  There is no way to specify a fixed
-                    // path with one character (or less).
-                    return true;
-                }
-
-                if (IsDirectorySeparator(path[0]))
-                {
-                    // There is no valid way to specify a relative path with two initial slashes or
-                    // \? as ? isn't valid for drive relative paths and \??\ is equivalent to \\?\
-                    return !(path[1] == '?' || IsDirectorySeparator(path[1]));
-                }
-
-                // The only way to specify a fixed path that doesn't begin with two slashes
-                // is the drive, colon, slash format- i.e. C:\
-                return !((path.Length >= 3)
-                    && (path[1] == Path.VolumeSeparatorChar)
-                    && IsDirectorySeparator(path[2])
-                    // To match old behavior we'll check the drive character for validity as the path is technically
-                    // not qualified if you don't have a valid drive. "=:\" is the "=" file's default data stream.
-                    && WindowsIsValidDriveChar(path[0]));
-            }
-
-            // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.Unix.cs#L77
-            static bool UnixImpl(string path)
-            {
-                return !Path.IsPathRooted(path);
-            }
-        }
-#endif
-
 #if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1 || NETCOREAPP2_0 || NETSTANDARD2_0
+        private const int WindowsDevicePrefixLength = 4;
+        private const int WindowsUncPrefixLength = 2;
+        private const int WindowsUncExtendedPrefixLength = 8;
+
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L21
         internal static bool EndsInDirectorySeparator(string path)
         {
             return path.Length != 0 && IsDirectorySeparator(path[path.Length - 1]);
         }
-#else
-        internal static bool EndsInDirectorySeparator(string path)
-        {
-            return Path.EndsInDirectorySeparator(path);
-        }
-#endif
 
-#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1 || NETCOREAPP2_0 || NETSTANDARD2_0
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L226
         internal static string TrimEndingDirectorySeparator(string path)
         {
@@ -132,14 +119,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
                 return path;
             }
         }
-#else
-        internal static string TrimEndingDirectorySeparator(string path)
-        {
-            return Path.TrimEndingDirectorySeparator(path);
-        }
-#endif
 
-#if NETSTANDARD2_1 || NETCOREAPP2_2 || NETCOREAPP2_1 || NETCOREAPP2_0 || NETSTANDARD2_0
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L28
         private static bool IsRoot(string path)
         {
@@ -271,6 +251,16 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
         private static bool WindowsIsValidDriveChar(char value)
         {
             return (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
+        }
+#else
+        internal static bool EndsInDirectorySeparator(string path)
+        {
+            return Path.EndsInDirectorySeparator(path);
+        }
+
+        internal static string TrimEndingDirectorySeparator(string path)
+        {
+            return Path.TrimEndingDirectorySeparator(path);
         }
 #endif
     }
