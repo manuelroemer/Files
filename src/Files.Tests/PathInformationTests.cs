@@ -8,42 +8,94 @@
     [TestClass]
     public class PathInformationTests
     {
+        private static readonly char[] InvalidPathChars = new[] { 'a', 'b', 'c' };
+        private static readonly char[] InvalidFileNameChars = new[] { 'd', 'e', 'f' };
+        private const char DirectorySeparator = '/';
+        private const char AltDirectorySeparator = '/';
+        private const char ExtensionSeparator = '.';
+        private const char VolumeSeparator = ':';
+        private const string CurrentDirectorySegment = ".";
+        private const string ParentDirectorySegment = "..";
+        private const StringComparison DefaultStringComparison = StringComparison.OrdinalIgnoreCase;
+
         #region Constructor Tests
+
+        [TestMethod]
+        public void Constructor_NullParameters_ThrowsArgumentNullException()
+        {
+            Should.Throw<ArgumentNullException>(() => new PathInformation(
+                null!,
+                InvalidFileNameChars,
+                DirectorySeparator,
+                AltDirectorySeparator,
+                ExtensionSeparator,
+                VolumeSeparator,
+                CurrentDirectorySegment,
+                ParentDirectorySegment,
+                DefaultStringComparison
+            ));
+
+            Should.Throw<ArgumentNullException>(() => new PathInformation(
+                InvalidPathChars,
+                null!,
+                DirectorySeparator,
+                AltDirectorySeparator,
+                ExtensionSeparator,
+                VolumeSeparator,
+                CurrentDirectorySegment,
+                ParentDirectorySegment,
+                DefaultStringComparison
+            ));
+
+            Should.Throw<ArgumentNullException>(() => new PathInformation(
+                InvalidFileNameChars,
+                InvalidFileNameChars,
+                DirectorySeparator,
+                AltDirectorySeparator,
+                ExtensionSeparator,
+                VolumeSeparator,
+                null!,
+                ParentDirectorySegment,
+                DefaultStringComparison
+            ));
+
+            Should.Throw<ArgumentNullException>(() => new PathInformation(
+                InvalidFileNameChars,
+                InvalidFileNameChars,
+                DirectorySeparator,
+                AltDirectorySeparator,
+                ExtensionSeparator,
+                VolumeSeparator,
+                CurrentDirectorySegment,
+                null!,
+                DefaultStringComparison
+            ));
+        }
 
         [TestMethod]
         public void Constructor_StandardParameters_SetsProperties()
         {
-            var invalidPathChars = new[] { 'a', 'b', 'c' };
-            var invalidFileNameChars = new[] { 'd', 'e', 'f' };
-            var directorySeparator = '/';
-            var altDirectorySeparator = '/';
-            var extensionSeparator = '.';
-            var volumeSeparator = ':';
-            var currentDirectorySegment = ".";
-            var parentDirectorySegment = "..";
-            var defaultStringComparison = StringComparison.OrdinalIgnoreCase;
-
             var info = new PathInformation(
-                invalidPathChars,
-                invalidFileNameChars,
-                directorySeparator,
-                altDirectorySeparator,
-                extensionSeparator,
-                volumeSeparator,
-                currentDirectorySegment,
-                parentDirectorySegment,
-                defaultStringComparison
+                InvalidPathChars,
+                InvalidFileNameChars,
+                DirectorySeparator,
+                AltDirectorySeparator,
+                ExtensionSeparator,
+                VolumeSeparator,
+                CurrentDirectorySegment,
+                ParentDirectorySegment,
+                DefaultStringComparison
             );
 
-            info.InvalidPathChars.ShouldBe(invalidPathChars);
-            info.InvalidFileNameChars.ShouldBe(invalidFileNameChars);
-            info.DirectorySeparatorChar.ShouldBe(directorySeparator);
-            info.AltDirectorySeparatorChar.ShouldBe(altDirectorySeparator);
-            info.ExtensionSeparatorChar.ShouldBe(extensionSeparator);
-            info.VolumeSeparatorChar.ShouldBe(volumeSeparator);
-            info.CurrentDirectorySegment.ShouldBe(currentDirectorySegment);
-            info.ParentDirectorySegment.ShouldBe(parentDirectorySegment);
-            info.DefaultStringComparison.ShouldBe(defaultStringComparison);
+            info.InvalidPathChars.ShouldBe(InvalidPathChars);
+            info.InvalidFileNameChars.ShouldBe(InvalidFileNameChars);
+            info.DirectorySeparatorChar.ShouldBe(DirectorySeparator);
+            info.AltDirectorySeparatorChar.ShouldBe(AltDirectorySeparator);
+            info.ExtensionSeparatorChar.ShouldBe(ExtensionSeparator);
+            info.VolumeSeparatorChar.ShouldBe(VolumeSeparator);
+            info.CurrentDirectorySegment.ShouldBe(CurrentDirectorySegment);
+            info.ParentDirectorySegment.ShouldBe(ParentDirectorySegment);
+            info.DefaultStringComparison.ShouldBe(DefaultStringComparison);
 
             info.InvalidPathChars.ShouldBeOfType<ReadOnlyCollection<char>>();
             info.InvalidFileNameChars.ShouldBeOfType<ReadOnlyCollection<char>>();
