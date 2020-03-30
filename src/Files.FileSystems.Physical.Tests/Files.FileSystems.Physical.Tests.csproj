@@ -13,7 +13,12 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
+    <!--
+    Do NOT upgrade Microsoft.NET.Test.Sdk here!
+    Doing so will break the .NET Core 2.0 runner since the package only targets .NET Core 2.1
+    starting from version 16.4.0.
+    -->
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.3.0" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.0" />
     <PackageReference Include="MSTest.TestFramework" Version="2.1.0" />
     <PackageReference Include="coverlet.collector" Version="1.2.0" PrivateAssets="All" />
