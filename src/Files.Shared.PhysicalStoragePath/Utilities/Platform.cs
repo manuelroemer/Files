@@ -11,61 +11,60 @@
     /// </summary>
     internal static class Platform
     {
-        public static PlatformID? Current
-        {
-            get
-            {
-                return GetViaRuntimeInformation()
-                    ?? GetViaEnvironment()
-                    ?? null;
+        public static PlatformID? Current { get; } = GetCurrentPlatformID();
 
-                static PlatformID? GetViaRuntimeInformation()
+        private static PlatformID? GetCurrentPlatformID()
+        {
+            return GetViaRuntimeInformation()
+                ?? GetViaEnvironment()
+                ?? null;
+
+            static PlatformID? GetViaRuntimeInformation()
+            {
+                try
                 {
-                    try
+                    if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                     {
-                        if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
-                        {
-                            return PlatformID.Win32NT;
-                        }
-                        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
-                        {
-                            return PlatformID.Unix;
-                        }
-                        else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
-                        {
-                            return PlatformID.Unix;
-                        }
-                        else if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")))
-                        {
-                            return PlatformID.Unix;
-                        }
-                        else
-                        {
-                            return null;
-                        }
+                        return PlatformID.Win32NT;
                     }
-                    catch
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                    {
+                        return PlatformID.Unix;
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+                    {
+                        return PlatformID.Unix;
+                    }
+                    else if (RuntimeInformation.IsOSPlatform(OSPlatform.Create("FREEBSD")))
+                    {
+                        return PlatformID.Unix;
+                    }
+                    else
                     {
                         return null;
                     }
                 }
-
-                static PlatformID? GetViaEnvironment()
+                catch
                 {
-                    try
+                    return null;
+                }
+            }
+
+            static PlatformID? GetViaEnvironment()
+            {
+                try
+                {
+                    // The switch might seem irrelevant, but we want to cover different cases not in .NET Standard.
+                    return Environment.OSVersion.Platform switch
                     {
-                        // The switch might seem irrelevant, but we want to cover different cases not in .NET Standard.
-                        return Environment.OSVersion.Platform switch
-                        {
-                            PlatformID.Win32NT => PlatformID.Win32NT,
-                            PlatformID.Unix => PlatformID.Unix,
-                            _ => null,
-                        };
-                    }
-                    catch
-                    {
-                        return null;
-                    }
+                        PlatformID.Win32NT => PlatformID.Win32NT,
+                        PlatformID.Unix => PlatformID.Unix,
+                        _ => null,
+                    };
+                }
+                catch
+                {
+                    return null;
                 }
             }
         }
