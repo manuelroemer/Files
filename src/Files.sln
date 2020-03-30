@@ -37,9 +37,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Files.FileSystems.Uwp.Tests
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Files.Tests", "Files.Tests\Files.Tests.csproj", "{221A0D21-E3A3-4737-9AEB-06BEAD6CE1CB}"
 EndProject
+Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Files.Shared.PhysicalStoragePath", "Files.Shared.PhysicalStoragePath\Files.Shared.PhysicalStoragePath.shproj", "{FD470C52-AEBE-4967-8252-EBC1B586D6B2}"
+EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
 		Files.Shared\Files.Shared.projitems*{90c16440-b281-4c5f-aba3-645f89c7820a}*SharedItemsImports = 13
+		Files.Shared.PhysicalStoragePath\Files.Shared.PhysicalStoragePath.projitems*{fd470c52-aebe-4967-8252-ebc1b586d6b2}*SharedItemsImports = 13
 	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -217,6 +220,7 @@ Global
 		{742E602B-F1CC-4AA5-AFAF-CE612E3C9B61} = {291E310C-2C0B-4FE6-85AC-09660224D1C9}
 		{B5EDFFE1-B61F-4B40-AE0A-75E7FCAD4884} = {291E310C-2C0B-4FE6-85AC-09660224D1C9}
 		{221A0D21-E3A3-4737-9AEB-06BEAD6CE1CB} = {291E310C-2C0B-4FE6-85AC-09660224D1C9}
+		{FD470C52-AEBE-4967-8252-EBC1B586D6B2} = {173D21E9-7F5D-450A-9955-04BFB1294026}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {A8B5C0FF-7EBC-4511-8073-A002B1C9BAB1}

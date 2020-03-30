@@ -9,7 +9,7 @@
 // > The .NET Foundation licenses this file to you under the MIT license.
 // > See the LICENSE file in the project root for more information.
 
-namespace Files.FileSystems.Physical.Utilities
+namespace Files.Shared.PhysicalStoragePath.Utilities
 {
     using System;
     using System.IO;
@@ -21,12 +21,12 @@ namespace Files.FileSystems.Physical.Utilities
     //
     // The code in this file should be updated if a better way/API ever becomes available.
 
-    internal static partial class PathHelper
+    internal static partial class PhysicalPathHelper
     {
         internal static bool IsCaseSensitive { get; } = GetIsCaseSensitive();
 
-        internal static StringComparison StringComparison => IsCaseSensitive 
-            ? StringComparison.Ordinal 
+        internal static StringComparison StringComparison => IsCaseSensitive
+            ? StringComparison.Ordinal
             : StringComparison.OrdinalIgnoreCase;
 
         private static bool GetIsCaseSensitive()

@@ -14,20 +14,6 @@
                 "The argument cannot be an empty string.";
         }
 
-        internal static class Path
-        {
-            internal static string InvalidFormat() =>
-                $"The specified path has an invalid format. See the inner exception for details.";
-
-            internal static string TrimmingResultsInEmptyPath() =>
-                $"Trimming the trailing directory separator results in an empty path string which " +
-                $"is not supported by the {nameof(StoragePath)} class.";
-
-            internal static string TrimmingResultsInInvalidPath() =>
-                "Trimming the trailing directory separator results in an invalid path string. " +
-                "See the inner exception for details.";
-        }
-
         internal static class File
         {
             internal static string CannotInitializeWithRootFolderPath() =>

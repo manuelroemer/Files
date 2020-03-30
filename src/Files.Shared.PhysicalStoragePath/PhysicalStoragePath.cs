@@ -1,10 +1,11 @@
-﻿namespace Files.FileSystems.Physical
+﻿namespace Files.Shared.PhysicalStoragePath
 {
     using System;
+    using System.Diagnostics;
     using System.IO;
     using Files;
-    using Files.FileSystems.Physical.Resources;
-    using Files.FileSystems.Physical.Utilities;
+    using Files.Shared.PhysicalStoragePath.Resources;
+    using Files.Shared.PhysicalStoragePath.Utilities;
 
     internal sealed class PhysicalStoragePath : StoragePath
     {
@@ -35,16 +36,22 @@
 
         public override bool EndsInDirectorySeparator { get; }
 
-        internal PhysicalStoragePath(PhysicalFileSystem fileSystem, string path)
+        internal PhysicalStoragePath(FileSystem fileSystem, string path)
             : base(path)
         {
+            Debug.Assert(
+                ReferenceEquals(fileSystem.PathInformation, PhysicalPathHelper.PhysicalPathInformation),
+                $"When using the PhysicalStoragePath, your file system should be using the corresponding " +
+                $"{nameof(PhysicalPathHelper.PhysicalPathInformation)}."
+            );
+
             var fullPath = GetFullPathOrThrow(path);
             var rootPath = Path.GetPathRoot(ToString());
             var pathWithoutTrailingSeparator = Path.TrimEndingDirectorySeparator(path);
             var directoryPath = Path.GetDirectoryName(pathWithoutTrailingSeparator);
             var name = Path.GetFileName(pathWithoutTrailingSeparator);
             var nameWithoutExtension = GetNameWithoutExtension(name);
-            var extension = PathHelper.GetExtensionWithoutTrailingExtensionSeparator(pathWithoutTrailingSeparator);
+            var extension = PhysicalPathHelper.GetExtensionWithoutTrailingExtensionSeparator(pathWithoutTrailingSeparator);
             var isPathFullyQualified = Path.IsPathFullyQualified(path);
             var endsInDirectorySeparator = Path.EndsInDirectorySeparator(path);
 
@@ -88,7 +95,7 @@
                 )
                 {
                     throw new ArgumentException(
-                        ExceptionStrings.Path.InvalidFormat(),
+                        ExceptionStrings.PhysicalStoragePath.InvalidFormat(),
                         nameof(path),
                         ex
                     );
@@ -100,7 +107,8 @@
                 // Specification requires special handling for these two directories.
                 // Without this code, we'd return "" and ".", because Path.GetFileNameWithoutExtension
                 // trims one dot.
-                if (name == "." || name == "..")
+                if (name == PhysicalPathHelper.CurrentDirectorySegment ||
+                    name == PhysicalPathHelper.ParentDirectorySegment)
                 {
                     return name;
                 }
@@ -155,7 +163,7 @@
             // We must manually throw here. Trimming isn't possible because StoragePaths cannot be empty strings.
             if (Length == 1)
             {
-                throw new InvalidOperationException(ExceptionStrings.Path.TrimmingResultsInEmptyPath());
+                throw new InvalidOperationException(ExceptionStrings.PhysicalStoragePath.TrimmingResultsInEmptyPath());
             }
 
             var trimmedPath = Path.TrimEndingDirectorySeparator(ToString());
@@ -167,7 +175,7 @@
             catch (ArgumentException ex)
             {
                 throw new InvalidOperationException(
-                    ExceptionStrings.Path.TrimmingResultsInInvalidPath(),
+                    ExceptionStrings.PhysicalStoragePath.TrimmingResultsInInvalidPath(),
                     ex
                 );
             }

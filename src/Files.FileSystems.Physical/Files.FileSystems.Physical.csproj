@@ -16,6 +16,8 @@
 
   <Import Project="..\Files.Shared\Files.Shared.projitems" Label="Shared" />
 
+  <Import Project="..\Files.Shared.PhysicalStoragePath\Files.Shared.PhysicalStoragePath.projitems" Label="Shared" />
+
   <PropertyGroup Condition=" $(TargetFramework) == 'netcoreapp3.0' ">
     <DefineConstants>HAS_MOVE_OVERWRITE_OVERLOAD</DefineConstants>
   </PropertyGroup>

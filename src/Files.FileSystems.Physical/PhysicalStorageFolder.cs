@@ -9,6 +9,8 @@
     using Files;
     using Files.FileSystems.Physical.Resources;
     using Files.FileSystems.Physical.Utilities;
+    using Files.Shared.PhysicalStoragePath;
+    using Files.Shared.PhysicalStoragePath.Utilities;
     using Files.Utilities;
     using IOPath = System.IO.Path;
 
@@ -61,7 +63,7 @@
                 return new StorageFolderProperties(
                     realFolderName,
                     IOPath.GetFileNameWithoutExtension(realFolderName),
-                    PathHelper.GetExtensionWithoutTrailingExtensionSeparator(realFolderName)?.ToNullIfEmpty(),
+                    PhysicalPathHelper.GetExtensionWithoutTrailingExtensionSeparator(realFolderName)?.ToNullIfEmpty(),
                     _directoryInfo.CreationTimeUtc,
                     lastWriteTime
                 );

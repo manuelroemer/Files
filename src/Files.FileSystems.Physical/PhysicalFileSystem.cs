@@ -4,31 +4,19 @@
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using Files;
-    using Files.FileSystems.Physical.Utilities;
+    using Files.Shared.PhysicalStoragePath;
     using static System.Environment;
     using static System.Environment.SpecialFolder;
 
     public sealed class PhysicalFileSystem : FileSystem
     {
-        private static readonly PathInformation PhysicalPathInformation = new PathInformation(
-            Path.GetInvalidPathChars(),
-            Path.GetInvalidFileNameChars(),
-            Path.DirectorySeparatorChar,
-            Path.AltDirectorySeparatorChar,
-            extensionSeparatorChar: '.',
-            Path.VolumeSeparatorChar,
-            currentDirectorySegment: ".",
-            parentDirectorySegment: "..",
-            defaultStringComparison: PathHelper.StringComparison
-        );
-
         /// <summary>
         ///     Gets a default instance of the <see cref="PhysicalFileSystem"/> class.
         /// </summary>
         public static PhysicalFileSystem Default { get; } = new PhysicalFileSystem();
 
         /// <inheritdoc/>
-        public override PathInformation PathInformation => PhysicalPathInformation;
+        public override PathInformation PathInformation => PhysicalPathHelper.PhysicalPathInformation;
 
         /// <inheritdoc/>
         public override StorageFile GetFile(StoragePath path)
