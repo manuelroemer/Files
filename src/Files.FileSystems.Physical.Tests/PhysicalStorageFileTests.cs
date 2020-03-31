@@ -6,6 +6,7 @@
     [TestClass]
     public sealed class PhysicalStorageFileTests : StorageFileSpecificationTests
     {
-        public PhysicalStorageFileTests() : base(PhysicalFileSystemTestContext.Instance) { }
+        public PhysicalStorageFileTests()
+            : base(PhysicalFileSystemTestContext.Instance) { }
     }
 }

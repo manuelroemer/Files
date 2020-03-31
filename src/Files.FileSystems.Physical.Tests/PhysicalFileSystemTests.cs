@@ -41,6 +41,7 @@
             new object[] { Default.PathName + "\0" },
         };
 
-        public PhysicalFileSystemTests() : base(PhysicalFileSystemTestContext.Instance) { }
+        public PhysicalFileSystemTests()
+            : base(PhysicalFileSystemTestContext.Instance) { }
     }
 }

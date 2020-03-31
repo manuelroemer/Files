@@ -6,7 +6,7 @@
     using Files.Specification.Tests;
     using Files.Specification.Tests.Setup;
 
-    public class PhysicalFileSystemTestContext : FileSystemTestContext
+    public sealed class PhysicalFileSystemTestContext : FileSystemTestContext
     {
         public static PhysicalFileSystemTestContext Instance { get; } = new PhysicalFileSystemTestContext();
 
