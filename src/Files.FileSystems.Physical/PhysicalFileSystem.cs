@@ -19,6 +19,11 @@
         /// <inheritdoc/>
         public override PathInformation PathInformation => PhysicalPathHelper.PhysicalPathInformation;
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="PhysicalFileSystem"/> class.
+        /// </summary>
+        public PhysicalFileSystem() { }
+
         /// <inheritdoc/>
         public override StorageFile GetFile(StoragePath path)
         {
