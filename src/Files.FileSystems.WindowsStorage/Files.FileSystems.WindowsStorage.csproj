@@ -1,0 +1,18 @@
+<Project Sdk="MSBuild.Sdk.Extras">
+
+  <PropertyGroup>
+    <TargetFramework>uap10.0.16299</TargetFramework>
+    <DefineConstants>$(DefineConstants);UAP</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Nullable" Version="1.2.1" PrivateAssets="All" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Files\Files.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\Files.Shared.PhysicalStoragePath\Files.Shared.PhysicalStoragePath.projitems" Label="Shared" />
+
+</Project>

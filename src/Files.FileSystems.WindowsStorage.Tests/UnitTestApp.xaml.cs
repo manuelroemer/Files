@@ -1,4 +1,4 @@
-﻿namespace Files.FileSystems.Uwp.Tests
+﻿namespace Files.FileSystems.WindowsStorage.Tests
 {
     using System;
     using System.Diagnostics;
@@ -19,11 +19,11 @@
             if (!(Window.Current.Content is Frame rootFrame))
             {
                 rootFrame = new Frame();
-                rootFrame.NavigationFailed += (sender, e) => 
+                rootFrame.NavigationFailed += (sender, e) =>
                     throw new Exception("Failed to load Page " + e.SourcePageType.FullName);
                 Window.Current.Content = rootFrame;
             }
-            
+
             DebugSettings.EnableFrameRateCounter = Debugger.IsAttached;
             UnitTestClient.CreateDefaultUI();
             Window.Current.Activate();

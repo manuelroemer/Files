@@ -1,20 +1,20 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Package
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:mp="http://schemas.microsoft.com/appx/2014/phone/manifest"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   IgnorableNamespaces="uap mp">
 
-  <Identity Name="9c589cb6-d562-4342-b2fb-be3668eee042"
+  <Identity Name="2a0a5115-294f-421f-b9c1-434b5c4f7233"
             Publisher="CN=Manuel"
             Version="1.0.0.0" />
 
-  <mp:PhoneIdentity PhoneProductId="9c589cb6-d562-4342-b2fb-be3668eee042" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
+  <mp:PhoneIdentity PhoneProductId="2a0a5115-294f-421f-b9c1-434b5c4f7233" PhonePublisherId="00000000-0000-0000-0000-000000000000"/>
 
   <Properties>
-    <DisplayName>Files.FileSystems.Uwp.Tests</DisplayName>
+    <DisplayName>Files.FileSystems.WindowsStorage.Tests</DisplayName>
     <PublisherDisplayName>Manuel</PublisherDisplayName>
-    <Logo>Properties\Assets\StoreLogo.png</Logo>
+    <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 
   <Dependencies>
@@ -27,15 +27,15 @@
   <Applications>
     <Application Id="vstest.executionengine.universal.App"
         Executable="$targetnametoken$.exe"
-        EntryPoint="Files.FileSystems.Uwp.Tests.App">
+        EntryPoint="Files.FileSystems.WindowsStorage.Tests.App">
       <uap:VisualElements
-        DisplayName="Files.FileSystems.Uwp.Tests"
-        Square150x150Logo="Properties\Assets\Square150x150Logo.png"
-        Square44x44Logo="Properties\Assets\Square44x44Logo.png"
-        Description="Files.FileSystems.Uwp.Tests"
+        DisplayName="Files.FileSystems.WindowsStorage.Tests"
+        Square150x150Logo="Assets\Square150x150Logo.png"
+        Square44x44Logo="Assets\Square44x44Logo.png"
+        Description="Files.FileSystems.WindowsStorage.Tests"
         BackgroundColor="transparent">
-        <uap:DefaultTile Wide310x150Logo="Properties\Assets\Wide310x150Logo.png"/>
-        <uap:SplashScreen Image="Properties\Assets\SplashScreen.png" />
+        <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png"/>
+        <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
     </Application>
   </Applications>

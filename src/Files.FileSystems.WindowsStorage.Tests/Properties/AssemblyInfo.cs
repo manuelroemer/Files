@@ -1,11 +1,11 @@
 using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("Files.FileSystems.Uwp.Tests")]
+[assembly: AssemblyTitle("Files.FileSystems.WindowsStorage.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("Files.FileSystems.Uwp.Tests")]
+[assembly: AssemblyProduct("Files.FileSystems.WindowsStorage.Tests")]
 [assembly: AssemblyCopyright("Copyright ©  2020")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
