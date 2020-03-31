@@ -35,7 +35,7 @@
         public override StorageFolder GetFolder(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new PhysicalFolder(this, (PhysicalStoragePath)path);
+            return new PhysicalStorageFolder(this, (PhysicalStoragePath)path);
         }
 
         /// <inheritdoc/>

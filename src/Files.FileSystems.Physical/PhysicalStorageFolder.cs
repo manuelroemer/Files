@@ -13,7 +13,7 @@
     using Files.Shared.PhysicalStoragePath.Utilities;
     using IOPath = System.IO.Path;
 
-    internal sealed class PhysicalFolder : StorageFolder
+    internal sealed class PhysicalStorageFolder : StorageFolder
     {
         private static readonly char[] InvalidNewNameChars =
             IOPath.GetInvalidPathChars()
@@ -31,7 +31,7 @@
 
         public override StoragePath Path => _path;
 
-        public PhysicalFolder(FileSystem fileSystem, PhysicalStoragePath path)
+        public PhysicalStorageFolder(FileSystem fileSystem, PhysicalStoragePath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
@@ -166,7 +166,7 @@
 
                 // Specification requires DirectoryNotFoundException if the destination parent folder
                 // does not exist,
-                if (destination.GetParent() is PhysicalFolder destinationParent)
+                if (destination.GetParent() is PhysicalStorageFolder destinationParent)
                 {
                     destinationParent.EnsureExists();
                 }
