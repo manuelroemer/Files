@@ -58,28 +58,28 @@
 
         #endregion
 
-        #region GetParent Tests
+        #region Parent Tests
 
         [TestMethod]
-        public void GetParent_StandardFolder_ReturnsParentFolder()
+        public void Parent_StandardFolder_ReturnsParentFolder()
         {
             var expectedParent = TestFolder;
-            var actualParent = TestFolder.GetFolder(Default.FolderName).GetParent();
+            var actualParent = TestFolder.GetFolder(Default.FolderName).Parent;
             actualParent?.Path.ShouldBeEffectivelyEqualTo(expectedParent.Path);
         }
 
         [TestMethod]
-        public void GetParent_FolderInRootFolder_ReturnsRootFolder()
+        public void Parent_FolderInRootFolder_ReturnsRootFolder()
         {
             var expectedParent = RootFolder;
-            var actualParent = RootFolder.GetFolder(Default.FolderName).GetParent();
+            var actualParent = RootFolder.GetFolder(Default.FolderName).Parent;
             actualParent?.Path.ShouldBeEffectivelyEqualTo(expectedParent.Path);
         }
 
         [TestMethod]
-        public void GetParent_RootFolder_ReturnsNull()
+        public void Parent_RootFolder_ReturnsNull()
         {
-            RootFolder.GetParent().ShouldBeNull();
+            RootFolder.Parent.ShouldBeNull();
         }
 
         #endregion
@@ -655,7 +655,7 @@
 
             var dstFolder = await srcFolder.CopyAsync(dstFolderPath, options);
 
-            dstFolder.GetParent()?.Path.ShouldBeEffectivelyEqualTo(dstParentFolder.Path);
+            dstFolder.Parent?.Path.ShouldBeEffectivelyEqualTo(dstParentFolder.Path);
             await srcFolder.ShouldExistAsync();
             await dstFolder.ShouldExistAsync();
         }
@@ -820,7 +820,7 @@
 
             var dstFolder = await srcFolder.MoveAsync(dstFolderPath, options);
 
-            dstFolder.GetParent()?.Path.ShouldBeEffectivelyEqualTo(dstParentFolder.Path);
+            dstFolder.Parent?.Path.ShouldBeEffectivelyEqualTo(dstParentFolder.Path);
             await srcFolder.ShouldNotExistAsync();
             await dstFolder.ShouldExistAsync();
         }

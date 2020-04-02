@@ -166,7 +166,7 @@
 
                 // Specification requires DirectoryNotFoundException if the destination parent folder
                 // does not exist,
-                if (destination.GetParent() is PhysicalStorageFolder destinationParent)
+                if (destination.Parent is PhysicalStorageFolder destinationParent)
                 {
                     destinationParent.EnsureExists();
                 }

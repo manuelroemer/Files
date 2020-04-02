@@ -7,6 +7,8 @@
     using System.Threading.Tasks;
     using Files.FileSystems.WindowsStorage.Resources;
     using Files.Shared.PhysicalStoragePath;
+    using WinStorageFile = Windows.Storage.StorageFile;
+    using WinStorageFolder = Windows.Storage.StorageFolder;
 
     internal sealed class WindowsStorageStorageFile : StorageFile
     {

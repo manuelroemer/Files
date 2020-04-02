@@ -9,13 +9,6 @@
     /// </summary>
     public static class FileSystemElementExtensions
     {
-        public static StorageFolder? GetParent(this StorageElement element) => element switch
-        {
-            StorageFile file => file.GetParent(),
-            StorageFolder folder => folder.GetParent(),
-            _ => throw new ArgumentNullException(nameof(element))
-        };
-
         public static async Task<StorageElementProperties> GetPropertiesAsync(
             this StorageElement element,
             CancellationToken cancellationToken = default

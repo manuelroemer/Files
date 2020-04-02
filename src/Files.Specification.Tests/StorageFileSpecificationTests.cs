@@ -60,21 +60,21 @@
 
         #endregion
 
-        #region GetParent Tests
+        #region Parent Tests
 
         [TestMethod]
-        public void GetParent_StandardFile_ReturnsParentFolder()
+        public void Parent_StandardFile_ReturnsParentFolder()
         {
             var expectedParent = TestFolder;
-            var actualParent = TestFolder.GetFile(Default.FileName).GetParent();
+            var actualParent = TestFolder.GetFile(Default.FileName).Parent;
             actualParent.Path.ShouldBeEffectivelyEqualTo(expectedParent.Path);
         }
 
         [TestMethod]
-        public void GetParent_FileInRootFolder_ReturnsRootFolder()
+        public void Parent_FileInRootFolder_ReturnsRootFolder()
         {
             var expectedParent = RootFolder;
-            var actualParent = RootFolder.GetFile(Default.FileName).GetParent();
+            var actualParent = RootFolder.GetFile(Default.FileName).Parent;
             actualParent.Path.ShouldBeEffectivelyEqualTo(expectedParent.Path);
         }
 
@@ -425,7 +425,7 @@
 
             var dstFile = await srcFile.CopyAsync(dstFilePath, options);
 
-            dstFile.GetParent().Path.ShouldBeEffectivelyEqualTo(dstParentFolder.Path);
+            dstFile.Parent.Path.ShouldBeEffectivelyEqualTo(dstParentFolder.Path);
             await srcFile.ShouldExistAsync();
             await dstFile.ShouldExistAsync();
             await srcFile.ShouldHaveContentAsync(Default.TextContent);
@@ -536,7 +536,7 @@
 
             var dstFile = await srcFile.MoveAsync(dstFilePath, options);
 
-            dstFile.GetParent().Path.ShouldBeEffectivelyEqualTo(dstParentFolder.Path);
+            dstFile.Parent.Path.ShouldBeEffectivelyEqualTo(dstParentFolder.Path);
             await srcFile.ShouldNotExistAsync();
             await dstFile.ShouldExistAsync();
             await dstFile.ShouldHaveContentAsync(Default.TextContent);

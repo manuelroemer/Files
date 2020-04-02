@@ -14,20 +14,25 @@
     [DebuggerDisplay("StorageFolder at {ToString()}")]
     public abstract class StorageFolder : StorageElement
     {
+        private readonly Lazy<StorageFolder?> _parentLazy;
+
         /// <summary>
-        ///     Returns this folder's parent folder or <see langword="null"/> if it is a root folder.
+        ///     Gets this folder's parent folder or <see langword="null"/> if it is a root folder.
         /// </summary>
-        /// <returns>
-        ///     A <see cref="StorageFolder"/> instance which represents the parent of this folder or
-        ///     <see langword="null"/> if this folder cannot possibly have a parent folder, i.e.
-        ///     if it is a root folder.
-        /// </returns>
-        public StorageFolder? GetParent()
+        public StorageFolder? Parent => _parentLazy.Value;
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="StorageFolder"/> class.
+        /// </summary>
+        public StorageFolder()
         {
-            var parentPath = Path.FullPath.Parent;
-            return parentPath is null
-                ? null
-                : FileSystem.GetFolder(parentPath);
+            _parentLazy = new Lazy<StorageFolder?>(() =>
+            {
+                var parentPath = Path.FullPath.Parent;
+                return parentPath is null
+                    ? null
+                    : FileSystem.GetFolder(parentPath);
+            });
         }
 
         /// <summary>

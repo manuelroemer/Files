@@ -14,26 +14,33 @@
     [DebuggerDisplay("StorageFile at {ToString()}")]
     public abstract class StorageFile : StorageElement
     {
+        private readonly Lazy<StorageFolder> _parentLazy;
+
         /// <summary>
-        ///     Returns this file's parent folder.
+        ///     Gets this file's parent folder.
         /// </summary>
-        /// <returns>
-        ///     A <see cref="StorageFolder"/> instance which represents the parent of this file.
-        /// </returns>
-        public StorageFolder GetParent()
+        public StorageFolder Parent => _parentLazy.Value;
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="StorageFile"/> class.
+        /// </summary>
+        public StorageFile()
         {
-            var parentPath = Path.FullPath.Parent;
-
-            // The Path API says that the parent path can be null and we should check for it.
-            // Ideally, the file implementation guards against this when the file is created,
-            // as realistically, every file must have a parent directory.
-            // We are throwing here to notify library implementers.
-            if (parentPath is null)
+            _parentLazy = new Lazy<StorageFolder>(() =>
             {
-                throw new InvalidOperationException(ExceptionStrings.File.HasNoParentPath());
-            }
+                var parentPath = Path.FullPath.Parent;
 
-            return FileSystem.GetFolder(parentPath);
+                // The Path API declares that the parent path can be null and we should check for it.
+                // The specification and assumptions of this library assume that each file has a
+                // parent folder though. Therefore this exception is undocumented, because it is
+                // treated as an implementation error and should never occur.
+                if (parentPath is null)
+                {
+                    throw new InvalidOperationException(ExceptionStrings.File.HasNoParentPath());
+                }
+
+                return FileSystem.GetFolder(parentPath);
+            });
         }
 
         /// <summary>

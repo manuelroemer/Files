@@ -23,11 +23,17 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
 
     internal static partial class PhysicalPathHelper
     {
-        internal static bool IsCaseSensitive { get; } = GetIsCaseSensitive();
-
         internal static StringComparison StringComparison => IsCaseSensitive
             ? StringComparison.Ordinal
             : StringComparison.OrdinalIgnoreCase;
+
+#if UAP
+        // For the WindowsStorage project.
+        // Windows is always assumed to be case-insensitive.
+        // Not doing the full check as below, since writing files is harder to do in a UWP sandbox.
+        internal static bool IsCaseSensitive { get; } = false;
+#else
+        internal static bool IsCaseSensitive { get; } = GetIsCaseSensitive();
 
         private static bool GetIsCaseSensitive()
         {
@@ -70,5 +76,6 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
                 };
             }
         }
+#endif
     }
 }
