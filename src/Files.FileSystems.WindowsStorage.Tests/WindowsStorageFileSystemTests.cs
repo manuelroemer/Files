@@ -34,9 +34,12 @@
             new object[] { ApplicationData.Current.TemporaryFolder.Path }, // Any absolute path is fine.
         };
 
-        public override IEnumerable<object[]> InvalidPathStringData => Path
-            .GetInvalidPathChars()
-            .Select(invalidChar => new[] { Default.PathName + invalidChar });
+        public override IEnumerable<object[]> InvalidPathStringData => new[]
+        {
+            new object[] { "" },
+            new object[] { "\0" },
+            new object[] { Default.PathName + "\0" },
+        };
 
         public WindowsStorageFileSystemTests()
             : base(WindowsStorageFileSystemTestContext.Instance) { }

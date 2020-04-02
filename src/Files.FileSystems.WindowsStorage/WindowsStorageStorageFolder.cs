@@ -3,14 +3,22 @@
     using System;
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using System.Threading;
     using System.Threading.Tasks;
     using Files;
+    using Files.FileSystems.WindowsStorage.Resources;
     using Files.FileSystems.WindowsStorage.Utilities;
     using Files.Shared.PhysicalStoragePath;
-    using WinStorageFile = Windows.Storage.StorageFile;
+    using Files.Shared.PhysicalStoragePath.Utilities;
+    using Windows.Storage;
+    using CreationCollisionOption = CreationCollisionOption;
+    using IOFileAttributes = System.IO.FileAttributes;
+    using IOPath = System.IO.Path;
+    using NameCollisionOption = NameCollisionOption;
+    using StorageFile = StorageFile;
+    using StorageFolder = StorageFolder;
     using WinStorageFolder = Windows.Storage.StorageFolder;
-    using WinCreationCollisionOption = Windows.Storage.CreationCollisionOption;
 
     internal sealed class WindowsStorageStorageFolder : StorageFolder
     {
@@ -33,24 +41,77 @@
             _fullParentPath = _fullPath.Parent;
         }
 
-        public override Task<StorageFolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
+        public override async Task<StorageFolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+            var props = await folder.GetBasicPropertiesAsync().Cancel(cancellationToken);
+            var lastModified = props.DateModified == default ? (DateTimeOffset?)null : props.DateModified;
+
+            return new StorageFolderProperties(
+                folder.Name,
+                IOPath.GetFileNameWithoutExtension(folder.Name),
+                PhysicalPathHelper.GetExtensionWithoutTrailingExtensionSeparator(folder.Name)?.ToNullIfEmpty(),
+                folder.DateCreated,
+                lastModified
+            );
         }
 
-        public override Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
+        public override async Task<IOFileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+            return folder.Attributes.ToIOFileAttributes();
         }
 
-        public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
+        public override Task SetAttributesAsync(IOFileAttributes attributes, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            // There's no "native" API for setting file/folder attributes.
+            // We can at least try to use System.IO's API - it should at least work in certain locations
+            // like the application data.
+
+            return Task.Run(async () =>
+            {
+                try
+                {
+                    // Get the folder to ensure that it exists and to throw the appropriate exception.
+                    await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+
+                    cancellationToken.ThrowIfCancellationRequested();
+                    File.SetAttributes(_fullPath.ToString(), attributes);
+                }
+                catch (FileNotFoundException ex)
+                {
+                    // Since we're using a File API, we must manually convert the FileNotFoundException.
+                    throw new DirectoryNotFoundException(message: null, ex);
+                }
+            });
         }
 
-        public override Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
+        public override async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            try
+            {
+                await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+                return true;
+            }
+            catch (DirectoryNotFoundException)
+            {
+                return false;
+            }
+            catch (IOException)
+            {
+                // IOException might be thrown if a conflicting file exists.
+                // In such cases the specification requires us to return false.
+                try
+                {
+                    await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+                    return false;
+                }
+                catch
+                {
+                    // No conflicting file exists. Rethrow the original IOException.
+                }
+                throw;
+            }
         }
 
         public override async Task CreateAsync(
@@ -59,106 +120,162 @@
             CancellationToken cancellationToken = default
         )
         {
-            throw new NotImplementedException();
-            //// We cannot reasonably create a root directory with the API.
-            //// If someone tries to do so, we'll simply deny the call. In most cases, the root
-            //// folder will exist anyway.
-            //if (_fullParentPath is null)
-            //{
-            //    throw new UnauthorizedAccessException();
-            //}
+            // We cannot reasonably create a root directory with the API.
+            // If someone tries to do so, we'll simply deny the call. In most cases, the root
+            // folder will exist anyway.
+            if (_fullParentPath is null)
+            {
+                throw new UnauthorizedAccessException();
+            }
 
-            //if (recursive)
-            //{
+            WinStorageFolder parentFolder;
+            if (recursive)
+            {
+                parentFolder = await FsHelper
+                    .GetOrCreateFolderAsync(_fullParentPath, cancellationToken)
+                    .ConfigureAwait(false);
+            }
+            else
+            {
+                parentFolder = await FsHelper
+                    .GetFolderAsync(_fullParentPath, cancellationToken)
+                    .ConfigureAwait(false);
+            }
 
-            //}
-            //else
-            //{
-            //    var parent = await WinStorageFolder
-            //        .GetFolderFromPathAsync(_fullParentPath.ToString())
-            //        .Cancel(cancellationToken);
-
-            //    await parent
-            //        .CreateFolderAsync(_path.Name, options.ToWinOptions())
-            //        .Cancel(cancellationToken);
-            //}
-
-            //async Task RecursiveImpl(StoragePath? currentParentPath, StoragePath? previousParentPath)
-            //{
-            //    if (currentParentPath is null)
-            //    {
-            //        // Reached root folder.
-            //        throw new UnauthorizedAccessException();
-            //    }
-
-            //    if (previousParentPath is null)
-            //    {
-            //        // Reached this folder.
-            //        return;
-            //    }
-
-            //    try
-            //    {
-            //        var parent = await WinStorageFolder
-            //            .GetFolderFromPathAsync(currentParentPath.ToString())
-            //            .Cancel(cancellationToken);
-
-            //        // Without an exception, the folder exists. We can now go up and, step by step,
-            //        // create the missing folders in the chain.
-            //        await parent
-            //            .CreateFolderAsync(previousParentPath.Name, WinCreationCollisionOption.OpenIfExists)
-            //            .Cancel(cancellationToken);
-            //    }
-            //    catch (FileNotFoundException)
-            //    {
-            //        await RecursiveImpl(currentParentPath.Parent, currentParentPath).ConfigureAwait(false);
-            //    }
-            //}
+            await parentFolder
+                .CreateFolderAsync(_fullPath.Name, options.ToWinOptions())
+                .Cancel(cancellationToken);
         }
 
-        public override Task<StorageFolder> CopyAsync(
+        public override async Task<StorageFolder> CopyAsync(
             StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
-            throw new NotImplementedException();
+            if (destinationPath.FullPath.Parent is null)
+            {
+                throw new IOException(ExceptionStrings.Folder.CannotMoveIntoRootLocation());
+            }
+
+            var destinationParentFolder = await FsHelper
+                .GetFolderAsync(destinationPath.FullPath.Parent, cancellationToken)
+                .ConfigureAwait(false);
+            var sourceFolder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+            await Impl(sourceFolder, destinationParentFolder, destinationPath.FullPath.Name).ConfigureAwait(false);
+            return FileSystem.GetFolder(destinationPath.FullPath);
+
+            async Task Impl(WinStorageFolder src, WinStorageFolder dstFolderParent, string dstFolderName)
+            {
+                var dstFolder = await dstFolderParent
+                    .CreateFolderAsync(dstFolderName, ((CreationCollisionOption)options).ToWinOptions())
+                    .Cancel(cancellationToken);
+
+                foreach (var file in await src.GetFilesAsync().Cancel(cancellationToken))
+                {
+                    await file.CopyAsync(dstFolderParent, file.Name).Cancel(cancellationToken);
+                }
+
+                foreach (var folder in await src.GetFoldersAsync().Cancel(cancellationToken))
+                {
+                    await Impl(folder, dstFolder, folder.Name).ConfigureAwait(false);
+                }
+            }
         }
 
-        public override Task<StorageFolder> MoveAsync(
+        public override async Task<StorageFolder> MoveAsync(
             StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
-            throw new NotImplementedException();
+
+            // There is no native Move API. The current "best practice" (haha) is to simply copy
+            // a folder instead of moving.
+            // We might be able to improve performance if we're moving into the same directory, i.e.
+            // if we're effectively doing a rename.
+            // Since this is path based, we have to be careful, of course.
+            if (destinationPath.FullPath.Parent == _fullParentPath)
+            {
+                await RenameAsync(destinationPath.FullPath.Name, cancellationToken).ConfigureAwait(false);
+            }
+            else
+            {
+                await CopyAsync(destinationPath, cancellationToken).ConfigureAwait(false);
+            }
+
+            await DeleteAsync(DeletionOption.IgnoreMissing).ConfigureAwait(false);
+            return FileSystem.GetFolder(destinationPath.FullPath);
         }
 
-        public override Task<StorageFolder> RenameAsync(
+        public override async Task<StorageFolder> RenameAsync(
             string newName,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         )
         {
             _ = newName ?? throw new ArgumentNullException(nameof(newName));
-            throw new NotImplementedException();
+            if (newName.Length == 0)
+            {
+                throw new ArgumentException(ExceptionStrings.String.CannotBeEmpty(), nameof(newName));
+            }
+
+            if (newName.Contains(PhysicalPathHelper.InvalidNewNameCharacters))
+            {
+                throw new ArgumentException(ExceptionStrings.Folder.NewNameContainsInvalidChar(), nameof(newName));
+            }
+
+            var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+            await folder.RenameAsync(newName, options.ToWinOptions()).Cancel(cancellationToken);
+            return FileSystem.GetFolder(_fullParentPath?.Join(newName) ?? newName);
         }
 
         public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            return options switch
+            {
+                DeletionOption.Fail => FailImpl(),
+                DeletionOption.IgnoreMissing => IgnoreMissingImpl(),
+                _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
+            };
+            
+            async Task FailImpl()
+            {
+                var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+                await folder.DeleteAsync(StorageDeleteOption.PermanentDelete).Cancel(cancellationToken);
+            }
+
+            async Task IgnoreMissingImpl()
+            {
+                try
+                {
+                    var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+                    if (folder is object)
+                    {
+                        await folder.DeleteAsync(StorageDeleteOption.PermanentDelete).Cancel(cancellationToken);
+                    }
+                }
+                catch (Exception ex) when (ex is DirectoryNotFoundException || ex is FileNotFoundException)
+                {
+                    // Nothing to do, since the options allow this case.
+                }
+            }
         }
 
-        public override Task<IEnumerable<StorageFile>> GetAllFilesAsync(CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<StorageFile>> GetAllFilesAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+            var allFiles = await folder.GetFilesAsync().Cancel(cancellationToken);
+            return allFiles.Select(winStorageFolder => FileSystem.GetFile(winStorageFolder.Path));
         }
 
-        public override Task<IEnumerable<StorageFolder>> GetAllFoldersAsync(CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<StorageFolder>> GetAllFoldersAsync(CancellationToken cancellationToken = default)
         {
-            throw new NotImplementedException();
+            var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+            var allFolders = await folder.GetFoldersAsync().Cancel(cancellationToken);
+            return allFolders.Select(winStorageFolder => FileSystem.GetFolder(winStorageFolder.Path));
         }
     }
 }

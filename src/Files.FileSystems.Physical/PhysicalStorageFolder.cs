@@ -15,14 +15,6 @@
 
     internal sealed class PhysicalStorageFolder : StorageFolder
     {
-        private static readonly char[] InvalidNewNameChars =
-            IOPath.GetInvalidPathChars()
-                .Append(IOPath.DirectorySeparatorChar)
-                .Append(IOPath.AltDirectorySeparatorChar)
-                .Append(IOPath.VolumeSeparatorChar)
-                .Distinct()
-                .ToArray();
-
         private readonly StoragePath _path;
         private readonly StoragePath _fullPath;
         private readonly StoragePath? _fullParentPath;
@@ -248,7 +240,7 @@
                 throw new ArgumentException(ExceptionStrings.String.CannotBeEmpty(), nameof(newName));
             }
 
-            if (newName.Contains(InvalidNewNameChars))
+            if (newName.Contains(PhysicalPathHelper.InvalidNewNameCharacters))
             {
                 throw new ArgumentException(ExceptionStrings.Folder.NewNameContainsInvalidChar(), nameof(newName));
             }

@@ -16,9 +16,7 @@
     public abstract class StorageFileSpecificationTests : FileSystemTestBase
     {
         private char[] InvalidNewNameChars =>
-            FileSystem.PathInformation.InvalidPathChars
-                .Concat(FileSystem.PathInformation.InvalidFileNameChars)
-                .Concat(FileSystem.PathInformation.DirectorySeparatorChars)
+            FileSystem.PathInformation.DirectorySeparatorChars
                 .Append(FileSystem.PathInformation.VolumeSeparatorChar)
                 .Distinct()
                 .ToArray();

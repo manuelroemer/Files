@@ -10,15 +10,20 @@
     [TestClass]
     public sealed class PhysicalStoragePathTests : StoragePathSpecificationTests
     {
-        public override IEnumerable<object[]> AppendPathsWithInvalidPartsData => InvalidPathsData;
+        public override IEnumerable<object[]> AppendPathsWithInvalidPartsData => new[]
+        {
+            new[] { Default.PathName, '\0'.ToString() },
+        };
 
-        public override IEnumerable<object[]> CombinePathsWithInvalidOthersData => InvalidPathsData;
+        public override IEnumerable<object[]> CombinePathsWithInvalidOthersData => new[]
+        {
+            new[] { Default.PathName, '\0'.ToString() },
+        };
 
-        public override IEnumerable<object[]> JoinPathsWithInvalidOthersData => InvalidPathsData;
-
-        private static IEnumerable<object[]> InvalidPathsData => Path
-            .GetInvalidPathChars()
-            .Select(invalidChar => new[] { Default.PathName, Default.PathName + invalidChar });
+        public override IEnumerable<object[]> JoinPathsWithInvalidOthersData => new[]
+        {
+            new[] { Default.PathName, '\0'.ToString() },
+        };
 
         public PhysicalStoragePathTests()
             : base(WindowsStorageFileSystemTestContext.Instance) { }

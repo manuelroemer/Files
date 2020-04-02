@@ -32,7 +32,7 @@
             new object[] { PathInformation.ParentDirectorySegment },
             new object[] { Path.GetTempPath() }, // Any absolute path is fine.
         };
-             
+        
         public override IEnumerable<object[]> InvalidPathStringData => new[]
         {
             // See comment in PhysicalStoragePathTests for details on why '\0' is used specifically.

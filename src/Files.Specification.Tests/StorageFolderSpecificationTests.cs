@@ -15,8 +15,7 @@
     public abstract class StorageFolderSpecificationTests : FileSystemTestBase
     {
         private char[] InvalidNewNameChars =>
-            FileSystem.PathInformation.InvalidPathChars
-                .Concat(FileSystem.PathInformation.DirectorySeparatorChars)
+            FileSystem.PathInformation.DirectorySeparatorChars
                 .Append(FileSystem.PathInformation.VolumeSeparatorChar)
                 .Distinct()
                 .ToArray();
@@ -613,7 +612,7 @@
         [TestMethod]
         public async Task DeleteAsync_IgnoreMissingAndNonExistingFolder_DoesNothing()
         {
-            var folder = TestFolder.GetFile(Default.FolderName);
+            var folder = TestFolder.GetFolder(Default.FolderName);
             await folder.DeleteAsync(DeletionOption.IgnoreMissing);
         }
 

@@ -1,6 +1,7 @@
 ﻿namespace Files.Shared.PhysicalStoragePath.Utilities
 {
     using System.IO;
+    using System.Linq;
 
     /// <summary>
     ///     Provides static utility members for interacting with physical path strings.
@@ -10,6 +11,16 @@
         internal const char ExtensionSeparatorChar = '.';
         internal const string CurrentDirectorySegment = ".";
         internal const string ParentDirectorySegment = "..";
+
+        internal static readonly char[] InvalidNewNameCharacters =
+            new[]
+            {
+                Path.DirectorySeparatorChar,
+                Path.AltDirectorySeparatorChar,
+                Path.VolumeSeparatorChar,
+            }
+            .Distinct()
+            .ToArray();
 
         internal static readonly PathInformation PhysicalPathInformation = new PathInformation(
             Path.GetInvalidPathChars(),

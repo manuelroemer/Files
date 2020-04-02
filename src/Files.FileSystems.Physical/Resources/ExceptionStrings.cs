@@ -26,10 +26,9 @@
             internal static string NewNameContainsInvalidChar() =>
                 $"The specified name contains one or more invalid characters. " +
                 $"Invalid characters are:\n" +
-                $"- The (alt) directory separator character\n" +
+                $"- The directory separator character\n" +
+                $"- The alternative directory separator character\n" +
                 $"- The volume separator character\n" +
-                $"- Any invalid path character\n" +
-                $"- Any invalid file name character\n" +
                 $"\n" +
                 $"You can use the {nameof(FileSystem)}.{nameof(FileSystem.PathInformation)} property " +
                 $"of this file's {nameof(FileSystem)} property to determine which characters are allowed.";
@@ -41,7 +40,8 @@
                 "Creating the folder failed because another folder already exists at the location.";
 
             internal static string ConflictingFileExistsAtFolderLocation() =>
-                "The operation failed because a file exists at the folder's location.";
+                "The operation failed because a file exists at the folder's location (or at the " +
+                "destination folder if this was a copy or move operation).";
 
             internal static string CopyConflictingFolderExistsAtDestination() =>
                 "Another folder already exists at the destination.";
@@ -49,12 +49,12 @@
             internal static string NewNameContainsInvalidChar() =>
                 $"The specified name contains one or more invalid characters. " +
                 $"Invalid characters are:\n" +
-                $"- The (alt) directory separator character\n" +
+                $"- The directory separator character\n" +
+                $"- The alternative directory separator character\n" +
                 $"- The volume separator character\n" +
-                $"- Any invalid path character\n" +
                 $"\n" +
                 $"You can use the {nameof(FileSystem)}.{nameof(FileSystem.PathInformation)} property " +
-                $"of this folder's {nameof(FileSystem)} property to determine which characters are allowed.";
+                $"of this file's {nameof(FileSystem)} property to determine which characters are allowed.";
         }
     }
 }
