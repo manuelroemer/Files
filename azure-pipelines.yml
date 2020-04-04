@@ -6,6 +6,12 @@
 trigger:
 - master
 
+variables:
+  solution: '**/*.sln'
+  buildPlatform: 'x86|x64'
+  buildConfiguration: 'Release'
+  appxPackageDir: '$(build.artifactStagingDirectory)\AppxPackages\'
+
 pool:
   vmImage: 'windows-latest'
 
@@ -44,4 +50,17 @@ steps:
 
 - task: VSBuild@1
   inputs:
-    solution: '**/*.sln'
+    solution: '***.sln'
+    configuration: '/nr:false'
+    maximumCpuCount: true
+    msbuildArgs: '/p:AppxBundlePlatforms="$(buildPlatform)" /p:AppxPackageDir="$(appxPackageDir)" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload'
+
+- task: VSTest@2
+  inputs:
+    testSelector: 'testAssemblies'
+    testAssemblyVer2: |
+      **\*test*.dll
+      **\*.appxrecipe
+      !**\*TestAdapter.dll
+      !**\obj\**
+    searchFolder: '$(System.DefaultWorkingDirectory)'
