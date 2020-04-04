@@ -103,7 +103,7 @@
                 {
                     // We are okay with Delete failing for two reasons:
                     // 1) Depending on the error, Move might still succeed.
-                    // 2) We prefer shared exceptions (like for invalid paths) to be thrown by
+                    // 2) We prefer exceptions (like for invalid paths) to be thrown by
                     //    Move, since the messages might be better (e.g. for paramNames in ArgumentExceptions).
                     //    Furthermore, there might be functional differences between Delete and Move
                     //    regarding error handling/error severity.

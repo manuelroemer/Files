@@ -20,6 +20,7 @@
     <PackageProjectUrl>https://github.com/manuelroemer/Files</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/manuelroemer/Files/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Version>1.0.0</Version>
 
     <IsTestProject>$(MSBuildProjectName.Contains('Test'))</IsTestProject>
   </PropertyGroup>

@@ -38,7 +38,7 @@
         ///     If the path doesn't have a parent directory (for example if it points to a root
         ///     directory), this returns <see langword="null"/>.
         ///     
-        ///     Any trailing directory separator characters are ignored when determining the parent.
+        ///     One trailing directory separator character is ignored when determining the parent.
         /// </summary>
         public abstract StoragePath? Parent { get; }
 

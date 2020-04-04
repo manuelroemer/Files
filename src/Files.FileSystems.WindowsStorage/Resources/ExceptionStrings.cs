@@ -32,22 +32,26 @@
             internal static string CannotInitializeWithRootFolderPath() =>
                 "The specified path points to a root folder which cannot identify a file.";
 
-            internal static string CannotMoveOrCopyIntoRootLocation() =>
-                "Cannot move and/or copy a file into a root location.";
+            internal static string CannotCopyToRootLocation() =>
+                "Copying the file to a root location is not possible.";
+            
+            internal static string CannotMoveToRootLocation() =>
+                "Moving the file to a root location is not possible.";
 
             internal static string ConflictingFolderExistsAtFileLocation() =>
                 "The operation failed because a folder exists at the file's location (or at the " +
                 "destination folder if this was a copy or move operation).";
 
-            internal static string NewNameContainsInvalidChar() =>
+            internal static string NewNameContainsInvalidChar(PathInformation pathInformation) =>
                 $"The specified name contains one or more invalid characters. " +
                 $"Invalid characters are:\n" +
-                $"- The directory separator character\n" +
-                $"- The alternative directory separator character\n" +
-                $"- The volume separator character\n" +
+                $"- The directory separator character '{pathInformation.DirectorySeparatorChar}'\n" +
+                $"- The alternative directory separator character '{pathInformation.AltDirectorySeparatorChar}'\n" +
+                $"- The volume separator character '{pathInformation.VolumeSeparatorChar}'\n" +
                 $"\n" +
                 $"You can use the {nameof(FileSystem)}.{nameof(FileSystem.PathInformation)} property " +
-                $"of this file's {nameof(FileSystem)} property to determine which characters are allowed.";
+                $"of this file's {nameof(StorageFile.FileSystem)} property to determine which characters" +
+                $"are allowed.";
         }
 
         internal static class Folder
@@ -56,18 +60,22 @@
                 "The operation failed because a file exists at the folder's location (or at the " +
                 "destination folder if this was a copy or move operation).";
 
-            internal static string CannotMoveIntoRootLocation() =>
-                "Cannot move a folder into a root location.";
+            internal static string CannotMoveToRootLocation() =>
+                "Moving the folder to a root location is not possible.";
 
-            internal static string NewNameContainsInvalidChar() =>
+            internal static string CannotCopyToSameLocation() =>
+                "Copying the folder to the same location is not possible.";
+
+            internal static string NewNameContainsInvalidChar(PathInformation pathInformation) =>
                 $"The specified name contains one or more invalid characters. " +
                 $"Invalid characters are:\n" +
-                $"- The directory separator character\n" +
-                $"- The alternative directory separator character\n" +
-                $"- The volume separator character\n" +
+                $"- The directory separator character '{pathInformation.DirectorySeparatorChar}'\n" +
+                $"- The alternative directory separator character '{pathInformation.AltDirectorySeparatorChar}'\n" +
+                $"- The volume separator character '{pathInformation.VolumeSeparatorChar}'\n" +
                 $"\n" +
                 $"You can use the {nameof(FileSystem)}.{nameof(FileSystem.PathInformation)} property " +
-                $"of this file's {nameof(FileSystem)} property to determine which characters are allowed.";
+                $"of this folder's {nameof(StorageFolder.FileSystem)} property to determine which characters" +
+                $"are allowed.";
         }
     }
 }

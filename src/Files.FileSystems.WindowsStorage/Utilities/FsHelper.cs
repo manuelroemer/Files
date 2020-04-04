@@ -1,18 +1,10 @@
 ﻿namespace Files.FileSystems.WindowsStorage.Utilities
 {
     using System;
-    using System.Collections.Generic;
     using System.Threading.Tasks;
-    using System.Linq;
-    using StorageFile = StorageFile;
-    using StorageFolder = StorageFolder;
-    using FileAttributes = System.IO.FileAttributes;
     using WinStorageFile = Windows.Storage.StorageFile;
     using WinStorageFolder = Windows.Storage.StorageFolder;
     using WinCreationCollisionOption = Windows.Storage.CreationCollisionOption;
-    using Windows.Storage;
-    using CreationCollisionOption = CreationCollisionOption;
-    using NameCollisionOption = NameCollisionOption;
     using Files.FileSystems.WindowsStorage.Resources;
     using System.IO;
     using System.Threading;
@@ -28,7 +20,7 @@
         {
             try
             {
-                return await WinStorageFile.GetFileFromPathAsync(fullPath).Cancel(cancellationToken);
+                return await WinStorageFile.GetFileFromPathAsync(fullPath).AsAwaitable(cancellationToken);
             }
             catch (FileNotFoundException ex)
             {
@@ -44,7 +36,7 @@
 
                 try
                 {
-                    await WinStorageFolder.GetFolderFromPathAsync(fullPath.Parent).Cancel(cancellationToken);
+                    await WinStorageFolder.GetFolderFromPathAsync(fullPath.Parent).AsAwaitable(cancellationToken);
                 }
                 catch
                 {
@@ -66,7 +58,7 @@
                 // which is required by specification.
                 try
                 {
-                    await WinStorageFolder.GetFolderFromPathAsync(fullPath).Cancel(cancellationToken);
+                    await WinStorageFolder.GetFolderFromPathAsync(fullPath).AsAwaitable(cancellationToken);
                 }
                 catch
                 {
@@ -82,6 +74,32 @@
             }
         }
 
+        internal static async Task<WinStorageFolder> GetOrCreateFolderAsync(
+            StoragePath fullPath,
+            CancellationToken cancellationToken
+        )
+        {
+            try
+            {
+                // If this succeedes, the folder exists. Nothing to do.
+                return await GetFolderAsync(fullPath, cancellationToken).ConfigureAwait(false);
+            }
+            catch (DirectoryNotFoundException)
+            {
+                var parentPath = fullPath.Parent;
+                if (parentPath is null)
+                {
+                    // Root folder.
+                    throw new UnauthorizedAccessException();
+                }
+
+                var parentFolder = await GetOrCreateFolderAsync(parentPath, cancellationToken).ConfigureAwait(false);
+                return await parentFolder
+                    .CreateFolderAsync(fullPath.Name, WinCreationCollisionOption.OpenIfExists)
+                    .AsAwaitable(cancellationToken);
+            }
+        }
+
         internal static async Task<WinStorageFolder> GetFolderAsync(
             StoragePath fullPath,
             CancellationToken cancellationToken
@@ -89,7 +107,7 @@
         {
             try
             {
-                return await WinStorageFolder.GetFolderFromPathAsync(fullPath).Cancel(cancellationToken);
+                return await WinStorageFolder.GetFolderFromPathAsync(fullPath).AsAwaitable(cancellationToken);
             }
             catch (FileNotFoundException ex)
             {
@@ -102,7 +120,7 @@
                 // which is required by specification.
                 try
                 {
-                    await WinStorageFile.GetFileFromPathAsync(fullPath).Cancel(cancellationToken);
+                    await WinStorageFile.GetFileFromPathAsync(fullPath).AsAwaitable(cancellationToken);
                 }
                 catch
                 {
@@ -115,34 +133,6 @@
                     ExceptionStrings.Folder.ConflictingFileExistsAtFolderLocation(),
                     ex
                 );
-            }
-        }
-
-        internal static async Task<WinStorageFolder> GetOrCreateFolderAsync(
-            StoragePath fullPath,
-            CancellationToken cancellationToken
-        )
-        {
-            try
-            {
-                // If this succeedes, the folder exists. Nothing to do.
-                return await WinStorageFolder
-                    .GetFolderFromPathAsync(fullPath.ToString())
-                    .Cancel(cancellationToken);
-            }
-            catch (FileNotFoundException)
-            {
-                var parentPath = fullPath.Parent;
-                if (parentPath is null)
-                {
-                    // Root folder.
-                    throw new UnauthorizedAccessException();
-                }
-
-                var parentFolder = await GetOrCreateFolderAsync(parentPath, cancellationToken).ConfigureAwait(false);
-                return await parentFolder
-                    .CreateFolderAsync(fullPath.Name, WinCreationCollisionOption.OpenIfExists)
-                    .Cancel(cancellationToken);
             }
         }
     }

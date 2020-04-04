@@ -172,12 +172,19 @@
             {
                 EnsureExists(cancellationToken);
 
-                var dstPathString = destinationPath.FullPath.ToString();
+                var fullDestinationPath = destinationPath.FullPath;
                 var overwrite = options.ToOverwriteBool();
+
+                // System.IO doesn't throw when moving files to the same location.
+                // Detecting this via paths will not always work, but it fulfills the spec most of the time.
+                if (_fullPath == fullDestinationPath)
+                {
+                    throw new IOException(ExceptionStrings.File.CannotMoveToSameLocation());
+                }
 
                 try
                 {
-                    FilePolyfills.Move(_fullPath.ToString(), dstPathString, overwrite);
+                    FilePolyfills.Move(_fullPath.ToString(), fullDestinationPath.ToString(), overwrite);
                     return FileSystem.GetFile(destinationPath);
                 }
                 catch (UnauthorizedAccessException ex)
@@ -187,7 +194,7 @@
                         potentialConflictingFolderPaths: new[]
                         {
                             _fullPath.ToString(),
-                            dstPathString,
+                            fullDestinationPath.ToString(),
                         }
                     );
                     throw;
@@ -209,7 +216,10 @@
 
             if (newName.Contains(PhysicalPathHelper.InvalidNewNameCharacters))
             {
-                throw new ArgumentException(ExceptionStrings.File.NewNameContainsInvalidChar(), nameof(newName));
+                throw new ArgumentException(
+                    ExceptionStrings.File.NewNameContainsInvalidChar(FileSystem.PathInformation),
+                    nameof(newName)
+                );
             }
 
             cancellationToken.ThrowIfCancellationRequested();

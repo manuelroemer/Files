@@ -795,6 +795,7 @@
             var srcFolder = await TestFolder.SetupFolderAsync(Default.FolderName);
             var destination = srcFolder.Path;
             await Should.ThrowAsync<IOException>(async () => await srcFolder.CopyAsync(destination, options));
+            await srcFolder.ShouldExistAsync();
         }
 
         #endregion
@@ -957,10 +958,10 @@
         [TestMethod]
         [DataRow(NameCollisionOption.Fail)]
         [DataRow(NameCollisionOption.ReplaceExisting)]
-        public async Task MoveAsync_MoveToSameLocation_DoesNothing(NameCollisionOption options)
+        public async Task MoveAsync_MoveToSameLocation_ThrowsIOException(NameCollisionOption options)
         {
             var srcFolder = await TestFolder.SetupFolderAsync(Default.FolderName);
-            await srcFolder.MoveAsync(srcFolder.Path, options);
+            await Should.ThrowAsync<IOException>(async () => await srcFolder.MoveAsync(srcFolder.Path, options));
             await srcFolder.ShouldExistAsync();
         }
 
@@ -1083,10 +1084,10 @@
         [TestMethod]
         [DataRow(NameCollisionOption.Fail)]
         [DataRow(NameCollisionOption.ReplaceExisting)]
-        public async Task RenameAsync_SameName_DoesNothing(NameCollisionOption options)
+        public async Task RenameAsync_SameName_ThrowsIOException(NameCollisionOption options)
         {
             var folder = await TestFolder.SetupFolderAsync(Default.FolderName);
-            await folder.RenameAsync(Default.FolderName, options);
+            await Should.ThrowAsync<IOException>(async () => await folder.RenameAsync(Default.FolderName, options));
             await folder.ShouldExistAsync();
         }
 

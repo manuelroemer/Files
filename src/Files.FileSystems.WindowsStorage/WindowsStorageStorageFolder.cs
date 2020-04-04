@@ -44,7 +44,7 @@
         public override async Task<StorageFolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
             var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-            var props = await folder.GetBasicPropertiesAsync().Cancel(cancellationToken);
+            var props = await folder.GetBasicPropertiesAsync().AsAwaitable(cancellationToken);
             var lastModified = props.DateModified == default ? (DateTimeOffset?)null : props.DateModified;
 
             return new StorageFolderProperties(
@@ -128,6 +128,8 @@
                 throw new UnauthorizedAccessException();
             }
 
+            await EnsureNoConflictingFileExistsAsync(cancellationToken).ConfigureAwait(false);
+
             WinStorageFolder parentFolder;
             if (recursive)
             {
@@ -144,7 +146,9 @@
 
             await parentFolder
                 .CreateFolderAsync(_fullPath.Name, options.ToWinOptions())
-                .Cancel(cancellationToken);
+                .AsTask(cancellationToken)
+                .WithConvertedException()
+                .ConfigureAwait(false);
         }
 
         public override async Task<StorageFolder> CopyAsync(
@@ -156,7 +160,12 @@
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
             if (destinationPath.FullPath.Parent is null)
             {
-                throw new IOException(ExceptionStrings.Folder.CannotMoveIntoRootLocation());
+                throw new IOException(ExceptionStrings.Folder.CannotMoveToRootLocation());
+            }
+
+            if (destinationPath.FullPath == _fullPath)
+            {
+                throw new IOException(ExceptionStrings.Folder.CannotCopyToSameLocation());
             }
 
             var destinationParentFolder = await FsHelper
@@ -170,14 +179,20 @@
             {
                 var dstFolder = await dstFolderParent
                     .CreateFolderAsync(dstFolderName, ((CreationCollisionOption)options).ToWinOptions())
-                    .Cancel(cancellationToken);
+                    .AsTask(cancellationToken)
+                    .WithConvertedException()
+                    .ConfigureAwait(false);
 
-                foreach (var file in await src.GetFilesAsync().Cancel(cancellationToken))
+                foreach (var file in await src.GetFilesAsync().AsAwaitable(cancellationToken))
                 {
-                    await file.CopyAsync(dstFolderParent, file.Name).Cancel(cancellationToken);
+                    await file
+                        .CopyAsync(dstFolder, file.Name)
+                        .AsTask(cancellationToken)
+                        .WithConvertedException()
+                        .ConfigureAwait(false);
                 }
 
-                foreach (var folder in await src.GetFoldersAsync().Cancel(cancellationToken))
+                foreach (var folder in await src.GetFoldersAsync().AsAwaitable(cancellationToken))
                 {
                     await Impl(folder, dstFolder, folder.Name).ConfigureAwait(false);
                 }
@@ -192,22 +207,25 @@
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
 
+            var fullDestinationPath = destinationPath.FullPath;
+            var destinationFolder = FileSystem.GetFolder(fullDestinationPath);
+
             // There is no native Move API. The current "best practice" (haha) is to simply copy
             // a folder instead of moving.
             // We might be able to improve performance if we're moving into the same directory, i.e.
             // if we're effectively doing a rename.
             // Since this is path based, we have to be careful, of course.
-            if (destinationPath.FullPath.Parent == _fullParentPath)
+            if (fullDestinationPath.Parent == _fullParentPath)
             {
-                await RenameAsync(destinationPath.FullPath.Name, cancellationToken).ConfigureAwait(false);
+                await RenameAsync(destinationPath.FullPath.Name, options, cancellationToken).ConfigureAwait(false);
             }
             else
             {
-                await CopyAsync(destinationPath, cancellationToken).ConfigureAwait(false);
+                await CopyAsync(destinationPath, options, cancellationToken).ConfigureAwait(false);
             }
 
             await DeleteAsync(DeletionOption.IgnoreMissing).ConfigureAwait(false);
-            return FileSystem.GetFolder(destinationPath.FullPath);
+            return destinationFolder;
         }
 
         public override async Task<StorageFolder> RenameAsync(
@@ -224,12 +242,65 @@
 
             if (newName.Contains(PhysicalPathHelper.InvalidNewNameCharacters))
             {
-                throw new ArgumentException(ExceptionStrings.Folder.NewNameContainsInvalidChar(), nameof(newName));
+                throw new ArgumentException(
+                    ExceptionStrings.Folder.NewNameContainsInvalidChar(FileSystem.PathInformation),
+                    nameof(newName)
+                );
             }
 
-            var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-            await folder.RenameAsync(newName, options.ToWinOptions()).Cancel(cancellationToken);
-            return FileSystem.GetFolder(_fullParentPath?.Join(newName) ?? newName);
+            var srcFolder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+            var fullDestinationPath = _fullParentPath is null
+                ? FileSystem.GetPath(newName).FullPath
+                : _fullParentPath.Join(newName).FullPath;
+
+            // The Windows Storage API doesn't do a hard replace with the ReplaceExisting option.
+            // For example, if we had this structure:
+            // |_ src
+            // |  |_ foo.ext
+            // |_ dst
+            //    |_ bar.ext
+            //
+            // and renamed `src` to `dst`, we'd get this result:
+            // |_ dst
+            //    |_ foo.ext
+            //    |_ bar.ext
+            // 
+            // What we (and the spec) want is this:
+            // |_ dst
+            //    |_ foo.ext
+            //
+            // We can manually delete the dst folder if it exists to fulfill the specification.
+            // We're *only* doing it if we can be sure that we're not doing an in-place rename though,
+            // i.e. rename `src` to `src`.
+            // Otherwise we'd run into the problem that `src` is deleted and that the rename operation
+            // will fail (DirectoryNotFound). Afterwards the entire folder is gone permanently.
+            // That must be avoided at all cost.
+            if (options == NameCollisionOption.ReplaceExisting &&
+                !fullDestinationPath.Name.Equals(_fullPath.Name, FileSystem.PathInformation.DefaultStringComparison))
+            {
+                try
+                {
+                    var dstFolder = await FsHelper.GetFolderAsync(fullDestinationPath, cancellationToken).ConfigureAwait(false);
+                    await dstFolder.DeleteAsync(StorageDeleteOption.PermanentDelete).AsAwaitable(cancellationToken);
+                }
+                catch
+                {
+                    // If deleting the conflicting folder fails, it's okay, since the whole process
+                    // is just there for fulfilling the specification.
+                    // The Windows Storage API will still replace conflicting elements.
+                    // It's just that certain files may be left over (as described above).
+                    // Not fulfilling the spec is the best thing we can do without taking higher risks
+                    // of lost data.
+                }
+            }
+
+            await srcFolder
+                .RenameAsync(newName, options.ToWinOptions())
+                .AsTask(cancellationToken)
+                .WithConvertedException()
+                .ConfigureAwait(false);
+
+            return FileSystem.GetFolder(fullDestinationPath);
         }
 
         public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
@@ -244,7 +315,7 @@
             async Task FailImpl()
             {
                 var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-                await folder.DeleteAsync(StorageDeleteOption.PermanentDelete).Cancel(cancellationToken);
+                await folder.DeleteAsync(StorageDeleteOption.PermanentDelete).AsAwaitable(cancellationToken);
             }
 
             async Task IgnoreMissingImpl()
@@ -254,7 +325,7 @@
                     var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
                     if (folder is object)
                     {
-                        await folder.DeleteAsync(StorageDeleteOption.PermanentDelete).Cancel(cancellationToken);
+                        await folder.DeleteAsync(StorageDeleteOption.PermanentDelete).AsAwaitable(cancellationToken);
                     }
                 }
                 catch (Exception ex) when (ex is DirectoryNotFoundException || ex is FileNotFoundException)
@@ -267,15 +338,35 @@
         public override async Task<IEnumerable<StorageFile>> GetAllFilesAsync(CancellationToken cancellationToken = default)
         {
             var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-            var allFiles = await folder.GetFilesAsync().Cancel(cancellationToken);
+            var allFiles = await folder.GetFilesAsync().AsAwaitable(cancellationToken);
             return allFiles.Select(winStorageFolder => FileSystem.GetFile(winStorageFolder.Path));
         }
 
         public override async Task<IEnumerable<StorageFolder>> GetAllFoldersAsync(CancellationToken cancellationToken = default)
         {
             var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-            var allFolders = await folder.GetFoldersAsync().Cancel(cancellationToken);
+            var allFolders = await folder.GetFoldersAsync().AsAwaitable(cancellationToken);
             return allFolders.Select(winStorageFolder => FileSystem.GetFolder(winStorageFolder.Path));
+        }
+
+        private async Task EnsureNoConflictingFileExistsAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Ideally we'd catch more specific exceptions here.
+                // Since this method is only called for throwing the *correct* exception type though,
+                // we can be less strict about it.
+                // At the end of the day, if a conflicting file does exist, the I/O APIs *will*
+                // throw, just not a guaranteed IOException. No need to make our life harder with
+                // extensive exception checking.
+                return;
+            }
+
+            throw new IOException(ExceptionStrings.Folder.ConflictingFileExistsAtFolderLocation());
         }
     }
 }

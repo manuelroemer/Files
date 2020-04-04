@@ -152,34 +152,43 @@
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
             cancellationToken.ThrowIfCancellationRequested();
 
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
+                var fullDestinationPath = destinationPath.FullPath;
                 var destination = FileSystem.GetFolder(destinationPath);
+                var overwrite = options.ToOverwriteBool();
 
                 // Specification requires DirectoryNotFoundException if the destination parent folder
-                // does not exist,
+                // does not exist.
                 if (destination.Parent is PhysicalStorageFolder destinationParent)
                 {
                     destinationParent.EnsureExists();
                 }
 
-                // The case of an existing folder at destination must also be manually handled.
-                // The CopyDirectory utility function cannot easily do that using System.IO members,
-                // because methods like Directory.CreateDirectory() are recursive by default.
-                if (await destination.ExistsAsync(cancellationToken).ConfigureAwait(false))
+                if (overwrite)
                 {
-                    var overwrite = options.ToOverwriteBool();
-                    if (overwrite)
+                    DeleteConflictingDestinationFolderWithoutDeletingThisFolder(fullDestinationPath.ToString());
+
+                    // At this point the conflicting destination folder should be deleted.
+                    // If that is not the case, we can assume that we are essentially copying
+                    // the folder to the same location (because otherwise, the method above would
+                    // have deleted the folder at the destination path).
+                    if (Directory.Exists(fullDestinationPath.ToString()))
                     {
-                        await destination.DeleteAsync(DeletionOption.IgnoreMissing, cancellationToken).ConfigureAwait(false);
+                        throw new IOException(ExceptionStrings.Folder.CannotCopyToSameLocation());
                     }
-                    else
+                }
+                else
+                {
+                    // The CopyDirectory helper cannot easily verify that no conflicting folder exists
+                    // at the destination. Specification requires an IOException on conflicts for the Fail option.
+                    if (Directory.Exists(fullDestinationPath.ToString()))
                     {
                         throw new IOException(ExceptionStrings.Folder.CopyConflictingFolderExistsAtDestination());
                     }
                 }
 
-                FsHelper.CopyDirectory(_fullPath.ToString(), destinationPath.FullPath.ToString(), cancellationToken);
+                FsHelper.CopyDirectory(_fullPath.ToString(), fullDestinationPath.ToString(), cancellationToken);
                 return destination;
             });
         }
@@ -193,39 +202,62 @@
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
             cancellationToken.ThrowIfCancellationRequested();
 
-            return Task.Run(async () =>
+            return Task.Run(() =>
             {
                 // For whatever reason, Directory.Move moves files instead of throwing an exception.
                 // We've got to manually verify that the current location actually is a directory and not a file.
                 EnsureNoConflictingFileExists();
 
+                var fullDestinationPath = destinationPath.FullPath;
                 var destination = FileSystem.GetFolder(destinationPath);
-                var fullDstPath = destinationPath.FullPath.ToString();
                 var overwrite = options.ToOverwriteBool();
 
-                // .NET is inconsistent with the File.Move and Directory.Move APIs.
-                // File.Move works perfectly well when moving a file to the same location.
-                // Directory.Move throws an IOException.
-                // We can do our best to follow the specification and not throw by manually comparing
-                // the full paths using the assumed, file system specific case-sensitivity.
-                // After all, .NET Core does the same, just the other way around:
-                // https://source.dot.net/#System.IO.FileSystem/System/IO/Directory.cs,275
-                // 
-                // This handling is certainly not perfect. If this leads to bugs, it should be improved.
-                if (_fullPath == destinationPath.FullPath)
+                if (overwrite)
                 {
-                    return destination;
-                }
+                    DeleteConflictingDestinationFolderWithoutDeletingThisFolder(fullDestinationPath.ToString());
 
-                if (overwrite && await destination.ExistsAsync(cancellationToken).ConfigureAwait(false))
-                {
-                    await destination.DeleteAsync(DeletionOption.IgnoreMissing, cancellationToken).ConfigureAwait(false);
+                    // At this point the conflicting destination folder should be deleted.
+                    // If that is not the case, we can assume that we are essentially moving
+                    // the folder to the same location (because otherwise, the method above would
+                    // have deleted the folder at the destination path).
+                    if (Directory.Exists(fullDestinationPath.ToString()))
+                    {
+                        throw new IOException(ExceptionStrings.Folder.CannotMoveToSameLocation());
+                    }
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
-                Directory.Move(_fullPath.ToString(), destinationPath.FullPath.ToString());
+                Directory.Move(_fullPath.ToString(), fullDestinationPath.ToString());
                 return destination;
             });
+        }
+
+        private void DeleteConflictingDestinationFolderWithoutDeletingThisFolder(string fullDestinationPath)
+        {
+            // Both Move and Copy require manual deletion of a conflicting folder at the destination
+            // with the ReplaceExisting option.
+            // This can be a problem if we want to move/copy a folder to the same location,
+            // because we'd delete the destination folder which is *also the source folder*.
+            // In essence, the folder would be gone for good.
+            // We prevent this with a little hack: Temporarily renaming the source folder
+            // so that deleting the destination does not automatically delete the source.
+            // After the deletion, we undo the rename and can continue with the actual moving/copying.
+            var tmpFolderName = PhysicalPathHelper.GetTemporaryElementName();
+            var tmpFolderPath = IOPath.Combine(_fullParentPath?.ToString() ?? "", tmpFolderName);
+
+            Directory.Move(_fullPath.ToString(), tmpFolderPath);
+
+            try
+            {
+                Directory.Delete(fullDestinationPath, recursive: true);
+            }
+            catch (DirectoryNotFoundException)
+            {
+            }
+            finally
+            {
+                Directory.Move(tmpFolderPath, _fullPath.ToString());
+            }
         }
 
         public override Task<StorageFolder> RenameAsync(
@@ -242,7 +274,10 @@
 
             if (newName.Contains(PhysicalPathHelper.InvalidNewNameCharacters))
             {
-                throw new ArgumentException(ExceptionStrings.Folder.NewNameContainsInvalidChar(), nameof(newName));
+                throw new ArgumentException(
+                    ExceptionStrings.Folder.NewNameContainsInvalidChar(FileSystem.PathInformation),
+                    nameof(newName)
+                );
             }
 
             cancellationToken.ThrowIfCancellationRequested();

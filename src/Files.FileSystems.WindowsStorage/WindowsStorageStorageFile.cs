@@ -1,30 +1,25 @@
 ﻿namespace Files.FileSystems.WindowsStorage
 {
     using System;
-    using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
+    using System.Runtime.InteropServices.WindowsRuntime;
+    using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Files;
+    using Files.FileSystems.WindowsStorage.Resources;
     using Files.FileSystems.WindowsStorage.Utilities;
     using Files.Shared.PhysicalStoragePath;
-    using StorageFile = StorageFile;
-    using StorageFolder = StorageFolder;
-    using IOFileAttributes = System.IO.FileAttributes;
-    using WinStorageFile = Windows.Storage.StorageFile;
-    using WinStorageFolder = Windows.Storage.StorageFolder;
-    using WinCreationCollisionOption = Windows.Storage.CreationCollisionOption;
+    using Files.Shared.PhysicalStoragePath.Utilities;
     using Windows.Storage;
     using CreationCollisionOption = CreationCollisionOption;
-    using NameCollisionOption = NameCollisionOption;
+    using IOFileAttributes = System.IO.FileAttributes;
     using IOPath = System.IO.Path;
-    using Files.FileSystems.WindowsStorage.Resources;
-    using Files.Shared.PhysicalStoragePath.Utilities;
-    using System.Linq;
-    using System.Text;
-    using System.Runtime.InteropServices.WindowsRuntime;
+    using NameCollisionOption = NameCollisionOption;
+    using StorageFile = StorageFile;
+    using WinStorageFolder = Windows.Storage.StorageFolder;
     using WinUnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding;
-    using Windows.Media.Protection.PlayReady;
 
     internal sealed class WindowsStorageStorageFile : StorageFile
     {
@@ -58,7 +53,7 @@
         public override async Task<StorageFileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
             var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-            var props = await file.GetBasicPropertiesAsync().Cancel(cancellationToken);
+            var props = await file.GetBasicPropertiesAsync().AsAwaitable(cancellationToken);
             var lastModified = props.DateModified == default ? (DateTimeOffset?)null : props.DateModified;
 
             return new StorageFileProperties(
@@ -80,7 +75,7 @@
         public override Task SetAttributesAsync(IOFileAttributes attributes, CancellationToken cancellationToken = default)
         {
             // There's no "native" API for setting file/folder attributes.
-            // We can at least try to use System.IO's API - it should at least work in certain locations
+            // We can try to use System.IO's API - it should at least work in certain locations
             // like the application data.
 
             return Task.Run(async () =>
@@ -127,6 +122,8 @@
             CancellationToken cancellationToken = default
         )
         {
+            await EnsureNoConflictingFolderExistsAsync(cancellationToken).ConfigureAwait(false);
+
             WinStorageFolder parentFolder;
             if (recursive)
             {
@@ -141,7 +138,11 @@
                     .ConfigureAwait(false);
             }
 
-            await parentFolder.CreateFileAsync(_fullPath.Name).Cancel(cancellationToken);
+            await parentFolder
+                .CreateFileAsync(_fullPath.Name, options.ToWinOptions())
+                .AsTask(cancellationToken)
+                .WithConvertedException()
+                .ConfigureAwait(false);
         }
 
         public override async Task<StorageFile> CopyAsync(
@@ -153,7 +154,7 @@
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
             if (destinationPath.FullPath.Parent is null)
             {
-                throw new IOException(ExceptionStrings.File.CannotMoveOrCopyIntoRootLocation());
+                throw new IOException(ExceptionStrings.File.CannotCopyToRootLocation());
             }
 
             var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
@@ -161,8 +162,10 @@
                 .GetFolderAsync(destinationPath.FullPath.Parent, cancellationToken)
                 .ConfigureAwait(false);
             await file
-                .CopyAsync(destFolder, destinationPath.FullPath.Parent, options.ToWinOptions())
-                .Cancel(cancellationToken);
+                .CopyAsync(destFolder, destinationPath.FullPath.Name, options.ToWinOptions())
+                .AsTask(cancellationToken)
+                .WithConvertedException()
+                .ConfigureAwait(false);
             return FileSystem.GetFile(destinationPath);
         }
 
@@ -175,17 +178,22 @@
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
             if (destinationPath.FullPath.Parent is null)
             {
-                throw new IOException(ExceptionStrings.File.CannotMoveOrCopyIntoRootLocation());
+                throw new IOException(ExceptionStrings.File.CannotMoveToRootLocation());
             }
+
+            var fullDestinationPath = destinationPath.FullPath;
+            var destinationFile = FileSystem.GetFile(fullDestinationPath);
 
             var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
             var destFolder = await FsHelper
-                .GetFolderAsync(destinationPath.FullPath.Parent, cancellationToken)
+                .GetFolderAsync(fullDestinationPath.Parent, cancellationToken)
                 .ConfigureAwait(false);
             await file
-                .MoveAsync(destFolder, destinationPath.FullPath.Parent, options.ToWinOptions())
-                .Cancel(cancellationToken);
-            return FileSystem.GetFile(destinationPath);
+                .MoveAsync(destFolder, fullDestinationPath.Name, options.ToWinOptions())
+                .AsTask(cancellationToken)
+                .WithConvertedException()
+                .ConfigureAwait(false);
+            return destinationFile;
         }
 
         public override async Task<StorageFile> RenameAsync(
@@ -202,12 +210,22 @@
 
             if (newName.Contains(PhysicalPathHelper.InvalidNewNameCharacters))
             {
-                throw new ArgumentException(ExceptionStrings.File.NewNameContainsInvalidChar(), nameof(newName));
+                throw new ArgumentException(
+                    ExceptionStrings.File.NewNameContainsInvalidChar(FileSystem.PathInformation),
+                    nameof(newName)
+                );
             }
 
+            var destinationPath = _fullParentPath.Join(newName).FullPath;
+            var destinationFile = FileSystem.GetFile(destinationPath);
+
             var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-            await file.RenameAsync(newName, options.ToWinOptions()).Cancel(cancellationToken);
-            return FileSystem.GetFile(_fullParentPath.Join(newName));
+            await file
+                .RenameAsync(newName, options.ToWinOptions())
+                .AsTask(cancellationToken)
+                .WithConvertedException()
+                .ConfigureAwait(false);
+            return destinationFile;
         }
 
         public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
@@ -222,7 +240,7 @@
             async Task FailImpl()
             {
                 var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-                await file.DeleteAsync(StorageDeleteOption.PermanentDelete).Cancel(cancellationToken);
+                await file.DeleteAsync(StorageDeleteOption.PermanentDelete).AsAwaitable(cancellationToken);
             }
 
             async Task IgnoreMissingImpl()
@@ -232,10 +250,10 @@
                     var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
                     if (file is object)
                     {
-                        await file.DeleteAsync(StorageDeleteOption.PermanentDelete).Cancel(cancellationToken);
+                        await file.DeleteAsync(StorageDeleteOption.PermanentDelete).AsAwaitable(cancellationToken);
                     }
                 }
-                catch (Exception ex) when (ex is DirectoryNotFoundException || ex is FileNotFoundException)
+                catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException)
                 {
                     // Nothing to do, since the options allow this case.
                 }
@@ -253,7 +271,7 @@
                 _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(fileAccess)),
             };
 
-            var randomAccessStream = await file.OpenAsync(fileAccessMode).Cancel(cancellationToken);
+            var randomAccessStream = await file.OpenAsync(fileAccessMode).AsAwaitable(cancellationToken);
             return randomAccessStream.AsStream();
         }
 
@@ -269,7 +287,7 @@
         {
             _ = bytes ?? throw new ArgumentNullException(nameof(bytes));
             var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-            await FileIO.WriteBytesAsync(file, bytes).Cancel(cancellationToken);
+            await FileIO.WriteBytesAsync(file, bytes).AsAwaitable(cancellationToken);
         }
 
         public override async Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
@@ -280,23 +298,23 @@
             // We use the native API when possible, but might fallback to custom conversions if required.
             if (encoding is null)
             {
-                return await FileIO.ReadTextAsync(file).Cancel(cancellationToken);
+                return await FileIO.ReadTextAsync(file).AsAwaitable(cancellationToken);
             }
             else if (encoding == Encoding.UTF8)
             {
-                return await FileIO.ReadTextAsync(file, WinUnicodeEncoding.Utf8).Cancel(cancellationToken);
+                return await FileIO.ReadTextAsync(file, WinUnicodeEncoding.Utf8).AsAwaitable(cancellationToken);
             }
             else if (encoding == Encoding.Unicode)
             {
-                return await FileIO.ReadTextAsync(file, WinUnicodeEncoding.Utf16LE).Cancel(cancellationToken);
+                return await FileIO.ReadTextAsync(file, WinUnicodeEncoding.Utf16LE).AsAwaitable(cancellationToken);
             }
             else if (encoding == Encoding.BigEndianUnicode)
             {
-                return await FileIO.ReadTextAsync(file, WinUnicodeEncoding.Utf16BE).Cancel(cancellationToken);
+                return await FileIO.ReadTextAsync(file, WinUnicodeEncoding.Utf16BE).AsAwaitable(cancellationToken);
             }
             else
             {
-                var buffer = await FileIO.ReadBufferAsync(file).Cancel(cancellationToken);
+                var buffer = await FileIO.ReadBufferAsync(file).AsAwaitable(cancellationToken);
                 var bytes = buffer.ToArray();
                 return encoding.GetString(bytes);
             }
@@ -314,24 +332,44 @@
             // We use the native API when possible, but might fallback to custom conversions if required.
             if (encoding is null)
             {
-                await FileIO.WriteTextAsync(file, text).Cancel(cancellationToken);
+                await FileIO.WriteTextAsync(file, text).AsAwaitable(cancellationToken);
             }
             else if (encoding == Encoding.UTF8)
             {
-                await FileIO.WriteTextAsync(file, text, WinUnicodeEncoding.Utf8).Cancel(cancellationToken);
+                await FileIO.WriteTextAsync(file, text, WinUnicodeEncoding.Utf8).AsAwaitable(cancellationToken);
             }
             else if (encoding == Encoding.Unicode)
             {
-                await FileIO.WriteTextAsync(file, text, WinUnicodeEncoding.Utf16LE).Cancel(cancellationToken);
+                await FileIO.WriteTextAsync(file, text, WinUnicodeEncoding.Utf16LE).AsAwaitable(cancellationToken);
             }
             else if (encoding == Encoding.BigEndianUnicode)
             {
-                await FileIO.WriteTextAsync(file, text, WinUnicodeEncoding.Utf16BE).Cancel(cancellationToken);
+                await FileIO.WriteTextAsync(file, text, WinUnicodeEncoding.Utf16BE).AsAwaitable(cancellationToken);
             }
             else
             {
-                await FileIO.WriteBytesAsync(file, encoding.GetBytes(text)).Cancel(cancellationToken);
+                await FileIO.WriteBytesAsync(file, encoding.GetBytes(text)).AsAwaitable(cancellationToken);
             }
+        }
+
+        private async Task EnsureNoConflictingFolderExistsAsync(CancellationToken cancellationToken)
+        {
+            try
+            {
+                await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
+            }
+            catch
+            {
+                // Ideally we'd catch more specific exceptions here.
+                // Since this method is only called for throwing the *correct* exception type though,
+                // we can be less strict about it.
+                // At the end of the day, if a conflicting folder does exist, the I/O APIs *will*
+                // throw, just not a guaranteed IOException. No need to make our life harder with
+                // extensive exception checking.
+                return;
+            }
+
+            throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation());
         }
     }
 }

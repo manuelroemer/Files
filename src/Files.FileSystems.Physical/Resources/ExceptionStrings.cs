@@ -22,16 +22,20 @@
             internal static string ConflictingFolderExistsAtFileLocation() =>
                 "The operation failed because a folder exists at the file's location (or at the " +
                 "destination folder if this was a copy or move operation).";
-
-            internal static string NewNameContainsInvalidChar() =>
+            
+            internal static string NewNameContainsInvalidChar(PathInformation pathInformation) =>
                 $"The specified name contains one or more invalid characters. " +
                 $"Invalid characters are:\n" +
-                $"- The directory separator character\n" +
-                $"- The alternative directory separator character\n" +
-                $"- The volume separator character\n" +
+                $"- The directory separator character '{pathInformation.DirectorySeparatorChar}'\n" +
+                $"- The alternative directory separator character '{pathInformation.AltDirectorySeparatorChar}'\n" +
+                $"- The volume separator character '{pathInformation.VolumeSeparatorChar}'\n" +
                 $"\n" +
                 $"You can use the {nameof(FileSystem)}.{nameof(FileSystem.PathInformation)} property " +
-                $"of this file's {nameof(FileSystem)} property to determine which characters are allowed.";
+                $"of this file's {nameof(StorageFile.FileSystem)} property to determine which characters" +
+                $"are allowed.";
+
+            internal static string CannotMoveToSameLocation() =>
+                "Moving the file to the same location is not possible.";
         }
 
         internal static class Folder
@@ -46,15 +50,22 @@
             internal static string CopyConflictingFolderExistsAtDestination() =>
                 "Another folder already exists at the destination.";
 
-            internal static string NewNameContainsInvalidChar() =>
+            internal static string NewNameContainsInvalidChar(PathInformation pathInformation) =>
                 $"The specified name contains one or more invalid characters. " +
                 $"Invalid characters are:\n" +
-                $"- The directory separator character\n" +
-                $"- The alternative directory separator character\n" +
-                $"- The volume separator character\n" +
+                $"- The directory separator character '{pathInformation.DirectorySeparatorChar}'\n" +
+                $"- The alternative directory separator character '{pathInformation.AltDirectorySeparatorChar}'\n" +
+                $"- The volume separator character '{pathInformation.VolumeSeparatorChar}'\n" +
                 $"\n" +
                 $"You can use the {nameof(FileSystem)}.{nameof(FileSystem.PathInformation)} property " +
-                $"of this file's {nameof(FileSystem)} property to determine which characters are allowed.";
+                $"of this folder's {nameof(StorageFolder.FileSystem)} property to determine which characters" +
+                $"are allowed.";
+
+            internal static string CannotCopyToSameLocation() =>
+                "Copying the folder to the same location is not possible.";
+
+            internal static string CannotMoveToSameLocation() =>
+                "Moving the folder to the same location is not possible.";
         }
     }
 }

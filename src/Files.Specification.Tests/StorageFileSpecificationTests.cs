@@ -509,6 +509,7 @@
             var srcFile = await TestFolder.SetupFileAsync(Default.FileName);
             var dstFilePath = srcFile.Path;
             await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(dstFilePath, options));
+            await srcFile.ShouldExistAsync();
         }
 
         #endregion
@@ -614,10 +615,10 @@
         [TestMethod]
         [DataRow(NameCollisionOption.Fail)]
         [DataRow(NameCollisionOption.ReplaceExisting)]
-        public async Task MoveAsync_MoveToSameLocation_DoesNothing(NameCollisionOption options)
+        public async Task MoveAsync_MoveToSameLocation_ThrowsIOException(NameCollisionOption options)
         {
             var srcFile = await TestFolder.SetupFileAsync(Default.FileName);
-            await srcFile.MoveAsync(srcFile.Path, options);
+            await Should.ThrowAsync<IOException>(async () => await srcFile.MoveAsync(srcFile.Path, options));
             await srcFile.ShouldExistAsync();
         }
 
@@ -729,10 +730,10 @@
         [TestMethod]
         [DataRow(NameCollisionOption.Fail)]
         [DataRow(NameCollisionOption.ReplaceExisting)]
-        public async Task RenameAsync_SameName_DoesNothing(NameCollisionOption options)
+        public async Task RenameAsync_SameName_ThrowsIOException(NameCollisionOption options)
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
-            await file.RenameAsync(Default.FileName, options);
+            await Should.ThrowAsync<IOException>(async () => await file.RenameAsync(Default.FileName, options));
             await file.ShouldExistAsync();
         }
 
