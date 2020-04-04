@@ -38,9 +38,10 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: 'restore'
+    projects: '**/*.sln'
     feedsToUse: 'config'
     nugetConfigPath: 'src/nuget.config'
 
 - task: VSBuild@1
   inputs:
-    solution: '**\*.sln'
+    solution: '**/*.sln'
