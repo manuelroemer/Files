@@ -50,12 +50,14 @@ steps:
 
 - task: VSBuild@1
   inputs:
-    solution: '***.sln'
+    platform: 'x86|x64'
+    solution: '**\*.sln'
     maximumCpuCount: true
     msbuildArgs: '-nr:false /p:AppxBundlePlatforms="$(buildPlatform)" /p:AppxPackageDir="$(appxPackageDir)" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload'
 
 - task: VSTest@2
   inputs:
+    platform: 'x86|x64'
     testSelector: 'testAssemblies'
     testAssemblyVer2: |
       **\*test*.dll
