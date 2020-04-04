@@ -51,9 +51,8 @@ steps:
 - task: VSBuild@1
   inputs:
     solution: '***.sln'
-    configuration: '/nr:false'
     maximumCpuCount: true
-    msbuildArgs: '/p:AppxBundlePlatforms="$(buildPlatform)" /p:AppxPackageDir="$(appxPackageDir)" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload'
+    msbuildArgs: '-nr:false /p:AppxBundlePlatforms="$(buildPlatform)" /p:AppxPackageDir="$(appxPackageDir)" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload'
 
 - task: VSTest@2
   inputs:
