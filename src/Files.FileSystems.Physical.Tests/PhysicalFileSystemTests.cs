@@ -14,15 +14,15 @@
         public override IEnumerable<object[]> KnownFolderData => new[]
         {
             new object[] { KnownFolder.TemporaryData, Path.GetTempPath() },
-            new object[] { KnownFolder.RoamingApplicationData, GetFolderPath(ApplicationData) },
-            new object[] { KnownFolder.LocalApplicationData, GetFolderPath(LocalApplicationData) },
-            new object[] { KnownFolder.ProgramData, GetFolderPath(CommonApplicationData) },
-            new object[] { KnownFolder.UserProfile, GetFolderPath(UserProfile) },
-            new object[] { KnownFolder.Desktop, GetFolderPath(Desktop) },
-            new object[] { KnownFolder.DocumentsLibrary, GetFolderPath(MyDocuments) },
-            new object[] { KnownFolder.PicturesLibrary, GetFolderPath(MyPictures) },
-            new object[] { KnownFolder.VideosLibrary, GetFolderPath(MyVideos) },
-            new object[] { KnownFolder.MusicLibrary, GetFolderPath(MyMusic) },
+            new object[] { KnownFolder.RoamingApplicationData, GetFolderPath(ApplicationData, SpecialFolderOption.DoNotVerify) },
+            new object[] { KnownFolder.LocalApplicationData, GetFolderPath(LocalApplicationData, SpecialFolderOption.DoNotVerify) },
+            new object[] { KnownFolder.ProgramData, GetFolderPath(CommonApplicationData, SpecialFolderOption.DoNotVerify) },
+            new object[] { KnownFolder.UserProfile, GetFolderPath(UserProfile, SpecialFolderOption.DoNotVerify) },
+            new object[] { KnownFolder.Desktop, GetFolderPath(Desktop, SpecialFolderOption.DoNotVerify) },
+            new object[] { KnownFolder.DocumentsLibrary, GetFolderPath(MyDocuments, SpecialFolderOption.DoNotVerify) },
+            new object[] { KnownFolder.PicturesLibrary, GetFolderPath(MyPictures, SpecialFolderOption.DoNotVerify) },
+            new object[] { KnownFolder.VideosLibrary, GetFolderPath(MyVideos, SpecialFolderOption.DoNotVerify) },
+            new object[] { KnownFolder.MusicLibrary, GetFolderPath(MyMusic, SpecialFolderOption.DoNotVerify) },
         };
 
         public override IEnumerable<object[]> ValidPathStringData => new[]
