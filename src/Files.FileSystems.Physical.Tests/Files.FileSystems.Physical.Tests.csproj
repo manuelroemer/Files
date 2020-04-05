@@ -2,12 +2,15 @@
 
   <PropertyGroup>
     <TargetFrameworks>
-      net48;
       netcoreapp2.0;
       netcoreapp2.1;
       netcoreapp2.2;
       netcoreapp3.0;
       netcoreapp3.1
+    </TargetFrameworks>
+    <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">
+      $(TargetFrameworks);
+      net48
     </TargetFrameworks>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
