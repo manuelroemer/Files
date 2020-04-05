@@ -37,7 +37,7 @@ steps:
   displayName: Build / Test / Pack
   inputs:
     filePath: 'build/build.ps1'
-    arguments: '--configuration $(buildConfiguration) --ArtifactsDirectory $(Build.ArtifactStagingDirectory)'
+    arguments: '--configuration $(buildConfiguration) --ArtifactsDirectory $(Build.ArtifactStagingDirectory) --no-logo'
     
 - task: PublishTestResults@2
   displayName: Publish Test Results
