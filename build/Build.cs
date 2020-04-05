@@ -102,7 +102,8 @@ class Build : NukeBuild
             {
                 DotNetBuild(s => s
                     .SetProjectFile(project)
-                    .SetConfiguration(Configuration));
+                    .SetConfiguration(Configuration)
+                    .SetNoRestore(true));
             }
         });
 
