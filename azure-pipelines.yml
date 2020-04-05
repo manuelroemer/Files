@@ -4,8 +4,17 @@ trigger:
 variables:
   buildConfiguration: 'Release'
 
+strategy:
+  matrix:
+    windows:
+      imageName: 'windows-2019'
+    linux:
+      imageName: 'ubuntu-latest'
+    mac:
+      imageName: 'macOS-latest'
+
 pool:
-  vmImage: 'windows-2019'
+  vmImage: $(imageName)
 
 steps:
 - task: UseDotNet@2
