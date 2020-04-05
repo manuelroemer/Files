@@ -42,7 +42,7 @@ steps:
     version: '3.1.x'
 
 - task: PowerShell@2
-  displayName: Build
+  displayName: Build / Test / Pack
   inputs:
     filePath: 'build/build.ps1'
 
