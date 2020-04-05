@@ -175,6 +175,7 @@ class Build : NukeBuild
         .DependsOn(TestCrossPlatformProjects)
         .DependsOn(TestUwpProjects)
         .OnlyWhenDynamic(() => Configuration == Configuration.Release)
+        .OnlyWhenDynamic(() => IsWin)
         .Executes(() =>
         {
             MSBuild(s => s
@@ -185,8 +186,7 @@ class Build : NukeBuild
         });
 
     Target CrossPlatformBuild => _ => _
-        .DependsOn(TestCrossPlatformProjects)
-        .DependsOn(Pack);
+        .DependsOn(TestCrossPlatformProjects);
 
     Target WindowsBuild => _ => _
         .DependsOn(TestCrossPlatformProjects)
