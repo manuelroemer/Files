@@ -115,7 +115,7 @@ class Build : NukeBuild
                 DotNetTest(s => s
                     .SetProjectFile(project)
                     .SetConfiguration(Configuration)
-                    .SetLogger($"trx;LogFileName={project.Name}.trx")
+                    .SetLogger("trx")
                     .SetNoBuild(true)
                     .SetNoRestore(true));
             }
@@ -149,7 +149,7 @@ class Build : NukeBuild
                     .SetWorkingDirectory(appxRecipePath.Parent)
                     .AddTestAssemblies(Path.GetFileName(appxRecipePath))
                     .SetFramework((VsTestFramework)"FrameworkUap10")
-                    .SetLogger($"trx;LogFileName={Path.GetFileName(appxRecipePath)}.trx"));
+                    .SetLogger("trx"));
             }
 
             static string FindVsTestExe()
