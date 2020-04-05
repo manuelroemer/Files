@@ -37,7 +37,7 @@ steps:
   displayName: Build / Test / Pack
   inputs:
     filePath: 'build/build.ps1'
-
+    arguments: '--configuration $(buildConfiguration) --ArtifactsDirectory $(Build.ArtifactStagingDirectory)'
     
 - task: PublishTestResults@2
   displayName: Publish Test Results
@@ -45,3 +45,10 @@ steps:
     testResultsFormat: 'VSTest'
     testResultsFiles: '**/*.trx'
     failTaskOnFailedTests: true
+
+- task: PublishBuildArtifacts@1
+  displayName: Publish NuGet Package Artifacts
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'NuGet Packages'
+    publishLocation: 'Container'

@@ -1,29 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using GlobExpressions;
 using Nuke.Common;
 using Nuke.Common.Execution;
-using Nuke.Common.Git;
 using Nuke.Common.IO;
 using Nuke.Common.ProjectModel;
 using Nuke.Common.Tooling;
-using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Tools.DotNet;
-using Nuke.Common.Tools.VSTest;
+using Nuke.Common.Tools.MSBuild;
 using Nuke.Common.Tools.NuGet;
+using Nuke.Common.Tools.VSTest;
 using Nuke.Common.Utilities.Collections;
 using static Nuke.Common.EnvironmentInfo;
 using static Nuke.Common.IO.FileSystemTasks;
 using static Nuke.Common.IO.PathConstruction;
-using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 using static Nuke.Common.Tools.DotNet.DotNetTasks;
+using static Nuke.Common.Tools.MSBuild.MSBuildTasks;
 using static Nuke.Common.Tools.VSTest.VSTestTasks;
-using static Nuke.Common.Tools.NuGet.NuGetTasks;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Runtime.ExceptionServices;
-using System.Threading;
-using GlobExpressions;
 
 [CheckBuildProjectConfigurations]
 [UnsetVisualStudioEnvironmentVariables]
@@ -34,11 +29,13 @@ class Build : NukeBuild
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
     readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
 
-    [Solution] readonly Solution Solution;
-    [GitRepository] readonly GitRepository GitRepository;
+    [Parameter("The directory where build artifacts (NuGet packages) will be placed.")]
+    readonly AbsolutePath ArtifactsDirectory = RootDirectory / "artifacts";
 
-    AbsolutePath SourceDirectory => RootDirectory / "src";
-    AbsolutePath ArtifactsDirectory => RootDirectory / "artifacts";
+    [Parameter("The directory where the project source files are located.")]
+    readonly AbsolutePath SourceDirectory = RootDirectory / "src";
+    
+    [Solution] readonly Solution Solution;
 
     IReadOnlyList<Project> FilesProjects =>
          Solution.GetProjects("Files*").Where(p => p.Is(ProjectType.CSharpProject)).ToList();
@@ -73,6 +70,12 @@ class Build : NukeBuild
         {
             Logger.Warn("The build is not running on Windows. Some projects and configurations will be skipped.");
         }
+
+        Logger.Info("");
+        Logger.Info($"Starting build...");
+        Logger.Info($"Configuration: {Configuration}");
+        Logger.Info($"Source Directory: {SourceDirectory}");
+        Logger.Info($"Artifacts Directory: {ArtifactsDirectory}");
     }
 
     Target Clean => _ => _
@@ -112,7 +115,7 @@ class Build : NukeBuild
                 DotNetTest(s => s
                     .SetProjectFile(project)
                     .SetConfiguration(Configuration)
-                    .SetLogger("trx")
+                    .SetLogger($"trx;LogFileName={project.Name}")
                     .SetNoBuild(true)
                     .SetNoRestore(true));
             }
@@ -131,10 +134,6 @@ class Build : NukeBuild
                     .SetConfiguration(Configuration)
                     .SetRestore(true)
                     .SetMaxCpuCount(Environment.ProcessorCount)
-                    //.AddProperty("AppxBundlePlatforms", "x86")
-                    //.AddProperty("AppxPackageDir", ArtifactsDirectory / "AppxPackages")
-                    //.AddProperty("AppxBundle", "Always")
-                    //.AddProperty("UapAppxPackageBuildMode", "CI")
                     .SetNodeReuse(false));
             }
         });
@@ -150,7 +149,7 @@ class Build : NukeBuild
                     .SetWorkingDirectory(appxRecipePath.Parent)
                     .AddTestAssemblies(Path.GetFileName(appxRecipePath))
                     .SetFramework((VsTestFramework)"FrameworkUap10")
-                    .SetLogger("trx"));
+                    .SetLogger($"trx;LogFileName={Path.GetFileName(appxRecipePath)}"));
             }
 
             static string FindVsTestExe()
@@ -175,13 +174,14 @@ class Build : NukeBuild
     Target Pack => _ => _
         .DependsOn(TestCrossPlatformProjects)
         .DependsOn(TestUwpProjects)
-        .Requires(() => Configuration == Configuration.Release)
+        .OnlyWhenDynamic(() => Configuration == Configuration.Release)
         .Executes(() =>
         {
             MSBuild(s => s
                 .SetTargetPath(Solution)
                 .SetTargets("pack")
-                .SetConfiguration(Configuration));
+                .SetConfiguration(Configuration)
+                .SetPackageOutputPath(ArtifactsDirectory));
         });
 
     Target CrossPlatformBuild => _ => _
