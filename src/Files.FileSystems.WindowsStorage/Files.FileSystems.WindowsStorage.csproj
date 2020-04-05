@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>uap10.0.16299</TargetFramework>
     <DefineConstants>$(DefineConstants);UAP</DefineConstants>
+    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

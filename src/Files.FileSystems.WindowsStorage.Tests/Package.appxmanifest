@@ -13,7 +13,7 @@
 
   <Properties>
     <DisplayName>Files.FileSystems.WindowsStorage.Tests</DisplayName>
-    <PublisherDisplayName>Manuel</PublisherDisplayName>
+    <PublisherDisplayName>Files</PublisherDisplayName>
     <Logo>Assets\StoreLogo.png</Logo>
   </Properties>
 

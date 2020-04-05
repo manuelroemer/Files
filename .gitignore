@@ -56,3 +56,8 @@ bld/
 [Bb]in/
 [Oo]bj/
 [Ll]og/
+AppPackages
+BundleArtifacts
+
+# Temporary
+.tmp
