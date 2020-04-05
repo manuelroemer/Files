@@ -41,13 +41,6 @@ steps:
   inputs:
     version: '3.1.x'
 
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'restore'
-    projects: '**/*.sln'
-    feedsToUse: 'config'
-    nugetConfigPath: 'src/nuget.config'
-
 - task: PowerShell@2
   displayName: Build
   inputs:
