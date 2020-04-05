@@ -6,11 +6,11 @@ variables:
 
 strategy:
   matrix:
-    windows:
+    Windows:
       imageName: 'windows-2019'
-    linux:
+    Linux:
       imageName: 'ubuntu-latest'
-    mac:
+    macOS:
       imageName: 'macOS-latest'
 
 pool:
@@ -53,7 +53,6 @@ steps:
   inputs:
     testResultsFormat: 'VSTest'
     testResultsFiles: '**/*.trx'
-    failTaskOnFailedTests: true
   condition: always()
 
 - task: PublishBuildArtifacts@1
