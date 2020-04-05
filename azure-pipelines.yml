@@ -48,20 +48,15 @@ steps:
     feedsToUse: 'config'
     nugetConfigPath: 'src/nuget.config'
 
-- task: VSBuild@1
+- task: PowerShell@2
+  displayName: Build
   inputs:
-    platform: 'x86|x64'
-    solution: '**\*.sln'
-    maximumCpuCount: true
-    msbuildArgs: '-nr:false /p:AppxBundlePlatforms="$(buildPlatform)" /p:AppxPackageDir="$(appxPackageDir)" /p:AppxBundle=Always /p:UapAppxPackageBuildMode=StoreUpload'
+    filePath: 'build/build.ps1'
 
-- task: VSTest@2
+    
+- task: PublishTestResults@2
+  displayName: Publish Test Results
   inputs:
-    platform: 'x86|x64'
-    testSelector: 'testAssemblies'
-    testAssemblyVer2: |
-      **\*test*.dll
-      **\*.appxrecipe
-      !**\*TestAdapter.dll
-      !**\obj\**
-    searchFolder: '$(System.DefaultWorkingDirectory)'
+  testResultsFormat: 'VSTest'
+  testResultsFiles: '**/*.trx'
+  failTaskOnFailedTests: true
