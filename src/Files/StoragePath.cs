@@ -8,7 +8,13 @@
     /// <summary>
     ///     An immutable representation of a path which points to an element in a file system.
     /// </summary>
-    public abstract class StoragePath : IFileSystemElement, IEquatable<string?>, IEquatable<StoragePath?>
+    public abstract class StoragePath :
+        IFileSystemElement,
+        IEquatable<string?>,
+        IEquatable<StoragePath?>,
+        IComparable,
+        IComparable<string?>,
+        IComparable<StoragePath?>
     {
         private readonly string _underlyingString;
 
@@ -86,7 +92,7 @@
             _ = path ?? throw new ArgumentNullException(nameof(path));
             if (path.Length == 0)
             {
-                throw new ArgumentException(ExceptionStrings.Path.NotEmpty(), nameof(path));
+                throw new ArgumentException(ExceptionStrings.String.CannotBeEmpty(), nameof(path));
             }
             
             _underlyingString = path;
@@ -221,6 +227,26 @@
             Join(other?._underlyingString!);
 
         public abstract StoragePath Join(string other);
+
+        int IComparable.CompareTo(object? obj) => obj switch
+        {
+            StoragePath path => CompareTo(path),
+            string path => CompareTo(path),
+            null => 1,
+            _ => throw new ArgumentException(ExceptionStrings.Comparable.TypeIsNotSupported(obj.GetType()), nameof(obj)),
+        };
+
+        public int CompareTo(StoragePath? path) =>
+            CompareTo(path, FileSystem.PathInformation.DefaultStringComparison);
+
+        public int CompareTo(StoragePath? path, StringComparison stringComparison) =>
+            CompareTo(path?._underlyingString, stringComparison);
+
+        public int CompareTo(string? path) =>
+            CompareTo(path, FileSystem.PathInformation.DefaultStringComparison);
+
+        public int CompareTo(string? path, StringComparison stringComparison) =>
+            string.Compare(_underlyingString, path, stringComparison);
 
         public sealed override bool Equals(object? obj) => obj switch
         {

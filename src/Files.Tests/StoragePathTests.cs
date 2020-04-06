@@ -9,6 +9,8 @@
     public class StoragePathTests
     {
         private const string MockPathString = "MockPathString";
+        private const string UpperPathString = "MOCKPATHSTRING";
+        private const string LowerPathString = "mockpathstring";
 
         private static readonly PathInformation PathInfoOrdinal = new PathInformation(
             invalidPathChars: Array.Empty<char>(),
@@ -131,6 +133,57 @@
 
         #endregion
 
+        #region CompareTo Tests
+
+        [TestMethod]
+        public void CompareTo_NullParameter_ReturnsGreater()
+        {
+            ((IComparable)_ordinalPathMock.Object).CompareTo((object?)null).ShouldBeGreaterThan(0);
+            _ordinalPathMock.Object.CompareTo((string?)null).ShouldBeGreaterThan(0);
+            _ordinalPathMock.Object.CompareTo((StoragePath?)null).ShouldBeGreaterThan(0);
+        }
+
+        [TestMethod]
+        [DataRow(MockPathString)]
+        [DataRow(UpperPathString)]
+        [DataRow(LowerPathString)]
+        public void CompareTo_StandardPath_ReturnsStringCompareResult(string otherPathStr)
+        {
+            var otherPath = new Mock<StoragePath>(otherPathStr) { CallBase = true }.Object;
+            var expected = string.Compare(MockPathString, otherPathStr, StringComparison.Ordinal);
+
+            ((IComparable)_ordinalPathMock.Object).CompareTo(otherPathStr).ShouldBe(expected);
+            ((IComparable)_ordinalPathMock.Object).CompareTo(otherPath).ShouldBe(expected);
+            _ordinalPathMock.Object.CompareTo(otherPathStr).ShouldBe(expected);
+            _ordinalPathMock.Object.CompareTo(otherPath).ShouldBe(expected);
+        }
+
+        [TestMethod]
+        public void CompareTo_WithoutStringComparison_UsesDefaultStringComparison()
+        {
+            var upperPath = new Mock<StoragePath>(UpperPathString) { CallBase = true }.Object;
+
+            _ordinalPathMock.Object.CompareTo(upperPath).ShouldNotBe(0);
+            _ordinalIgnoreCasePathMock.Object.CompareTo(UpperPathString).ShouldBe(0);
+
+            _ordinalPathMock.Object.CompareTo(upperPath).ShouldNotBe(0);
+            _ordinalIgnoreCasePathMock.Object.CompareTo(upperPath).ShouldBe(0);
+        }
+
+        [TestMethod]
+        public void CompareTo_WithStringComparison_UsesStringComparison()
+        {
+            var upperPath = new Mock<StoragePath>(UpperPathString) { CallBase = true }.Object;
+
+            _ordinalPathMock.Object.CompareTo(UpperPathString, StringComparison.OrdinalIgnoreCase).ShouldBe(0);
+            _ordinalIgnoreCasePathMock.Object.CompareTo(UpperPathString, StringComparison.Ordinal).ShouldNotBe(0);
+
+            _ordinalPathMock.Object.CompareTo(upperPath, StringComparison.OrdinalIgnoreCase).ShouldBe(0);
+            _ordinalIgnoreCasePathMock.Object.CompareTo(upperPath, StringComparison.Ordinal).ShouldNotBe(0);
+        }
+
+        #endregion
+
         #region Equals Tests
 
         [TestMethod]
@@ -144,27 +197,25 @@
         [TestMethod]
         public void Equals_WithoutStringComparison_UsesDefaultStringComparison()
         {
-            var otherPathStr = MockPathString.ToUpperInvariant();
-            var otherPath = new Mock<StoragePath>(otherPathStr) { CallBase = true }.Object;
+            var upperPath = new Mock<StoragePath>(UpperPathString) { CallBase = true }.Object;
 
-            _ordinalPathMock.Object.Equals(otherPathStr).ShouldBeFalse();
-            _ordinalIgnoreCasePathMock.Object.Equals(otherPathStr).ShouldBeTrue();
+            _ordinalPathMock.Object.Equals(UpperPathString).ShouldBeFalse();
+            _ordinalIgnoreCasePathMock.Object.Equals(UpperPathString).ShouldBeTrue();
 
-            _ordinalPathMock.Object.Equals(otherPath).ShouldBeFalse();
-            _ordinalIgnoreCasePathMock.Object.Equals(otherPath).ShouldBeTrue();
+            _ordinalPathMock.Object.Equals(upperPath).ShouldBeFalse();
+            _ordinalIgnoreCasePathMock.Object.Equals(upperPath).ShouldBeTrue();
         }
 
         [TestMethod]
         public void Equals_WithStringComparison_UsesStringComparison()
         {
-            var otherPathStr = MockPathString.ToUpperInvariant();
-            var otherPath = new Mock<StoragePath>(otherPathStr) { CallBase = true }.Object;
+            var upperPath = new Mock<StoragePath>(UpperPathString) { CallBase = true }.Object;
 
-            _ordinalPathMock.Object.Equals(otherPathStr, StringComparison.OrdinalIgnoreCase).ShouldBeTrue();
-            _ordinalIgnoreCasePathMock.Object.Equals(otherPathStr, StringComparison.Ordinal).ShouldBeFalse();
+            _ordinalPathMock.Object.Equals(UpperPathString, StringComparison.OrdinalIgnoreCase).ShouldBeTrue();
+            _ordinalIgnoreCasePathMock.Object.Equals(UpperPathString, StringComparison.Ordinal).ShouldBeFalse();
 
-            _ordinalPathMock.Object.Equals(otherPath, StringComparison.OrdinalIgnoreCase).ShouldBeTrue();
-            _ordinalIgnoreCasePathMock.Object.Equals(otherPath, StringComparison.Ordinal).ShouldBeFalse();
+            _ordinalPathMock.Object.Equals(upperPath, StringComparison.OrdinalIgnoreCase).ShouldBeTrue();
+            _ordinalIgnoreCasePathMock.Object.Equals(upperPath, StringComparison.Ordinal).ShouldBeFalse();
         }
 
         #endregion
