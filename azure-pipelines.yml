@@ -70,3 +70,10 @@ jobs:
         eq(variables['build.sourceBranch'], $(releaseBranch)),
         eq(variables['Agent.OS'], 'Windows_NT')
       )
+
+- job: Publish
+  dependsOn: Build
+  pool:
+    vmImage: 'ubuntu-latest'
+  steps:
+  - script: echo 'Hello world!'
