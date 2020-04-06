@@ -3,7 +3,6 @@ trigger:
 
 variables:
   buildConfiguration: 'Release'
-  releaseBranch: 'refs/heads/master'
   nuGetArtifactName: 'NuGet Packages'
 
 jobs:
@@ -68,7 +67,7 @@ jobs:
       and
       (
         succeeded(),
-        eq(variables['build.sourceBranch'], variables['releaseBranch'])
+        eq(variables['build.sourceBranch'], 'refs/heads/master')
         eq(variables['Agent.OS'], 'Windows_NT')
       )
 
@@ -78,7 +77,7 @@ jobs:
     and
     (
       succeeded(),
-      eq(variables['build.sourceBranch'], variables['releaseBranch'])
+      eq(variables['build.sourceBranch'], 'refs/heads/master')
     )
   pool:
     vmImage: 'ubuntu-latest'
