@@ -139,6 +139,28 @@
                 var dstPathString = destinationPath.FullPath.ToString();
                 var overwrite = options.ToOverwriteBool();
 
+#if NETCOREAPP2_0 || NETCOREAPP2_1 || NETCOREAPP2_2
+                // File.Copy on Unix systems AND .NET Core 2.0 - 2.2 has this weird behavior where
+                // no exception is thrown if the destination is a folder. When copying a file to
+                // a conflicting folder, the API, instead of throwing, simply moves the file *into*
+                // the folder. For example, assume that we copy "src/srcFile.ext" to "dst":
+                // |_ src
+                // |  |_ srcFile.ext
+                // |_ dst
+                //
+                // We'd assume that this throws, but instead, this happens:
+                // |_ src
+                // |  |_ srcFile.ext
+                // |_ dst
+                //    |_ srcFile.ext
+                // 
+                // This can be fixed by preemptively verifying that there is no conflicting folder.
+                // This has the disadvantage that we lose the inner exception which would normally
+                // be thrown (the UnauthorizedAccessException below).
+                // To not lose it with other TFMs, only include it in the failing .NET Core versions.
+                EnsureNoConflictingFolderExists(_fullPath.ToString());
+#endif
+
                 try
                 {
                     File.Copy(_fullPath.ToString(), dstPathString, overwrite);
@@ -164,11 +186,10 @@
 
             return Task.Run(() =>
             {
+                EnsureExists(cancellationToken);
+
                 var fullDestinationPath = destinationPath.FullPath;
                 var overwrite = options.ToOverwriteBool();
-
-                EnsureExists(cancellationToken);
-                EnsureNoConflictingFolderExists(fullDestinationPath.ToString());
 
                 // System.IO doesn't throw when moving files to the same location.
                 // Detecting this via paths will not always work, but it fulfills the spec most of the time.
