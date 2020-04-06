@@ -1,11 +1,11 @@
-﻿namespace Files.Shared.PhysicalStoragePath
+﻿namespace Files.FileSystems.Shared.PhysicalStoragePath
 {
     using System;
     using System.Diagnostics;
     using System.IO;
     using Files;
-    using Files.Shared.PhysicalStoragePath.Resources;
-    using Files.Shared.PhysicalStoragePath.Utilities;
+    using Files.FileSystems.Shared.PhysicalStoragePath.Resources;
+    using Files.FileSystems.Shared.PhysicalStoragePath.Utilities;
 
     internal sealed class PhysicalStoragePath : StoragePath
     {

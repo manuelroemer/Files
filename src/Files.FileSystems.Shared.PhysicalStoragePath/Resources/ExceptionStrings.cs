@@ -1,4 +1,4 @@
-﻿namespace Files.Shared.PhysicalStoragePath.Resources
+﻿namespace Files.FileSystems.Shared.PhysicalStoragePath.Resources
 {
     internal static class ExceptionStrings
     {

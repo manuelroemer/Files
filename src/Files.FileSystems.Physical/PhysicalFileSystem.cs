@@ -4,8 +4,8 @@
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using Files;
-    using Files.Shared.PhysicalStoragePath;
-    using Files.Shared.PhysicalStoragePath.Utilities;
+    using Files.FileSystems.Shared.PhysicalStoragePath;
+    using Files.FileSystems.Shared.PhysicalStoragePath.Utilities;
     using static System.Environment;
     using static System.Environment.SpecialFolder;
 

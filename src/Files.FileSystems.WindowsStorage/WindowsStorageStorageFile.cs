@@ -10,8 +10,8 @@
     using Files;
     using Files.FileSystems.WindowsStorage.Resources;
     using Files.FileSystems.WindowsStorage.Utilities;
-    using Files.Shared.PhysicalStoragePath;
-    using Files.Shared.PhysicalStoragePath.Utilities;
+    using Files.FileSystems.Shared.PhysicalStoragePath;
+    using Files.FileSystems.Shared.PhysicalStoragePath.Utilities;
     using Windows.Storage;
     using CreationCollisionOption = CreationCollisionOption;
     using IOFileAttributes = System.IO.FileAttributes;
