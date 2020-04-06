@@ -75,7 +75,7 @@
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
-                EnsureNoConflictingFolderExists();
+                EnsureNoConflictingFolderExists(_fullPath.ToString());
                 cancellationToken.ThrowIfCancellationRequested();
                 return File.GetAttributes(_fullPath.ToString());
             });
@@ -86,7 +86,7 @@
             cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
-                EnsureNoConflictingFolderExists();
+                EnsureNoConflictingFolderExists(_fullPath.ToString());
                 cancellationToken.ThrowIfCancellationRequested();
                 File.SetAttributes(_fullPath.ToString(), attributes);
             });
@@ -119,7 +119,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    EnsureNoConflictingFolderExists(ex);
+                    EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
                     throw;
                 }
             });
@@ -146,14 +146,8 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    EnsureNoConflictingFolderExists(
-                        ex,
-                        potentialConflictingFolderPaths: new[]
-                        {
-                            _fullPath.ToString(),
-                            dstPathString,
-                        }
-                    );
+                    EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
+                    EnsureNoConflictingFolderExists(dstPathString, ex);
                     throw;
                 }
             });
@@ -174,7 +168,7 @@
                 var overwrite = options.ToOverwriteBool();
 
                 EnsureExists(cancellationToken);
-                EnsureNoConflictingFolderExists(null, new[] { fullDestinationPath.ToString() });
+                EnsureNoConflictingFolderExists(fullDestinationPath.ToString());
 
                 // System.IO doesn't throw when moving files to the same location.
                 // Detecting this via paths will not always work, but it fulfills the spec most of the time.
@@ -190,14 +184,8 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    EnsureNoConflictingFolderExists(
-                        ex,
-                        potentialConflictingFolderPaths: new[]
-                        {
-                            _fullPath.ToString(),
-                            fullDestinationPath.ToString(),
-                        }
-                    );
+                    EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
+                    EnsureNoConflictingFolderExists(fullDestinationPath.ToString(), ex);
                     throw;
                 }
             });
@@ -254,7 +242,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    EnsureNoConflictingFolderExists(ex);
+                    EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
                     throw;
                 }
             });
@@ -271,7 +259,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    EnsureNoConflictingFolderExists(ex);
+                    EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
                     throw;
                 }
             });
@@ -288,7 +276,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    await EnsureNoConflictingFolderExists(ex).ConfigureAwait(false);
+                    EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
                     throw;
                 }
             });
@@ -319,7 +307,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    await EnsureNoConflictingFolderExists(ex).ConfigureAwait(false);
+                    EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
                     throw;
                 }
             });
@@ -364,46 +352,9 @@
             }
         }
 
-        private void EnsureNoConflictingFolderExists()
+        private void EnsureNoConflictingFolderExists(string path, Exception? innerException = null)
         {
-            if (Directory.Exists(_fullPath.ToString()))
-            {
-                throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation());
-            }
-        }
-
-        private Task EnsureNoConflictingFolderExists(Exception? innerException) =>
-            Task.Run(() => EnsureNoConflictingFolderExists(innerException));
-
-        /// <summary>
-        ///     Several methods in the <see cref="File"/> class throw an <see cref="UnauthorizedAccessException"/>
-        ///     when a file operation (e.g. Create, Delete, ...) is executed on a directory.
-        ///     
-        ///     Per library specification, the library should throw an IOException in such cases.
-        ///     To do this, we manually check if a directory exists in such a location and throw
-        ///     an IOException instead.
-        /// </summary>
-        private void EnsureNoConflictingFolderExists(
-            Exception? innerException,
-            string[]? potentialConflictingFolderPaths = null
-        )
-        {
-            potentialConflictingFolderPaths ??= new[] { _fullPath.ToString() };
-
-            bool hasConflictingDirectory;
-
-            try
-            {
-                hasConflictingDirectory = potentialConflictingFolderPaths.Any(path => Directory.Exists(path));
-            }
-            // Do not catch general exception types
-            // Since this is only used for exception conversions, it's okay to fail.
-            catch
-            {
-                hasConflictingDirectory = false;
-            }
-
-            if (hasConflictingDirectory)
+            if (Directory.Exists(path))
             {
                 throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation(), innerException);
             }
