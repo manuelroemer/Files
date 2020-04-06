@@ -25,32 +25,17 @@
     <IsTestProject>$(MSBuildProjectName.Contains('Test'))</IsTestProject>
   </PropertyGroup>
   
-  <PropertyGroup Condition=" $(IsTestProject) ">
-    <CodeAnalysisRuleSet>../Tests.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-
-  <ItemGroup>
-    <!--<PackageReference Include="SauceControl.InheritDoc" Version="1.0.0" PrivateAssets="All" />-->
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8" PrivateAssets="all" />
-  </ItemGroup>
-
-  <!-- netstandard2.0 inheritdoc fixes. -->
-  <!--<PropertyGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <NoWarn>$(NoWarn);IDT001</NoWarn>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageDownload Include="NETStandard.Library.Ref" Version="[2.1.0]" />
-    <InheritDocReference Include="$([MSBuild]::EnsureTrailingSlash('$(NugetPackageRoot)'))netstandard.library.ref\2.1.0\ref\netstandard2.1\netstandard.xml" />
-  </ItemGroup>-->
-  
   <PropertyGroup Condition=" $(Configuration) == 'Release' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
-  <!-- Certain warnings make no sense in test projects. -->
   <PropertyGroup Condition=" $(IsTestProject) ">
+    <CodeAnalysisRuleSet>../Tests.ruleset</CodeAnalysisRuleSet>
     <NoWarn>$(NoWarn);CS1573</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8" PrivateAssets="all" />
+  </ItemGroup>
 
 </Project>
