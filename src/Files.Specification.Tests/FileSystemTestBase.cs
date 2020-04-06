@@ -6,6 +6,7 @@
     using System.Threading.Tasks;
     using Files;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 
     /// <summary>
     ///     Defines base for test classes which need to interact or test a file system element
@@ -91,12 +92,54 @@
             {
                 if (_testFolder is object)
                 {
+                    await LogFinalTestFolderStateAsync();
                     await _testFolder.DeleteAsync(DeletionOption.IgnoreMissing);
                 }
             }
             catch (DirectoryNotFoundException)
             {
                 // Should not be thrown, but it MAY happen if the underlying implementation is wrong.
+            }
+        }
+
+        private async Task LogFinalTestFolderStateAsync()
+        {
+            try
+            {
+                Logger.LogMessage("Final test folder state:");
+                if (!await TestFolder.ExistsAsync())
+                {
+                    Logger.LogMessage("The test folder does not exist anymore.");
+                    return;
+                }
+
+                await LogRecursively(TestFolder);
+            }
+            catch (Exception ex)
+            {
+                Logger.LogMessage($"Logging the state of the test folder failed with an exception: {ex.ToString()}");
+            }
+
+            static async Task LogRecursively(StorageFolder folder, int level = 0)
+            {
+                LogFsMember(folder, level);
+
+                foreach (var file in await folder.GetAllFilesAsync())
+                {
+                    LogFsMember(file, level + 2);
+                }
+
+                foreach (var subFolder in await folder.GetAllFoldersAsync())
+                {
+                    await LogRecursively(subFolder, level + 2);
+                }
+            }
+
+            static void LogFsMember(StorageElement element, int level)
+            {
+                var emojiPrefix = element is StorageFile ? "📄" : "📁";
+                var msg = $"|_ {emojiPrefix} {element.Path.Name}".PadLeft(level);
+                Logger.LogMessage(msg);
             }
         }
     }
