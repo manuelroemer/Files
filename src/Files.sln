@@ -47,9 +47,6 @@ EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = "Files.FileSystems.Shared.PhysicalStoragePath", "Files.FileSystems.Shared.PhysicalStoragePath\Files.FileSystems.Shared.PhysicalStoragePath.shproj", "{FD470C52-AEBE-4967-8252-EBC1B586D6B2}"
 EndProject
 Global
-	GlobalSection(SharedMSBuildProjectFiles) = preSolution
-		Files.FileSystems.Shared.PhysicalStoragePath\Files.Shared.PhysicalStoragePath.projitems*{fd470c52-aebe-4967-8252-ebc1b586d6b2}*SharedItemsImports = 13
-	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|ARM = Debug|ARM

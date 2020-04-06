@@ -122,7 +122,7 @@
         }
 
         [TestMethod]
-        public async Task SetAttributes_InvalidAttributeCombination_DoesNotThrow()
+        public async Task SetAttributes_ConflictingAttributeCombination_DoesNotThrow()
         {
             // Of course, there is no guarantee that this is invalid in every FS implementation.
             // But in most, it should be.
@@ -253,6 +253,13 @@
 
         #region CreateAsync Tests
 
+        [TestMethod]
+        public async Task CreateAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await Should.ThrowAsync<ArgumentException>(async () => await file.CreateAsync(Default.InvalidCreationCollisionOption));
+        }
+
         [DataTestMethod]
         [DataRow(CreationCollisionOption.Fail, true)]
         [DataRow(CreationCollisionOption.ReplaceExisting, true)]
@@ -342,6 +349,13 @@
 
         #region DeleteAsync Tests
 
+        [TestMethod]
+        public async Task DeleteAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await Should.ThrowAsync<ArgumentException>(async () => await file.DeleteAsync(Default.InvalidDeletionOption));
+        }
+
         [DataTestMethod]
         [DataRow(DeletionOption.Fail)]
         [DataRow(DeletionOption.IgnoreMissing)]
@@ -409,6 +423,14 @@
         {
             var file = TestFolder.GetFile(Default.FileName);
             await Should.ThrowAsync<ArgumentNullException>(async () => await file.CopyAsync(destinationPath: null!));
+        }
+
+        [TestMethod]
+        public async Task CopyAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            var dst = TestFolder.GetPath(Default.DstFileSegments);
+            await Should.ThrowAsync<ArgumentException>(async () => await file.CopyAsync(dst, Default.InvalidNameCollisionOption));
         }
 
         [DataTestMethod]
@@ -521,6 +543,14 @@
         {
             var file = TestFolder.GetFile(Default.FileName);
             await Should.ThrowAsync<ArgumentNullException>(async () => await file.MoveAsync(destinationPath: null!));
+        }
+
+        [TestMethod]
+        public async Task MoveAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            var dst = TestFolder.GetPath(Default.DstFileSegments);
+            await Should.ThrowAsync<ArgumentException>(async () => await file.MoveAsync(dst, Default.InvalidNameCollisionOption));
         }
 
         [TestMethod]
@@ -647,6 +677,13 @@
         }
 
         [TestMethod]
+        public async Task RenameAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await Should.ThrowAsync<ArgumentException>(async () => await file.RenameAsync(Default.RenamedFileName, Default.InvalidNameCollisionOption));
+        }
+
+        [TestMethod]
         [DynamicInstanceData(nameof(RenameAsyncInvalidNewNamesData))]
         public async Task RenameAsync_InvalidName_ThrowsArgumentException(string newName)
         {
@@ -740,6 +777,13 @@
         #endregion
 
         #region OpenAsync Tests
+
+        [TestMethod]
+        public async Task RenameAsync_InvalidFileAccess_ThrowsArgumentException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await Should.ThrowAsync<ArgumentException>(async () => await file.OpenAsync((FileAccess)(-1)));
+        }
 
         [TestMethod]
         [DataRow(FileAccess.Read)]

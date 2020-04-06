@@ -473,6 +473,13 @@
 
         #region CreateAsync Tests
 
+        [TestMethod]
+        public async Task CreateAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var folder = await TestFolder.SetupFolderAsync(Default.FolderName);
+            await Should.ThrowAsync<ArgumentException>(async () => await folder.CreateAsync(Default.InvalidCreationCollisionOption));
+        }
+
         [DataTestMethod]
         [DataRow(CreationCollisionOption.Fail, true)]
         [DataRow(CreationCollisionOption.ReplaceExisting, true)]
@@ -573,6 +580,13 @@
 
         #region DeleteAsync Tests
 
+        [TestMethod]
+        public async Task DeleteAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var folder = await TestFolder.SetupFolderAsync(Default.FolderName);
+            await Should.ThrowAsync<ArgumentException>(async () => await folder.DeleteAsync(Default.InvalidDeletionOption));
+        }
+
         [DataTestMethod]
         [DataRow(DeletionOption.Fail)]
         [DataRow(DeletionOption.IgnoreMissing)]
@@ -641,6 +655,14 @@
         {
             var folder = TestFolder.GetFolder(Default.FolderName);
             await Should.ThrowAsync<ArgumentNullException>(async () => await folder.CopyAsync(destinationPath: null!));
+        }
+
+        [TestMethod]
+        public async Task CopyAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var folder = await TestFolder.SetupFolderAsync(Default.FileName);
+            var dst = TestFolder.GetPath(Default.DstFolderSegments);
+            await Should.ThrowAsync<ArgumentException>(async () => await folder.CopyAsync(dst, Default.InvalidNameCollisionOption));
         }
 
         [DataTestMethod]
@@ -807,6 +829,14 @@
         {
             var folder = TestFolder.GetFolder(Default.FolderName);
             await Should.ThrowAsync<ArgumentNullException>(async () => await folder.MoveAsync(destinationPath: null!));
+        }
+
+        [TestMethod]
+        public async Task MoveAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var folder = await TestFolder.SetupFolderAsync(Default.FolderName);
+            var dst = TestFolder.GetPath(Default.DstFolderSegments);
+            await Should.ThrowAsync<ArgumentException>(async () => await folder.MoveAsync(dst, Default.InvalidNameCollisionOption));
         }
 
         [TestMethod]
@@ -997,6 +1027,13 @@
         {
             var folder = TestFolder.GetFolder(Default.FolderName);
             await Should.ThrowAsync<ArgumentNullException>(async () => await folder.RenameAsync(newName: null!));
+        }
+
+        [TestMethod]
+        public async Task RenameAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var folder = await TestFolder.SetupFolderAsync(Default.FolderName);
+            await Should.ThrowAsync<ArgumentException>(async () => await folder.RenameAsync(Default.RenamedFolderName, Default.InvalidNameCollisionOption));
         }
 
         [TestMethod]

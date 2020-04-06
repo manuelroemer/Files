@@ -55,6 +55,10 @@
 
 
 
+        public static CreationCollisionOption InvalidCreationCollisionOption => (CreationCollisionOption)(-1);
+        public static NameCollisionOption InvalidNameCollisionOption => (NameCollisionOption)(-1);
+        public static DeletionOption InvalidDeletionOption => (DeletionOption)(-1);
+
         public static string TextContent => "Hello World! \n\n This is the default file content used during testing.";
         public static byte[] ByteContent => Encoding.UTF8.GetBytes(TextContent);
 
