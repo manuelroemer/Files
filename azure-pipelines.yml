@@ -68,7 +68,7 @@ jobs:
       and
       (
         succeeded(),
-        eq(variables['build.sourceBranch'], '$(releaseBranch)'),
+        eq(variables['build.sourceBranch'], variables['releaseBranch'])
         eq(variables['Agent.OS'], 'Windows_NT')
       )
 
@@ -78,7 +78,7 @@ jobs:
     and
     (
       succeeded(),
-      eq(variables['build.sourceBranch'], '$(releaseBranch)')
+      eq(variables['build.sourceBranch'], variables['releaseBranch'])
     )
   pool:
     vmImage: 'ubuntu-latest'
