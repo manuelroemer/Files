@@ -136,7 +136,7 @@
 
             return Task.Run(() =>
             {
-                var dstPathString = destinationPath.FullPath.ToString();
+                var fullDstPath = destinationPath.FullPath;
                 var overwrite = options.ToOverwriteBool();
 
 #if NETCOREAPP2_0 || NETCOREAPP2_1 || NETCOREAPP2_2
@@ -156,20 +156,20 @@
                 // 
                 // This can be fixed by preemptively verifying that there is no conflicting folder.
                 // This has the disadvantage that we lose the inner exception which would normally
-                // be thrown (the UnauthorizedAccessException below).
-                // To not lose it with other TFMs, only include it in the failing .NET Core versions.
-                EnsureNoConflictingFolderExists(_fullPath.ToString());
+                // be thrown (the UnauthorizedAccessException below). To not lose it with other TFMs,
+                // only include the check in the failing .NET Core versions.
+                EnsureNoConflictingFolderExists(fullDstPath.ToString());
 #endif
 
                 try
                 {
-                    File.Copy(_fullPath.ToString(), dstPathString, overwrite);
+                    File.Copy(_fullPath.ToString(), fullDstPath.ToString(), overwrite);
                     return FileSystem.GetFile(destinationPath);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
                     EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
-                    EnsureNoConflictingFolderExists(dstPathString, ex);
+                    EnsureNoConflictingFolderExists(fullDstPath.ToString(), ex);
                     throw;
                 }
             });
