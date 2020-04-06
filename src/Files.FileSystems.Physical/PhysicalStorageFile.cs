@@ -373,7 +373,7 @@
             }
         }
 
-        private void EnsureNoConflictingFolderExists(string path, Exception? innerException = null)
+        private static void EnsureNoConflictingFolderExists(string path, Exception? innerException = null)
         {
             if (Directory.Exists(path))
             {
