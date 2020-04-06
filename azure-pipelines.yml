@@ -3,9 +3,10 @@ trigger:
 
 variables:
   buildConfiguration: 'Release'
+  releaseBranch: 'refs/heads/master'
 
 jobs:
-- job: Test
+- job: Build
   strategy:
     matrix:
       Windows:
@@ -55,8 +56,17 @@ jobs:
       testResultsFiles: '**/*.trx'
     condition: always()
 
+  # Only publish Windows artifacts since only Windows supports a full build.
+  # The Publish job will not run if any OS fails building.
   - task: PublishBuildArtifacts@1
-    displayName: Publish NuGet Package Artifacts
+    displayName: Publish NuGet Package Artifacts (Windows)
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
       ArtifactName: 'NuGet Packages'
+    condition: |
+      and
+      (
+        succeeded(),
+        eq(variables['build.sourceBranch'], $(releaseBranch)),
+        eq(variables['Agent.OS'], 'Windows_NT')
+      )
