@@ -119,7 +119,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    ThrowIOExceptionIfConflictingFolderExists(ex);
+                    EnsureNoConflictingFolderExists(ex);
                     throw;
                 }
             });
@@ -146,7 +146,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    ThrowIOExceptionIfConflictingFolderExists(
+                    EnsureNoConflictingFolderExists(
                         ex,
                         potentialConflictingFolderPaths: new[]
                         {
@@ -170,10 +170,11 @@
 
             return Task.Run(() =>
             {
-                EnsureExists(cancellationToken);
-
                 var fullDestinationPath = destinationPath.FullPath;
                 var overwrite = options.ToOverwriteBool();
+
+                EnsureExists(cancellationToken);
+                EnsureNoConflictingFolderExists(null, new[] { fullDestinationPath.ToString() });
 
                 // System.IO doesn't throw when moving files to the same location.
                 // Detecting this via paths will not always work, but it fulfills the spec most of the time.
@@ -189,7 +190,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    ThrowIOExceptionIfConflictingFolderExists(
+                    EnsureNoConflictingFolderExists(
                         ex,
                         potentialConflictingFolderPaths: new[]
                         {
@@ -253,7 +254,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    ThrowIOExceptionIfConflictingFolderExists(ex);
+                    EnsureNoConflictingFolderExists(ex);
                     throw;
                 }
             });
@@ -270,7 +271,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    ThrowIOExceptionIfConflictingFolderExists(ex);
+                    EnsureNoConflictingFolderExists(ex);
                     throw;
                 }
             });
@@ -287,7 +288,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    await ThrowIOExceptionIfConflictingFolderExistsAsync(ex).ConfigureAwait(false);
+                    await EnsureNoConflictingFolderExists(ex).ConfigureAwait(false);
                     throw;
                 }
             });
@@ -318,7 +319,7 @@
                 }
                 catch (UnauthorizedAccessException ex)
                 {
-                    await ThrowIOExceptionIfConflictingFolderExistsAsync(ex).ConfigureAwait(false);
+                    await EnsureNoConflictingFolderExists(ex).ConfigureAwait(false);
                     throw;
                 }
             });
@@ -371,8 +372,8 @@
             }
         }
 
-        private Task ThrowIOExceptionIfConflictingFolderExistsAsync(UnauthorizedAccessException innerException) =>
-            Task.Run(() => ThrowIOExceptionIfConflictingFolderExists(innerException));
+        private Task EnsureNoConflictingFolderExists(Exception? innerException) =>
+            Task.Run(() => EnsureNoConflictingFolderExists(innerException));
 
         /// <summary>
         ///     Several methods in the <see cref="File"/> class throw an <see cref="UnauthorizedAccessException"/>
@@ -382,8 +383,8 @@
         ///     To do this, we manually check if a directory exists in such a location and throw
         ///     an IOException instead.
         /// </summary>
-        private void ThrowIOExceptionIfConflictingFolderExists(
-            UnauthorizedAccessException innerException,
+        private void EnsureNoConflictingFolderExists(
+            Exception? innerException,
             string[]? potentialConflictingFolderPaths = null
         )
         {
