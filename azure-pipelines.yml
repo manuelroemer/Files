@@ -69,6 +69,7 @@ jobs:
       (
         succeeded(),
         eq(variables['build.sourceBranch'], variables['releaseBranch']),
+        eq(variables['system.pullrequest.isfork'], false),
         eq(variables['Agent.OS'], 'Windows_NT')
       )
 
@@ -78,7 +79,8 @@ jobs:
     and
     (
       succeeded(),
-      eq(variables['build.sourceBranch'], variables['releaseBranch'])
+      eq(variables['build.sourceBranch'], variables['releaseBranch']),
+      eq(variables['system.pullrequest.isfork'], false)
     )
   pool:
     vmImage: 'ubuntu-latest'
