@@ -4,6 +4,7 @@ trigger:
 variables:
   buildConfiguration: 'Release'
   releaseBranch: 'refs/heads/master'
+  nuGetArtifactName: 'NuGet Packages'
 
 jobs:
 - job: Build
@@ -62,7 +63,7 @@ jobs:
     displayName: Publish NuGet Package Artifacts (Windows)
     inputs:
       PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-      ArtifactName: 'NuGet Packages'
+      ArtifactName: '$(nuGetArtifactName)'
     condition: |
       and
       (
@@ -73,7 +74,26 @@ jobs:
 
 - job: Publish
   dependsOn: Build
+  condition: |
+    and
+    (
+      succeeded(),
+      eq(variables['build.sourceBranch'], '$(releaseBranch)'),
+    )
   pool:
     vmImage: 'ubuntu-latest'
   steps:
-  - script: echo 'Hello world!'
+  - task: DownloadBuildArtifacts@0
+    displayName: Download NuGet Package Artifacts
+    inputs:
+      buildType: 'current'
+      downloadType: 'single'
+      artifactName: '$(nuGetArtifactName)'
+      downloadPath: '$(System.ArtifactsDirectory)'
+  - task: NuGetCommand@2
+    displayName: Push to NuGet
+    inputs:
+      command: 'push'
+      packagesToPush: '$(System.ArtifactsDirectory)/**/*.nupkg'
+      nuGetFeedType: 'external'
+      publishFeedCredentials: NuGet.org
