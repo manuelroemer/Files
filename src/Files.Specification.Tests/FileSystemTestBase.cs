@@ -138,8 +138,9 @@
             static void LogFsMember(StorageElement element, int level)
             {
                 var emojiPrefix = element is StorageFile ? "📄" : "📁";
-                var msg = $"|_ {emojiPrefix} {element.Path.Name}".PadLeft(level);
-                Logger.LogMessage(msg);
+                var levelWhitespace = new string(' ', level);
+                var msg = $"{levelWhitespace}|_ {emojiPrefix} {element.Path.Name}";
+                Logger.LogMessage($"{msg}");
             }
         }
     }
