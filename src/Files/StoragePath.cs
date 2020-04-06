@@ -232,7 +232,7 @@
         {
             StoragePath path => CompareTo(path),
             string path => CompareTo(path),
-            null => 1,
+            null => CompareTo((string?)null),
             _ => throw new ArgumentException(ExceptionStrings.Comparable.TypeIsNotSupported(obj.GetType()), nameof(obj)),
         };
 
