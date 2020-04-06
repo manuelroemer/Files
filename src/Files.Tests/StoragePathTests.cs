@@ -253,7 +253,7 @@
 
         #endregion
 
-        #region OpInequality
+        #region operator!=
 
         [TestMethod]
         public void OpInequality_UsesDefaultStringComparison()
