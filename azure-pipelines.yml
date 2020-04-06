@@ -4,59 +4,59 @@ trigger:
 variables:
   buildConfiguration: 'Release'
 
-strategy:
-  matrix:
-    Windows:
-      imageName: 'windows-2019'
-    Linux:
-      imageName: 'ubuntu-latest'
-    macOS:
-      imageName: 'macOS-latest'
+jobs:
+- job: Test
+  strategy:
+    matrix:
+      Windows:
+        imageName: 'windows-2019'
+      Linux:
+        imageName: 'ubuntu-latest'
+      macOS:
+        imageName: 'macOS-latest'
+  pool:
+    vmImage: $(imageName)
+  steps:
+  - task: UseDotNet@2
+    displayName: Install .NET Core 2.0 SDK
+    inputs:
+      version: '2.0.x'
 
-pool:
-  vmImage: $(imageName)
+  - task: UseDotNet@2
+    displayName: Install .NET Core 2.1 SDK
+    inputs:
+      version: '2.1.x'
 
-steps:
-- task: UseDotNet@2
-  displayName: Install .NET Core 2.0 SDK
-  inputs:
-    version: '2.0.x'
+  - task: UseDotNet@2
+    displayName: Install .NET Core 2.2 SDK
+    inputs:
+      version: '2.2.x'
 
-- task: UseDotNet@2
-  displayName: Install .NET Core 2.1 SDK
-  inputs:
-    version: '2.1.x'
+  - task: UseDotNet@2
+    displayName: Install .NET Core 3.0 SDK
+    inputs:
+      version: '3.0.x'
 
-- task: UseDotNet@2
-  displayName: Install .NET Core 2.2 SDK
-  inputs:
-    version: '2.2.x'
+  - task: UseDotNet@2
+    displayName: Install .NET Core 3.1 SDK
+    inputs:
+      version: '3.1.x'
 
-- task: UseDotNet@2
-  displayName: Install .NET Core 3.0 SDK
-  inputs:
-    version: '3.0.x'
+  - task: PowerShell@2
+    displayName: Build / Test / Pack
+    inputs:
+      filePath: 'build/build.ps1'
+      arguments: '--configuration $(buildConfiguration) --ArtifactsDirectory $(Build.ArtifactStagingDirectory) --no-logo'
+      
+  - task: PublishTestResults@2
+    displayName: Publish Test Results
+    inputs:
+      testResultsFormat: 'VSTest'
+      testResultsFiles: '**/*.trx'
+    condition: always()
 
-- task: UseDotNet@2
-  displayName: Install .NET Core 3.1 SDK
-  inputs:
-    version: '3.1.x'
-
-- task: PowerShell@2
-  displayName: Build / Test / Pack
-  inputs:
-    filePath: 'build/build.ps1'
-    arguments: '--configuration $(buildConfiguration) --ArtifactsDirectory $(Build.ArtifactStagingDirectory) --no-logo'
-    
-- task: PublishTestResults@2
-  displayName: Publish Test Results
-  inputs:
-    testResultsFormat: 'VSTest'
-    testResultsFiles: '**/*.trx'
-  condition: always()
-
-- task: PublishBuildArtifacts@1
-  displayName: Publish NuGet Package Artifacts
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'NuGet Packages'
+  - task: PublishBuildArtifacts@1
+    displayName: Publish NuGet Package Artifacts
+    inputs:
+      PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+      ArtifactName: 'NuGet Packages'
