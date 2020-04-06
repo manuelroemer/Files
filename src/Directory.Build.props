@@ -11,8 +11,8 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);CS1591</NoWarn>
     
-    <IsPackable>false</IsPackable>
     <Product>Files</Product>
+    <Version>1.0.0</Version>
     <Authors>Manuel Römer</Authors>
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryType>git</RepositoryType>
@@ -20,7 +20,7 @@
     <PackageProjectUrl>https://github.com/manuelroemer/Files</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/manuelroemer/Files/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <Version>1.0.0</Version>
+    <IsPackable>false</IsPackable>
 
     <IsTestProject>$(MSBuildProjectName.Contains('Test'))</IsTestProject>
   </PropertyGroup>
