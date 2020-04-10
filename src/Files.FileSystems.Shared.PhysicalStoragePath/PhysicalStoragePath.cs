@@ -36,7 +36,7 @@
 
         public override bool EndsInDirectorySeparator { get; }
 
-        internal PhysicalStoragePath(FileSystem fileSystem, string path)
+        internal PhysicalStoragePath(string path, FileSystem fileSystem)
             : base(path)
         {
             Debug.Assert(

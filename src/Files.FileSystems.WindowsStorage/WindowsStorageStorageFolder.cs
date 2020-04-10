@@ -30,7 +30,7 @@
 
         public override StoragePath Path => _path;
 
-        public WindowsStorageStorageFolder(FileSystem fileSystem, PhysicalStoragePath path)
+        public WindowsStorageStorageFolder(WindowsStorageFileSystem fileSystem, PhysicalStoragePath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
@@ -158,6 +158,7 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             if (destinationPath.FullPath.Parent is null)
             {
                 throw new IOException(ExceptionStrings.Folder.CannotMoveToRootLocation());
@@ -206,6 +207,7 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
 
             var fullDestinationPath = destinationPath.FullPath;
             var destinationFolder = FileSystem.GetFolder(fullDestinationPath);

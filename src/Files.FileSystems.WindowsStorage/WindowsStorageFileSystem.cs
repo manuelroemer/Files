@@ -13,7 +13,7 @@
 
     /// <summary>
     ///     A <see cref="FileSystem"/> implementation which uses the <see cref="Windows.Storage"/>
-    ///     APIs of the Windows SDK for interacting with the local physical file system.
+    ///     API of the Windows SDK for interacting with the local physical file system.
     ///     See remarks for details.
     /// </summary>
     /// <remarks>
@@ -48,21 +48,21 @@
         public override StorageFile GetFile(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new WindowsStorageStorageFile(this, (PhysicalStoragePath)path);
+            return new WindowsStorageStorageFile(this, path.ToPhysicalStoragePath(this));
         }
 
         /// <inheritdoc/>
         public override StorageFolder GetFolder(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new WindowsStorageStorageFolder(this, (PhysicalStoragePath)path);
+            return new WindowsStorageStorageFolder(this, path.ToPhysicalStoragePath(this));
         }
 
         /// <inheritdoc/>
         public override StoragePath GetPath(string path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new PhysicalStoragePath(this, path);
+            return new PhysicalStoragePath(path, this);
         }
 
         /// <inheritdoc/>

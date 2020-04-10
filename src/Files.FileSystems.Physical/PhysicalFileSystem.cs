@@ -4,11 +4,16 @@
     using System.Diagnostics.CodeAnalysis;
     using System.IO;
     using Files;
+    using Files.FileSystems.Physical.Utilities;
     using Files.FileSystems.Shared.PhysicalStoragePath;
     using Files.FileSystems.Shared.PhysicalStoragePath.Utilities;
     using static System.Environment;
     using static System.Environment.SpecialFolder;
 
+    /// <summary>
+    ///     A <see cref="FileSystem"/> implementation which uses the <see cref="System.IO"/> API
+    ///     for interacting with the local physical file system.
+    /// </summary>
     public sealed class PhysicalFileSystem : FileSystem
     {
         /// <summary>
@@ -28,21 +33,21 @@
         public override StorageFile GetFile(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new PhysicalStorageFile(this, (PhysicalStoragePath)path);
+            return new PhysicalStorageFile(this, path.ToPhysicalStoragePath(this));
         }
 
         /// <inheritdoc/>
         public override StorageFolder GetFolder(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new PhysicalStorageFolder(this, (PhysicalStoragePath)path);
+            return new PhysicalStorageFolder(this, path.ToPhysicalStoragePath(this));
         }
 
         /// <inheritdoc/>
         public override StoragePath GetPath(string path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new PhysicalStoragePath(this, path);
+            return new PhysicalStoragePath(path, this);
         }
 
         /// <inheritdoc/>

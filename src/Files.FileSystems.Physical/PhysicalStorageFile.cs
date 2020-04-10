@@ -15,16 +15,17 @@
 
     internal sealed class PhysicalStorageFile : StorageFile
     {
+        private readonly FileSystem _fileSystem;
         private readonly StoragePath _path;
         private readonly StoragePath _fullPath;
         private readonly StoragePath _fullParentPath;
         private readonly FileInfo _fileInfo;
 
-        public override FileSystem FileSystem { get; }
+        public override FileSystem FileSystem => _fileSystem;
 
         public override StoragePath Path => _path;
 
-        public PhysicalStorageFile(FileSystem fileSystem, PhysicalStoragePath path)
+        internal PhysicalStorageFile(PhysicalFileSystem fileSystem, PhysicalStoragePath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
@@ -37,11 +38,11 @@
                 );
             }
 
-            FileSystem = fileSystem;
+            _fileSystem = fileSystem;
             _path = path;
             _fullPath = path.FullPath;
             _fullParentPath = path.FullPath.Parent;
-            _fileInfo = new FileInfo(_fullPath);
+            _fileInfo = new FileInfo(_fullPath.ToString());
         }
 
         public override Task<StorageFileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
@@ -132,6 +133,7 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             cancellationToken.ThrowIfCancellationRequested();
 
             return Task.Run(() =>
@@ -182,6 +184,7 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             cancellationToken.ThrowIfCancellationRequested();
 
             return Task.Run(() =>

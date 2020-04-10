@@ -15,5 +15,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)PhysicalStoragePath.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Resources\ExceptionStrings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\Platform.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Utilities\StoragePathExtensions.cs" />
   </ItemGroup>
 </Project>

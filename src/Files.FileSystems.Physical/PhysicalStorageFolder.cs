@@ -15,20 +15,21 @@
 
     internal sealed class PhysicalStorageFolder : StorageFolder
     {
+        private readonly FileSystem _fileSystem;
         private readonly StoragePath _path;
         private readonly StoragePath _fullPath;
         private readonly StoragePath? _fullParentPath;
 
-        public override FileSystem FileSystem { get; }
+        public override FileSystem FileSystem => _fileSystem;
 
         public override StoragePath Path => _path;
 
-        public PhysicalStorageFolder(FileSystem fileSystem, PhysicalStoragePath path)
+        public PhysicalStorageFolder(PhysicalFileSystem fileSystem, PhysicalStoragePath path)
         {
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            FileSystem = fileSystem;
+            _fileSystem = fileSystem;
             _path = path;
             _fullPath = path.FullPath;
             _fullParentPath = path.FullPath.Parent;
@@ -150,6 +151,7 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             cancellationToken.ThrowIfCancellationRequested();
 
             return Task.Run(() =>
@@ -200,6 +202,7 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             cancellationToken.ThrowIfCancellationRequested();
 
             return Task.Run(() =>
