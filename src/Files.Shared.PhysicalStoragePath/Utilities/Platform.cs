@@ -1,4 +1,4 @@
-﻿namespace Files.FileSystems.Shared.PhysicalStoragePath.Utilities
+﻿namespace Files.Shared.PhysicalStoragePath.Utilities
 {
     using System;
     using System.Runtime.InteropServices;

@@ -8,10 +8,9 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Files;
-    using Files.FileSystems.WindowsStorage.Resources;
     using Files.FileSystems.WindowsStorage.Utilities;
-    using Files.FileSystems.Shared.PhysicalStoragePath;
-    using Files.FileSystems.Shared.PhysicalStoragePath.Utilities;
+    using Files.Shared.PhysicalStoragePath;
+    using Files.Shared.PhysicalStoragePath.Utilities;
     using Windows.Storage;
     using CreationCollisionOption = CreationCollisionOption;
     using IOFileAttributes = System.IO.FileAttributes;
@@ -20,6 +19,7 @@
     using StorageFile = StorageFile;
     using WinStorageFolder = Windows.Storage.StorageFolder;
     using WinUnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding;
+    using Files.Shared;
 
     internal sealed class WindowsStorageStorageFile : StorageFile
     {
@@ -39,7 +39,7 @@
             if (path.FullPath.Parent is null)
             {
                 throw new ArgumentException(
-                    ExceptionStrings.File.CannotInitializeWithRootFolderPath(),
+                    ExceptionStrings.StorageFile.CannotInitializeWithRootFolderPath(),
                     nameof(path)
                 );
             }
@@ -155,7 +155,7 @@
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             if (destinationPath.FullPath.Parent is null)
             {
-                throw new IOException(ExceptionStrings.File.CannotCopyToRootLocation());
+                throw new IOException(ExceptionStrings.StorageFile.CannotMoveToRootLocation());
             }
 
             var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
@@ -180,7 +180,7 @@
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             if (destinationPath.FullPath.Parent is null)
             {
-                throw new IOException(ExceptionStrings.File.CannotMoveToRootLocation());
+                throw new IOException(ExceptionStrings.StorageFile.CannotMoveToRootLocation());
             }
 
             var fullDestinationPath = destinationPath.FullPath;
@@ -213,7 +213,7 @@
             if (newName.Contains(PhysicalPathHelper.InvalidNewNameCharacters))
             {
                 throw new ArgumentException(
-                    ExceptionStrings.File.NewNameContainsInvalidChar(FileSystem.PathInformation),
+                    ExceptionStrings.StorageFile.NewNameContainsInvalidChar(FileSystem.PathInformation),
                     nameof(newName)
                 );
             }
@@ -371,7 +371,7 @@
                 return;
             }
 
-            throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation());
+            throw new IOException(ExceptionStrings.StorageFile.ConflictingFolderExistsAtFileLocation());
         }
     }
 }

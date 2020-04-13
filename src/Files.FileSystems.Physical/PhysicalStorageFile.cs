@@ -2,15 +2,14 @@
 {
     using System;
     using System.IO;
-    using System.Linq;
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
     using Files;
-    using Files.FileSystems.Physical.Resources;
     using Files.FileSystems.Physical.Utilities;
-    using Files.FileSystems.Shared.PhysicalStoragePath;
-    using Files.FileSystems.Shared.PhysicalStoragePath.Utilities;
+    using Files.Shared.PhysicalStoragePath;
+    using Files.Shared.PhysicalStoragePath.Utilities;
+    using Files.Shared;
     using IOPath = System.IO.Path;
 
     internal sealed class PhysicalStorageFile : StorageFile
@@ -33,7 +32,7 @@
             if (path.FullPath.Parent is null)
             {
                 throw new ArgumentException(
-                    ExceptionStrings.File.CannotInitializeWithRootFolderPath(),
+                    ExceptionStrings.StorageFile.CannotInitializeWithRootFolderPath(),
                     nameof(path)
                 );
             }
@@ -47,7 +46,6 @@
 
         public override Task<StorageFileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
                 _fileInfo.Refresh();
@@ -68,35 +66,37 @@
                     lastWriteTime,
                     (ulong)_fileInfo.Length
                 );
-            });
+            }, cancellationToken);
         }
 
         public override Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
                 EnsureNoConflictingFolderExists(_fullPath.ToString());
                 cancellationToken.ThrowIfCancellationRequested();
                 return File.GetAttributes(_fullPath.ToString());
-            });
+            }, cancellationToken);
         }
 
         public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (!EnumInfo.IsDefined(attributes))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(attributes), nameof(attributes));
+            }
+
             return Task.Run(() =>
             {
                 EnsureNoConflictingFolderExists(_fullPath.ToString());
                 cancellationToken.ThrowIfCancellationRequested();
                 File.SetAttributes(_fullPath.ToString(), attributes);
-            });
+            }, cancellationToken);
         }
 
         public override Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => File.Exists(_fullPath.ToString()));
+            return Task.Run(() => File.Exists(_fullPath.ToString()), cancellationToken);
         }
 
         public override Task CreateAsync(
@@ -105,7 +105,11 @@
             CancellationToken cancellationToken = default
         )
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             return Task.Run(() =>
             {
                 if (recursive)
@@ -123,7 +127,7 @@
                     EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
                     throw;
                 }
-            });
+            }, cancellationToken);
         }
 
         public override Task<StorageFile> CopyAsync(
@@ -133,8 +137,12 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
-            cancellationToken.ThrowIfCancellationRequested();
 
             return Task.Run(() =>
             {
@@ -174,7 +182,7 @@
                     EnsureNoConflictingFolderExists(fullDstPath.ToString(), ex);
                     throw;
                 }
-            });
+            }, cancellationToken);
         }
 
         public override Task<StorageFile> MoveAsync(
@@ -184,8 +192,12 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
-            cancellationToken.ThrowIfCancellationRequested();
 
             return Task.Run(() =>
             {
@@ -198,7 +210,7 @@
                 // Detecting this via paths will not always work, but it fulfills the spec most of the time.
                 if (_fullPath == fullDestinationPath)
                 {
-                    throw new IOException(ExceptionStrings.File.CannotMoveToSameLocation());
+                    throw new IOException(ExceptionStrings.StorageFile.CannotMoveToSameLocation());
                 }
 
                 try
@@ -212,7 +224,7 @@
                     EnsureNoConflictingFolderExists(fullDestinationPath.ToString(), ex);
                     throw;
                 }
-            });
+            }, cancellationToken);
         }
 
         public override Task<StorageFile> RenameAsync(
@@ -230,51 +242,73 @@
             if (newName.Contains(PhysicalPathHelper.InvalidNewNameCharacters))
             {
                 throw new ArgumentException(
-                    ExceptionStrings.File.NewNameContainsInvalidChar(FileSystem.PathInformation),
+                    ExceptionStrings.StorageFile.NewNameContainsInvalidChar(FileSystem.PathInformation),
                     nameof(newName)
                 );
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             var destinationPath = _fullParentPath.Join(newName);
             return MoveAsync(destinationPath, options, cancellationToken);
         }
 
         public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() =>
+            if (!EnumInfo.IsDefined(options))
             {
-                if (options == DeletionOption.Fail)
-                {
-                    EnsureExists(cancellationToken);
-                }
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
 
+            return Task.Run(
+                options switch 
+                {
+                    DeletionOption.Fail => FailImpl,
+                    DeletionOption.IgnoreMissing => IgnoreMissingImpl,
+                    _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options))
+                },
+                cancellationToken
+            );
+
+            void FailImpl()
+            {
+                EnsureExists(cancellationToken);
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     File.Delete(_fullPath.ToString());
                 }
-                catch (Exception ex) when (ex is FileNotFoundException || ex is DirectoryNotFoundException)
-                {
-                    // The exception is thrown if a parent directory does not exist.
-                    // Must be caught manually to ensure compatibility with DeletionOption.IgnoreMissing.
-                    if (options != DeletionOption.IgnoreMissing)
-                    {
-                        throw;
-                    }
-                }
                 catch (UnauthorizedAccessException ex)
                 {
                     EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
-                    throw;
                 }
-            });
+            }
+
+            void IgnoreMissingImpl()
+            {
+                try
+                {
+                    File.Delete(_fullPath.ToString());
+                }
+                catch (FileNotFoundException) { }
+                catch (DirectoryNotFoundException) { }
+                catch (UnauthorizedAccessException ex)
+                {
+                    EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
+                }
+            }
         }
 
         public override Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (!EnumInfo.IsDefined(fileAccess))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileAccess), nameof(fileAccess));
+            }
+
             return Task.Run<Stream>(() =>
             {
                 try
@@ -286,7 +320,7 @@
                     EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
                     throw;
                 }
-            });
+            }, cancellationToken);
         }
 
         public override Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
@@ -296,7 +330,7 @@
             {
                 try
                 {
-                    return await FilePolyfills.ReadAllBytesAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false);
+                    return await FilePolyfills.ReadAllBytesMaybeAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -309,32 +343,29 @@
         public override Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
         {
             _ = bytes ?? throw new ArgumentNullException(nameof(bytes));
-
-            cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(async () =>
             {
                 EnsureExists(cancellationToken);
-                await FilePolyfills.WriteAllBytesAsync(_fullPath.ToString(), bytes, cancellationToken).ConfigureAwait(false);
-            });
+                await FilePolyfills.WriteAllBytesMaybeAsync(_fullPath.ToString(), bytes, cancellationToken).ConfigureAwait(false);
+            }, cancellationToken);
         }
 
         public override Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(async () =>
             {
                 try
                 {
                     return encoding is null
-                        ? await FilePolyfills.ReadAllTextAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false)
-                        : await FilePolyfills.ReadAllTextAsync(_fullPath.ToString(), encoding, cancellationToken).ConfigureAwait(false);
+                        ? await FilePolyfills.ReadAllTextMaybeAsync(_fullPath.ToString(), cancellationToken).ConfigureAwait(false)
+                        : await FilePolyfills.ReadAllTextMaybeAsync(_fullPath.ToString(), encoding, cancellationToken).ConfigureAwait(false);
                 }
                 catch (UnauthorizedAccessException ex)
                 {
                     EnsureNoConflictingFolderExists(_fullPath.ToString(), ex);
                     throw;
                 }
-            });
+            }, cancellationToken);
         }
 
         public override Task WriteTextAsync(
@@ -344,21 +375,19 @@
         )
         {
             _ = text ?? throw new ArgumentNullException(nameof(text));
-
-            cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(async () =>
             {
                 EnsureExists(cancellationToken);
 
                 if (encoding is null)
                 {
-                    await FilePolyfills.WriteAllTextAsync(_fullPath.ToString(), text, cancellationToken).ConfigureAwait(false);
+                    await FilePolyfills.WriteAllTextMaybeAsync(_fullPath.ToString(), text, cancellationToken).ConfigureAwait(false);
                 }
                 else
                 {
-                    await FilePolyfills.WriteAllTextAsync(_fullPath.ToString(), text, encoding, cancellationToken).ConfigureAwait(false);
+                    await FilePolyfills.WriteAllTextMaybeAsync(_fullPath.ToString(), text, encoding, cancellationToken).ConfigureAwait(false);
                 }
-            });
+            }, cancellationToken);
         }
 
         private void EnsureExists(CancellationToken cancellationToken)
@@ -380,7 +409,7 @@
         {
             if (Directory.Exists(path))
             {
-                throw new IOException(ExceptionStrings.File.ConflictingFolderExistsAtFileLocation(), innerException);
+                throw new IOException(ExceptionStrings.StorageFile.ConflictingFolderExistsAtFileLocation(), innerException);
             }
         }
     }

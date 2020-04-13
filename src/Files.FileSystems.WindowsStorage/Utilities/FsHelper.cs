@@ -5,11 +5,11 @@
     using WinStorageFile = Windows.Storage.StorageFile;
     using WinStorageFolder = Windows.Storage.StorageFolder;
     using WinCreationCollisionOption = Windows.Storage.CreationCollisionOption;
-    using Files.FileSystems.WindowsStorage.Resources;
     using System.IO;
     using System.Threading;
     using Files;
     using System.Runtime.ExceptionServices;
+    using Files.Shared;
 
     internal static class FsHelper
     {
@@ -41,10 +41,7 @@
                 catch
                 {
                     // Getting the parent folder failed.
-                    throw new DirectoryNotFoundException(
-                        ExceptionStrings.File.ParentFolderDoesNotExist(),
-                        ex
-                    );
+                    throw new DirectoryNotFoundException(ExceptionStrings.StorageFile.ParentFolderDoesNotExist(), ex);
                 }
 
                 // At this point we know that the parent folder exists, but the file doesn't.
@@ -67,10 +64,7 @@
                 }
 
                 // At this point, getting the folder succeeded. We must manually throw to fulfill the specification.
-                throw new IOException(
-                    ExceptionStrings.File.ConflictingFolderExistsAtFileLocation(),
-                    ex
-                );
+                throw new IOException(ExceptionStrings.StorageFile.ConflictingFolderExistsAtFileLocation(), ex);
             }
         }
 
@@ -129,10 +123,7 @@
                 }
 
                 // At this point, getting the file succeeded. We must manually throw to fulfill the specification.
-                throw new IOException(
-                    ExceptionStrings.Folder.ConflictingFileExistsAtFolderLocation(),
-                    ex
-                );
+                throw new IOException(ExceptionStrings.StorageFolder.ConflictingFileExistsAtFolderLocation(), ex);
             }
         }
     }

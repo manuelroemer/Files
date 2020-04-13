@@ -5,6 +5,7 @@
     <Rule Id="CA1031" Action="Info" /> <!-- // Do not catch general exception types -->
     <Rule Id="CA1303" Action="None" /> <!-- Do not pass literals as localized parameters -->
     <Rule Id="CA1307" Action="Info" /> <!-- Specify StringComparison -->
+    <Rule Id="CA1810" Action="Info" /> <!-- Initialize reference type static fields inline -->
     <Rule Id="CA2225" Action="Info" /> <!-- Operator overloads have named alternates -->
   </Rules>
 </RuleSet>

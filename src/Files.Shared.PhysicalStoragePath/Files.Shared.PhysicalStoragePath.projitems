@@ -13,7 +13,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\PhysicalPathHelper.CaseSensitivity.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\PhysicalPathHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)PhysicalStoragePath.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)Resources\ExceptionStrings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\Platform.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Utilities\StoragePathExtensions.cs" />
   </ItemGroup>

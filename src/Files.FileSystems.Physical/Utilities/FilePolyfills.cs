@@ -8,71 +8,81 @@
     internal static class FilePolyfills
     {
 #if NETSTANDARD2_0
-        // For the following methods, we're simply using Task.Run, because the alternatives are harder
-        // to implement/maintain than one might think.
+        // Implementing the following methods to really be async is harder one might think.
         // See for example the implementation of ReadAllBytesAsync:
         // https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.IO.FileSystem/src/System/IO/File.cs#L762
         // 
-        // Using Task.Run is certainly not good etiquette, but until it actually poses any problems,
-        // we can go with it.
-        // This is just a polyfill after all - ideally, this library is used from .NET Core 3.0+.
+        // Since all of these methods are going to run on a Task anyway due to how
+        // PhysicalStorageFile/PhysicalStorageFolder are implemented, we can get away with
+        // simply running these methods synchronously. This prevents a second thread from being
+        // blocked for no reason.
+        // If we are running on a TFM which supports async, go with that, of course.
 
-        internal static Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken)
+        internal static Task<byte[]> ReadAllBytesMaybeAsync(string path, CancellationToken cancellationToken)
         {
-            return Task.Run(() => File.ReadAllBytes(path), cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(File.ReadAllBytes(path));
         }
 
-        internal static Task WriteAllBytesAsync(string path, byte[] bytes, CancellationToken cancellationToken)
+        internal static Task WriteAllBytesMaybeAsync(string path, byte[] bytes, CancellationToken cancellationToken)
         {
-            return Task.Run(() => File.WriteAllBytes(path, bytes), cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            File.WriteAllBytes(path, bytes);
+            return Task.CompletedTask;
         }
 
-        internal static Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken)
+        internal static Task<string> ReadAllTextMaybeAsync(string path, CancellationToken cancellationToken)
         {
-            return Task.Run(() => File.ReadAllText(path), cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(File.ReadAllText(path));
         }
 
-        internal static Task<string> ReadAllTextAsync(string path, Encoding encoding, CancellationToken cancellationToken)
+        internal static Task<string> ReadAllTextMaybeAsync(string path, Encoding encoding, CancellationToken cancellationToken)
         {
-            return Task.Run(() => File.ReadAllText(path, encoding), cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            return Task.FromResult(File.ReadAllText(path, encoding));
         }
 
-        internal static Task WriteAllTextAsync(string path, string contents, CancellationToken cancellationToken)
+        internal static Task WriteAllTextMaybeAsync(string path, string contents, CancellationToken cancellationToken)
         {
-            return Task.Run(() => File.WriteAllText(path, contents), cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            File.WriteAllText(path, contents);
+            return Task.CompletedTask;
         }
 
-        internal static Task WriteAllTextAsync(string path, string contents, Encoding encoding, CancellationToken cancellationToken)
+        internal static Task WriteAllTextMaybeAsync(string path, string contents, Encoding encoding, CancellationToken cancellationToken)
         {
-            return Task.Run(() => File.WriteAllText(path, contents, encoding), cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            File.WriteAllText(path, contents, encoding);
+            return Task.CompletedTask;
         }
 #else
-        internal static Task<byte[]> ReadAllBytesAsync(string path, CancellationToken cancellationToken)
+        internal static Task<byte[]> ReadAllBytesMaybeAsync(string path, CancellationToken cancellationToken)
         {
             return File.ReadAllBytesAsync(path, cancellationToken);
         }
 
-        internal static Task WriteAllBytesAsync(string path, byte[] bytes, CancellationToken cancellationToken)
+        internal static Task WriteAllBytesMaybeAsync(string path, byte[] bytes, CancellationToken cancellationToken)
         {
             return File.WriteAllBytesAsync(path, bytes, cancellationToken);
         }
 
-        internal static Task<string> ReadAllTextAsync(string path, CancellationToken cancellationToken)
+        internal static Task<string> ReadAllTextMaybeAsync(string path, CancellationToken cancellationToken)
         {
             return File.ReadAllTextAsync(path, cancellationToken);
         }
 
-        internal static Task<string> ReadAllTextAsync(string path, Encoding encoding, CancellationToken cancellationToken)
+        internal static Task<string> ReadAllTextMaybeAsync(string path, Encoding encoding, CancellationToken cancellationToken)
         {
             return File.ReadAllTextAsync(path, encoding, cancellationToken);
         }
 
-        internal static Task WriteAllTextAsync(string path, string contents, CancellationToken cancellationToken)
+        internal static Task WriteAllTextMaybeAsync(string path, string contents, CancellationToken cancellationToken)
         {
             return File.WriteAllTextAsync(path, contents, cancellationToken);
         }
 
-        internal static Task WriteAllTextAsync(string path, string contents, Encoding encoding, CancellationToken cancellationToken)
+        internal static Task WriteAllTextMaybeAsync(string path, string contents, Encoding encoding, CancellationToken cancellationToken)
         {
             return File.WriteAllTextAsync(path, contents, encoding, cancellationToken);
         }

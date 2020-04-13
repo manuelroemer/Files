@@ -1,7 +1,7 @@
 ﻿namespace Files.FileSystems.WindowsStorage.Utilities
 {
     using System.IO;
-    using Files.FileSystems.WindowsStorage.Resources;
+    using Files.Shared;
     using Windows.Storage;
 
     internal static class WinStorageItemExtensions

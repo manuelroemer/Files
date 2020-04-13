@@ -1,11 +1,11 @@
 ﻿namespace Files.FileSystems.WindowsStorage.Utilities
 {
     using System;
-    using Files.FileSystems.WindowsStorage.Resources;
     using WinCreationCollisionOption = Windows.Storage.CreationCollisionOption;
     using WinNameCollisionOption = Windows.Storage.NameCollisionOption;
     using WinFileAttributes = Windows.Storage.FileAttributes;
     using IOFileAttributes = System.IO.FileAttributes;
+    using Files.Shared;
 
     internal static class ConversionExtensions
     {

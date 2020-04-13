@@ -665,6 +665,14 @@
             await Should.ThrowAsync<ArgumentException>(async () => await folder.CopyAsync(dst, Default.InvalidNameCollisionOption));
         }
 
+        [TestMethod]
+        public async Task CopyAsync_ForeignFileSystemPath_ThrowsArgumentException()
+        {
+            var foldr = await TestFolder.SetupFileAsync(Default.FolderName);
+            var dst = TestFolder.GetPath(Default.DstFolderSegments);
+            await Should.ThrowAsync<ArgumentException>(async () => await foldr.CopyAsync(Default.ForeignFileSystemPath));
+        }
+
         [DataTestMethod]
         [DataRow(NameCollisionOption.Fail)]
         [DataRow(NameCollisionOption.ReplaceExisting)]
@@ -837,6 +845,14 @@
             var folder = await TestFolder.SetupFolderAsync(Default.FolderName);
             var dst = TestFolder.GetPath(Default.DstFolderSegments);
             await Should.ThrowAsync<ArgumentException>(async () => await folder.MoveAsync(dst, Default.InvalidNameCollisionOption));
+        }
+
+        [TestMethod]
+        public async Task MoveAsync_ForeignFileSystemPath_ThrowsArgumentException()
+        {
+            var folder = await TestFolder.SetupFileAsync(Default.FolderName);
+            var dst = TestFolder.GetPath(Default.DstFolderSegments);
+            await Should.ThrowAsync<ArgumentException>(async () => await folder.MoveAsync(Default.ForeignFileSystemPath));
         }
 
         [TestMethod]

@@ -2,9 +2,9 @@
 {
     using System;
     using System.IO;
-    using Files.FileSystems.Physical.Resources;
+    using Files.Shared;
 
-    internal static class OptionExtensions
+    internal static class ConversionExtensions
     {
         public static bool ToOverwriteBool(this NameCollisionOption options) => options switch
         {

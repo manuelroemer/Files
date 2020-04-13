@@ -7,10 +7,10 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Files;
-    using Files.FileSystems.WindowsStorage.Resources;
+    using Files.Shared;
     using Files.FileSystems.WindowsStorage.Utilities;
-    using Files.FileSystems.Shared.PhysicalStoragePath;
-    using Files.FileSystems.Shared.PhysicalStoragePath.Utilities;
+    using Files.Shared.PhysicalStoragePath;
+    using Files.Shared.PhysicalStoragePath.Utilities;
     using Windows.Storage;
     using CreationCollisionOption = CreationCollisionOption;
     using IOFileAttributes = System.IO.FileAttributes;
@@ -161,12 +161,12 @@
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             if (destinationPath.FullPath.Parent is null)
             {
-                throw new IOException(ExceptionStrings.Folder.CannotMoveToRootLocation());
+                throw new IOException(ExceptionStrings.StorageFolder.CannotMoveToRootLocation());
             }
 
             if (destinationPath.FullPath == _fullPath)
             {
-                throw new IOException(ExceptionStrings.Folder.CannotCopyToSameLocation());
+                throw new IOException(ExceptionStrings.StorageFolder.CannotCopyToSameLocation());
             }
 
             var destinationParentFolder = await FsHelper
@@ -245,7 +245,7 @@
             if (newName.Contains(PhysicalPathHelper.InvalidNewNameCharacters))
             {
                 throw new ArgumentException(
-                    ExceptionStrings.Folder.NewNameContainsInvalidChar(FileSystem.PathInformation),
+                    ExceptionStrings.StorageFolder.NewNameContainsInvalidChar(FileSystem.PathInformation),
                     nameof(newName)
                 );
             }
@@ -368,7 +368,7 @@
                 return;
             }
 
-            throw new IOException(ExceptionStrings.Folder.ConflictingFileExistsAtFolderLocation());
+            throw new IOException(ExceptionStrings.StorageFolder.ConflictingFileExistsAtFolderLocation());
         }
     }
 }

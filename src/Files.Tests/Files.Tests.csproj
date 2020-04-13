@@ -12,9 +12,6 @@
     <PackageReference Include="coverlet.collector" Version="1.2.0" PrivateAssets="All" />
     <PackageReference Include="Shouldly" Version="3.0.2" />
     <PackageReference Include="Moq" Version="4.13.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <ProjectReference Include="..\Files\Files.csproj" />
   </ItemGroup>
 

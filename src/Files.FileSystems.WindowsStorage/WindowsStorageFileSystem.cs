@@ -1,11 +1,11 @@
 ﻿namespace Files.FileSystems.WindowsStorage
 {
     using System;
-    using System.Diagnostics.CodeAnalysis;
     using Files;
+    using Files.Shared.PhysicalStoragePath;
+    using Files.Shared.PhysicalStoragePath.Utilities;
     using Files.FileSystems.WindowsStorage.Utilities;
-    using Files.FileSystems.Shared.PhysicalStoragePath;
-    using Files.FileSystems.Shared.PhysicalStoragePath.Utilities;
+    using Files.Shared;
     using Windows.Storage;
     using static System.Environment;
     using StorageFile = StorageFile;
@@ -30,9 +30,13 @@
     ///     data folder.
     ///     
     ///     Apart from this, this file system implementation is compatible with any other file system
-    ///     implementation that uses the Win32 path format. Apart from the <see cref="KnownFolder"/>
+    ///     implementation using the Win32 path format. Apart from the <see cref="KnownFolder"/>
     ///     differences, it should be possible to switch between this implementation and similar ones
     ///     (for example the <c>PhysicalFileSystem</c>) without too much effort.
+    ///     
+    ///     While it is possible without errors to create multiple instances of the
+    ///     <see cref="WindowsStorageFileSystem"/>, you should ideally create and reuse a single
+    ///     instance of this class.
     /// </remarks>
     public sealed class WindowsStorageFileSystem : FileSystem
     {
@@ -66,8 +70,13 @@
         }
 
         /// <inheritdoc/>
-        public override bool TryGetPath(KnownFolder knownFolder, [NotNullWhen(true)] out StoragePath? result)
+        public override StoragePath GetPath(KnownFolder knownFolder)
         {
+            if (!Enum.IsDefined(typeof(KnownFolder), knownFolder))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(knownFolder), nameof(knownFolder));
+            }
+
             var path = knownFolder switch
             {
                 KnownFolder.TemporaryData => ApplicationData.Current.TemporaryFolder.GetPathOrThrow(),
@@ -80,10 +89,9 @@
                 KnownFolder.PicturesLibrary => GetSpecialFolder(SpecialFolder.MyPictures),
                 KnownFolder.VideosLibrary => GetSpecialFolder(SpecialFolder.MyVideos),
                 KnownFolder.MusicLibrary => GetSpecialFolder(SpecialFolder.MyMusic),
-                _ => null,
+                _ => throw new NotSupportedException(ExceptionStrings.FileSystem.KnownFolderNotSupported(knownFolder)),
             };
-
-            return TryGetPath(path, out result);
+            return GetPath(path);
 
             static string GetSpecialFolder(SpecialFolder specialFolder) =>
                 GetFolderPath(specialFolder, SpecialFolderOption.DoNotVerify);

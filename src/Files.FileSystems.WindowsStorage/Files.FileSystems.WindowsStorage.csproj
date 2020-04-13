@@ -7,13 +7,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nullable" Version="1.2.1" PrivateAssets="All" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="Nullable" Version="1.*" PrivateAssets="All" />
     <ProjectReference Include="..\Files\Files.csproj" />
   </ItemGroup>
 
-  <Import Project="..\Files.FileSystems.Shared.PhysicalStoragePath\Files.FileSystems.Shared.PhysicalStoragePath.projitems" Label="Shared" />
+  <Import Project="..\Files.Shared\Files.Shared.projitems" />
+  <Import Project="..\Files.Shared.PhysicalStoragePath\Files.Shared.PhysicalStoragePath.projitems" />
 
 </Project>

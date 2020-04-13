@@ -3,12 +3,12 @@
     using System;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
-    using Files.Resources;
+    using Files.Shared;
 
 #pragma warning disable CA1036
-// Override methods on comparable types, i.e. implement <, >, <=, >= operators due to IComparable.
-// These operators are not implemented because .NET's string class also doesn't implement them.
-// Since a path is, at the end, just a string these operators are also not implemented here.
+    // Override methods on comparable types, i.e. implement <, >, <=, >= operators due to IComparable.
+    // These operators are not implemented because .NET's string class also doesn't implement them.
+    // Since a path is, at the end, just a string these operators are also not implemented here.
 
     /// <summary>
     ///     An immutable representation of a path which points to an element in a file system.
@@ -99,7 +99,7 @@
             {
                 throw new ArgumentException(ExceptionStrings.String.CannotBeEmpty(), nameof(path));
             }
-            
+
             _underlyingString = path;
         }
 

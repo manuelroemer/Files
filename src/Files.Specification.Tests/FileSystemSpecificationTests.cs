@@ -10,19 +10,9 @@
     [TestClass]
     public abstract class FileSystemSpecificationTests : FileSystemTestBase
     {
-        /// <summary>
-        ///     Gets a <see cref="KnownFolder"/> value which is not supported by the file system
-        ///     implementation.
-        ///     By default this returns <see cref="int.MinValue"/>, casted to a <see cref="KnownFolder"/> value.
-        /// </summary>
-        protected virtual KnownFolder UnknownFolder { get; } = (KnownFolder)int.MinValue;
+        public const KnownFolder UndefinedKnownFolder = (KnownFolder)int.MinValue;
 
         public abstract IEnumerable<object[]> KnownFolderData { get; }
-
-        public virtual IEnumerable<object[]> UnknownFolderData => new[]
-        {
-            new object[] { (KnownFolder)int.MinValue },
-        };
 
         public abstract IEnumerable<object[]> ValidPathStringData { get; }
 
@@ -52,10 +42,9 @@
         }
 
         [TestMethod]
-        [DynamicInstanceData(nameof(UnknownFolderData))]
-        public void GetPath_KnownFolder_UnknownFolder_ThrowsNotSupportedException(KnownFolder unknownFolder)
+        public void GetPath_KnownFolder_UndefinedValue_ThrowsArgumentException()
         {
-            Should.Throw<NotSupportedException>(() => FileSystem.GetPath(unknownFolder));
+            Should.Throw<ArgumentException>(() => FileSystem.GetPath(UndefinedKnownFolder));
         }
 
         #endregion
@@ -73,10 +62,9 @@
         }
 
         [TestMethod]
-        [DynamicInstanceData(nameof(UnknownFolderData))]
-        public void TryGetPath_KnownFolder_UnknownFolder_ReturnsFalseAndNull(KnownFolder unknownFolder)
+        public void TryGetPath_KnownFolder_UndefinedValue_ReturnsFalseAndNull()
         {
-            var result = FileSystem.TryGetPath(unknownFolder, out var path);
+            var result = FileSystem.TryGetPath(UndefinedKnownFolder, out var path);
             result.ShouldBeFalse();
             path.ShouldBeNull();
         }
@@ -239,10 +227,9 @@
         }
 
         [TestMethod]
-        [DynamicInstanceData(nameof(UnknownFolderData))]
-        public void GetFolder_KnownFolder_UnknownFolder_ThrowsNotSupportedException(KnownFolder unknownFolder)
+        public void GetFolder_KnownFolder_UndefinedValue_ThrowsArgumentException()
         {
-            Should.Throw<NotSupportedException>(() => FileSystem.GetFolder(unknownFolder));
+            Should.Throw<ArgumentException>(() => FileSystem.GetFolder(UndefinedKnownFolder));
         }
 
         #endregion
@@ -305,10 +292,9 @@
         }
 
         [TestMethod]
-        [DynamicInstanceData(nameof(UnknownFolderData))]
-        public void TryGetFolder_KnownFolder_UnknownFolder_ReturnsFalseAndNull(KnownFolder unknownFolder)
+        public void TryGetFolder_KnownFolder_UndefinedValue_ReturnsFalseAndNull()
         {
-            var result = FileSystem.TryGetFolder(unknownFolder, out var folder);
+            var result = FileSystem.TryGetFolder(UndefinedKnownFolder, out var folder);
             result.ShouldBeFalse();
             folder.ShouldBeNull();
         }

@@ -1,4 +1,4 @@
-﻿namespace Files.FileSystems.WindowsStorage.Utilities
+﻿namespace Files.Shared
 {
     internal static class StringExtensions
     {

@@ -9,7 +9,7 @@
     using Microsoft.VisualStudio.TestTools.UnitTesting.Logging;
 
     /// <summary>
-    ///     Defines base for test classes which need to interact or test a file system element
+    ///     A base for test classes which need to interact or test a file system element
     ///     of some kind.
     ///     Using this base class provides access to a <see cref="FileSystemTestContext"/> and
     ///     thus locations where a specific <see cref="FileSystem"/> can be tested.

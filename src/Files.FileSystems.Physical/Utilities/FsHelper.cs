@@ -2,7 +2,7 @@
 {
     using System.IO;
     using System.Threading;
-    using Files.FileSystems.Shared.PhysicalStoragePath.Utilities;
+    using Files.Shared.PhysicalStoragePath.Utilities;
 
     internal static class FsHelper
     {

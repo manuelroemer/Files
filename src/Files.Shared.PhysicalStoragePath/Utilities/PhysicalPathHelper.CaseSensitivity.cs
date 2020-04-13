@@ -9,7 +9,7 @@
 // > The .NET Foundation licenses this file to you under the MIT license.
 // > See the LICENSE file in the project root for more information.
 
-namespace Files.FileSystems.Shared.PhysicalStoragePath.Utilities
+namespace Files.Shared.PhysicalStoragePath.Utilities
 {
     using System;
     using System.IO;

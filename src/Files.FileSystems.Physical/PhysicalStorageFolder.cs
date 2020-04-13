@@ -7,10 +7,10 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Files;
-    using Files.FileSystems.Physical.Resources;
     using Files.FileSystems.Physical.Utilities;
-    using Files.FileSystems.Shared.PhysicalStoragePath;
-    using Files.FileSystems.Shared.PhysicalStoragePath.Utilities;
+    using Files.Shared.PhysicalStoragePath;
+    using Files.Shared.PhysicalStoragePath.Utilities;
+    using Files.Shared;
     using IOPath = System.IO.Path;
 
     internal sealed class PhysicalStorageFolder : StorageFolder
@@ -37,7 +37,6 @@
 
         public override Task<StorageFolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
                 EnsureExists();
@@ -56,12 +55,11 @@
                     Directory.GetCreationTimeUtc(_fullPath.ToString()),
                     lastWriteTime
                 );
-            });
+            }, cancellationToken);
         }
 
         public override Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
                 try
@@ -75,12 +73,16 @@
                     // Since we're using a File API, we must manually convert the FileNotFoundException.
                     throw new DirectoryNotFoundException(message: null, ex);
                 }
-            });
+            }, cancellationToken);
         }
 
         public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (!EnumInfo.IsDefined(attributes))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(attributes), nameof(attributes));
+            }
+
             return Task.Run(() =>
             {
                 try
@@ -94,13 +96,12 @@
                     // Since we're using a File API, we must manually convert the FileNotFoundException.
                     throw new DirectoryNotFoundException(message: null, ex);
                 }
-            });
+            }, cancellationToken);
         }
 
         public override Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() => Directory.Exists(_fullPath.ToString()));
+            return Task.Run(() => Directory.Exists(_fullPath.ToString()), cancellationToken);
         }
 
         public override Task CreateAsync(
@@ -109,7 +110,11 @@
             CancellationToken cancellationToken = default
         )
         {
-            cancellationToken.ThrowIfCancellationRequested();
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             return Task.Run(async () =>
             {
                 // Directory.CreateDirectory is recursive by default.
@@ -128,7 +133,7 @@
                     switch (options)
                     {
                         case CreationCollisionOption.Fail:
-                            throw new IOException(ExceptionStrings.Folder.CreateFailFolderAlreadyExists());
+                            throw new IOException(ExceptionStrings.StorageFolder.CreateFailFolderAlreadyExists());
                         case CreationCollisionOption.ReplaceExisting:
                             await DeleteAsync(DeletionOption.IgnoreMissing, cancellationToken).ConfigureAwait(false);
                             break;
@@ -141,7 +146,7 @@
 
                 cancellationToken.ThrowIfCancellationRequested();
                 Directory.CreateDirectory(_fullPath.ToString());
-            });
+            }, cancellationToken);
         }
 
         public override Task<StorageFolder> CopyAsync(
@@ -151,8 +156,12 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
-            cancellationToken.ThrowIfCancellationRequested();
 
             return Task.Run(() =>
             {
@@ -177,7 +186,7 @@
                     // have deleted the folder at the destination path).
                     if (Directory.Exists(fullDestinationPath.ToString()))
                     {
-                        throw new IOException(ExceptionStrings.Folder.CannotCopyToSameLocation());
+                        throw new IOException(ExceptionStrings.StorageFolder.CannotCopyToSameLocation());
                     }
                 }
                 else
@@ -186,13 +195,13 @@
                     // at the destination. Specification requires an IOException on conflicts for the Fail option.
                     if (Directory.Exists(fullDestinationPath.ToString()))
                     {
-                        throw new IOException(ExceptionStrings.Folder.CopyConflictingFolderExistsAtDestination());
+                        throw new IOException(ExceptionStrings.StorageFolder.CopyConflictingFolderExistsAtDestination());
                     }
                 }
 
                 FsHelper.CopyDirectory(_fullPath.ToString(), fullDestinationPath.ToString(), cancellationToken);
                 return destination;
-            });
+            }, cancellationToken);
         }
 
         public override Task<StorageFolder> MoveAsync(
@@ -202,8 +211,12 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
-            cancellationToken.ThrowIfCancellationRequested();
 
             return Task.Run(() =>
             {
@@ -225,14 +238,14 @@
                     // have deleted the folder at the destination path).
                     if (Directory.Exists(fullDestinationPath.ToString()))
                     {
-                        throw new IOException(ExceptionStrings.Folder.CannotMoveToSameLocation());
+                        throw new IOException(ExceptionStrings.StorageFolder.CannotMoveToSameLocation());
                     }
                 }
 
                 cancellationToken.ThrowIfCancellationRequested();
                 Directory.Move(_fullPath.ToString(), fullDestinationPath.ToString());
                 return destination;
-            });
+            }, cancellationToken);
         }
 
         private void DeleteConflictingDestinationFolderWithoutDeletingThisFolder(string fullDestinationPath)
@@ -278,51 +291,63 @@
             if (newName.Contains(PhysicalPathHelper.InvalidNewNameCharacters))
             {
                 throw new ArgumentException(
-                    ExceptionStrings.Folder.NewNameContainsInvalidChar(FileSystem.PathInformation),
+                    ExceptionStrings.StorageFolder.NewNameContainsInvalidChar(FileSystem.PathInformation),
                     nameof(newName)
                 );
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             var destinationPath = _fullParentPath?.Join(newName) ?? FileSystem.GetPath(newName);
             return MoveAsync(destinationPath, options, cancellationToken);
         }
 
         public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
-            return Task.Run(() =>
+            if (!EnumInfo.IsDefined(options))
             {
-                // Required for .NET Core/Unix.
-                // On Windows, Directory.Delete throws an IOException when a file exists at the same
-                // location, but not on Unix.
-                EnsureNoConflictingFileExists();
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
 
-                if (options == DeletionOption.Fail)
+            return Task.Run(
+                options switch
                 {
-                    EnsureExists();
-                }
+                    DeletionOption.Fail => FailImpl,
+                    DeletionOption.IgnoreMissing => IgnoreMissingImpl,
+                    _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
+                },
+                cancellationToken
+            );
+            
+            void FailImpl()
+            {
+                EnsureNoConflictingFileExists(); // Unix doesn't throw when a file exists at the same location.
+
+                cancellationToken.ThrowIfCancellationRequested();
+                EnsureExists();
+                
+                cancellationToken.ThrowIfCancellationRequested();
+                Directory.Delete(_fullPath.ToString(), recursive: true);
+            }
+
+            void IgnoreMissingImpl()
+            {
+                EnsureNoConflictingFileExists(); // Unix doesn't throw when a file exists at the same location.
 
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
                     Directory.Delete(_fullPath.ToString(), recursive: true);
                 }
-                catch (DirectoryNotFoundException)
-                {
-                    // The exception is thrown if a parent directory does not exist.
-                    // Must be caught manually to ensure compatibility with DeletionOption.IgnoreMissing.
-                    if (options != DeletionOption.IgnoreMissing)
-                    {
-                        throw;
-                    }
-                }
-            });
+                catch (DirectoryNotFoundException) { }
+            }
         }
 
         public override Task<IEnumerable<StorageFile>> GetAllFilesAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
                 // Use GetFiles() instead of EnumerateFiles() for two reasons:
@@ -331,12 +356,11 @@
                 return Directory
                     .GetFiles(_fullPath.ToString())
                     .Select(path => FileSystem.GetFile(path));
-            });
+            }, cancellationToken);
         }
 
         public override Task<IEnumerable<StorageFolder>> GetAllFoldersAsync(CancellationToken cancellationToken = default)
         {
-            cancellationToken.ThrowIfCancellationRequested();
             return Task.Run(() =>
             {
                 // Use GetDirectories() instead of EnumerateDirectories() for two reasons:
@@ -345,7 +369,7 @@
                 return Directory
                     .GetDirectories(_fullPath.ToString())
                     .Select(path => FileSystem.GetFolder(path));
-            });
+            }, cancellationToken);
         }
 
         private void EnsureExists()
@@ -360,7 +384,7 @@
         {
             if (File.Exists(_fullPath.ToString()))
             {
-                throw new IOException(ExceptionStrings.Folder.ConflictingFileExistsAtFolderLocation());
+                throw new IOException(ExceptionStrings.StorageFolder.ConflictingFileExistsAtFolderLocation());
             }
         }
     }

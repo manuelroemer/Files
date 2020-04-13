@@ -2,6 +2,7 @@
 {
     using System;
     using System.Text;
+    using Moq;
 
     /// <summary>
     ///     Defines default values for file system structures which are used by the tests.
@@ -58,6 +59,8 @@
         public static CreationCollisionOption InvalidCreationCollisionOption => (CreationCollisionOption)(-1);
         public static NameCollisionOption InvalidNameCollisionOption => (NameCollisionOption)(-1);
         public static DeletionOption InvalidDeletionOption => (DeletionOption)(-1);
+
+        public static StoragePath ForeignFileSystemPath => new Mock<StoragePath>(FileName, MockBehavior.Strict) { CallBase = true }.Object;
 
         public static string TextContent => "Hello World! \n\n This is the default file content used during testing.";
         public static byte[] ByteContent => Encoding.UTF8.GetBytes(TextContent);

@@ -6,7 +6,7 @@
     using System.Text;
     using System.Threading;
     using System.Threading.Tasks;
-    using Files.Resources;
+    using Files.Shared;
 
     /// <summary>
     ///     An immutable representation of a file in a file system.
@@ -36,7 +36,7 @@
                 // treated as an implementation error and should never occur.
                 if (parentPath is null)
                 {
-                    throw new InvalidOperationException(ExceptionStrings.File.HasNoParentPath());
+                    throw new InvalidOperationException(ExceptionStrings.StorageFile.HasNoParentPath());
                 }
 
                 return FileSystem.GetFolder(parentPath);
