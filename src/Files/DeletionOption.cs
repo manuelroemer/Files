@@ -1,7 +1,7 @@
 ﻿namespace Files
 {
     /// <summary>
-    ///     Defines different ways to react when an element which does not exist during a deletion attempt.
+    ///     Defines different ways to react to a missing element during a deletion attempt.
     /// </summary>
     public enum DeletionOption
     {
