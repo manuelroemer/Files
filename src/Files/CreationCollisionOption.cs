@@ -15,7 +15,7 @@
         ///     The existing file or folder should be overwritten or replaced.
         ///     
         ///     Specifying this flag only replaces elements of the same type.
-        ///     If a folder already exists in the location where a file is supposed to be created,
+        ///     If a folder already exists in the location where a file is supposed to be created
         ///     the creation will fail (and vice versa).
         /// </summary>
         ReplaceExisting,
@@ -26,7 +26,7 @@
         ///     file system.
         ///     
         ///     Specifying this flag only ignores elements of the same type.
-        ///     If a folder already exists in the location where a file is supposed to be created,
+        ///     If a folder already exists in the location where a file is supposed to be created
         ///     the creation will fail (and vice versa).
         /// </summary>
         Ignore,
