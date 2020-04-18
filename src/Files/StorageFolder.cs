@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
     using System.Linq;
@@ -11,7 +12,7 @@
     /// <summary>
     ///     An immutable representation of a folder in a file system.
     /// </summary>
-    [DebuggerDisplay("StorageFolder at {ToString()}")]
+    [DebuggerDisplay("📁 {ToString()}")]
     public abstract class StorageFolder : StorageElement
     {
         private readonly Lazy<StorageFolder?> _parentLazy;
@@ -34,6 +35,15 @@
                     : FileSystem.GetFolder(parentPath);
             });
         }
+
+        /// <inheritdoc/>
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public sealed override StorageFile AsFile() =>
+            FileSystem.GetFile(Path);
+
+        /// <inheritdoc/>
+        public sealed override StorageFolder AsFolder() =>
+            this;
 
         /// <summary>
         ///     Returns a file relative to this folder by joining this folder's full path with the specified

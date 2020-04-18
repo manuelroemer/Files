@@ -8,7 +8,7 @@
     /// <summary>
     ///     An immutable representation of a file or folder in a file system.
     ///     This is the base class of the <see cref="StorageFile"/> and <see cref="StorageFolder"/> classes.
-    ///     No other classes can derive from this class.
+    ///     No other classes can be derived from this class.
     /// </summary>
     /// <seealso cref="StorageFile"/>
     /// <seealso cref="StorageFolder"/>
@@ -31,14 +31,43 @@
         /// </summary>
         /// <remarks>
         ///     This internal constructor ensures that only the <see cref="StorageFile"/> and
-        ///     <see cref="StorageFolder"/> classes can derive from this base class.
-        ///     External users of the library cannot derive from it.
+        ///     <see cref="StorageFolder"/> classes can be derived from this base class.
         /// </remarks>
         private protected StorageElement()
         {
             // Never make this public or protected!
             // Only the file/folder classes within this library are supposed to inherit from this base.
         }
+
+        /// <summary>
+        ///     Returns a <see cref="StorageFile"/> which uses the same path as this element.
+        /// </summary>
+        /// <returns>
+        ///     If this element is a <see cref="StorageFile"/>, returns the same instance;
+        ///     a new <see cref="StorageFile"/> instance initialized with this element's
+        ///     <see cref="Path"/> otherwise.
+        /// </returns>
+        /// <remarks>
+        ///     Using this method is similar to calling <c>element.FileSystem.GetFile(element.Path)</c>,
+        ///     but has the benefit of reusing the same object instance if the element already is a
+        ///     <see cref="StorageFile"/>.
+        /// </remarks>
+        public abstract StorageFile AsFile();
+
+        /// <summary>
+        ///     Returns a <see cref="StorageFolder"/> which uses the same path as this element.
+        /// </summary>
+        /// <returns>
+        ///     If this element is a <see cref="StorageFolder"/>, returns the same instance;
+        ///     a new <see cref="StorageFolder"/> instance initialized with this element's
+        ///     <see cref="Path"/> otherwise.
+        /// </returns>
+        /// <remarks>
+        ///     Using this method is similar to calling <c>element.FileSystem.GetFolder(element.Path)</c>,
+        ///     but has the benefit of reusing the same object instance if the element already is a
+        ///     <see cref="StorageFolder"/>.
+        /// </remarks>
+        public abstract StorageFolder AsFolder();
 
         /// <summary>
         ///     Gets the element's current attributes.
@@ -56,17 +85,22 @@
         ///     Access to the element is restricted.
         /// </exception>
         /// <exception cref="IOException">
-        ///     An I/O error occured while interacting with the file system.
+        ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
+        ///     conflicting folder (or file) exists at its path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
         ///     One of the element's parent folders does not exist.
         ///     
         ///     -or-
         ///     
-        ///     The element is a <see cref="StorageFolder"/> and does not exist.
+        ///     The element is a <see cref="StorageFolder"/> which does not exist.
         /// </exception>
         /// <exception cref="FileNotFoundException">
-        ///     The element is a <see cref="StorageFile"/> and does not exist.
+        ///     The element is a <see cref="StorageFile"/> which does not exist.
         /// </exception>
         public abstract Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default);
 
@@ -75,8 +109,9 @@
         ///     <paramref name="attributes"/> parameter.
         ///     
         ///     This method does not throw an exception if the specified <paramref name="attributes"/>
-        ///     value defines invalid or unsupported attributes or attribute combinations.
-        ///     These values or combinations are ignored instead.
+        ///     value defines a particular attribute combination which is not supported by the
+        ///     underlying file system.
+        ///     The unsupported values are ignored instead.
         /// </summary>
         /// <param name="attributes">
         ///     The new attributes for the file or folder.
@@ -84,6 +119,9 @@
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="attributes"/> is an invalid <see cref="FileAttributes"/> value.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
@@ -91,17 +129,22 @@
         ///     Access to the element is restricted.
         /// </exception>
         /// <exception cref="IOException">
-        ///     An I/O error occured while interacting with the file system.
+        ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
+        ///     conflicting folder (or file) exists at its path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
         ///     One of the element's parent folders does not exist.
         ///     
         ///     -or-
         ///     
-        ///     The element is a <see cref="StorageFolder"/> and does not exist.
+        ///     The element is a <see cref="StorageFolder"/> which does not exist.
         /// </exception>
         /// <exception cref="FileNotFoundException">
-        ///     The element is a <see cref="StorageFile"/> and does not exist.
+        ///     The element is a <see cref="StorageFile"/> which does not exist.
         /// </exception>
         public abstract Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default);
 
@@ -124,7 +167,7 @@
         ///     Access to the element is restricted.
         /// </exception>
         /// <exception cref="IOException">
-        ///     An I/O error occured while interacting with the file system.
+        ///     An undefined I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
         ///     One of the element's parent folders does not exist.
@@ -151,11 +194,16 @@
         ///     Access to the element is restricted.
         /// </exception>
         /// <exception cref="IOException">
-        ///     An I/O error occured while interacting with the file system.
+        ///     The element already exists.
         ///     
         ///     -or-
         ///     
-        ///     The element already exists.
+        ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
+        ///     conflicting folder (or file) exists at its path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
         ///     One of the element's parent folders does not exist.
@@ -192,11 +240,16 @@
         ///     Access to the element is restricted.
         /// </exception>
         /// <exception cref="IOException">
-        ///     An I/O error occured while interacting with the file system.
+        ///     The element already exists.
         ///     
         ///     -or-
         ///     
-        ///     The element already exists.
+        ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
+        ///     conflicting folder (or file) exists at its path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
         ///     One of the element's parent folders does not exist and <paramref name="recursive"/>
@@ -228,12 +281,17 @@
         ///     Access to the element is restricted.
         /// </exception>
         /// <exception cref="IOException">
-        ///     An I/O error occured while interacting with the file system.
+        ///     The element already exists and <paramref name="options"/> has the value
+        ///     <see cref="CreationCollisionOption.Fail"/>.
         ///     
         ///     -or-
         ///     
-        ///     The element already exists and <paramref name="options"/> has the value
-        ///     <see cref="CreationCollisionOption.Fail"/>.
+        ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
+        ///     conflicting folder (or file) exists at its path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
         ///     One of the element's parent folders does not exist.
@@ -242,7 +300,7 @@
             CreateAsync(recursive: false, options, cancellationToken);
 
         /// <summary>
-        ///     Creates the element and optionally all of its non-existing parent folders if it does not already exist.
+        ///     Creates the element.
         /// </summary>
         /// <param name="recursive">
         ///     A value indicating whether the element's parent folder should be created recursively
@@ -264,6 +322,9 @@
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="options"/> is an invalid <see cref="CreationCollisionOption"/> value.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
@@ -271,12 +332,17 @@
         ///     Access to the element is restricted.
         /// </exception>
         /// <exception cref="IOException">
-        ///     An I/O error occured while interacting with the file system.
+        ///     The element already exists and <paramref name="options"/> has the value
+        ///     <see cref="CreationCollisionOption.Fail"/>.
         ///     
         ///     -or-
         ///     
-        ///     The element already exists and <paramref name="options"/> has the value
-        ///     <see cref="CreationCollisionOption.Fail"/>.
+        ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
+        ///     conflicting folder (or file) exists at its path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
         ///     One of the element's parent folders does not exist and <paramref name="recursive"/>
@@ -306,17 +372,22 @@
         ///     Access to the element is restricted.
         /// </exception>
         /// <exception cref="IOException">
-        ///     An I/O error occured while interacting with the file system.
+        ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
+        ///     conflicting folder (or file) exists at its path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="FileNotFoundException">
-        ///     The element is a <see cref="StorageFile"/> and does not exist.
+        ///     The element is a <see cref="StorageFile"/> which does not exist.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
         ///     One of the element's parent folders does not exist.
         ///     
         ///     -or-
         ///     
-        ///     The element is a <see cref="StorageFolder"/> and does not exist.
+        ///     The element is a <see cref="StorageFolder"/> which does not exist.
         /// </exception>
         public Task DeleteAsync(CancellationToken cancellationToken = default) =>
             DeleteAsync(DefaultDeletionOption, cancellationToken);
@@ -330,6 +401,9 @@
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="options"/> is an invalid <see cref="DeletionOption"/> value.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
@@ -337,7 +411,12 @@
         ///     Access to the element is restricted.
         /// </exception>
         /// <exception cref="IOException">
-        ///     An I/O error occured while interacting with the file system.
+        ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
+        ///     conflicting folder (or file) exists at its path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="FileNotFoundException">
         ///     The element is a <see cref="StorageFile"/> which does not exist and <paramref name="options"/>
@@ -356,6 +435,9 @@
         /// <summary>
         ///     Returns the element's full path as a string.
         /// </summary>
+        /// <remarks>
+        ///     Calling this method is equivalent to calling <c>element.Path.FullPath.ToString()</c>.
+        /// </remarks>
         public sealed override string ToString() =>
             Path.FullPath.ToString();
     }

@@ -4,7 +4,7 @@
     using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
-    ///     Provides a central entry point for interacting with a file system and its elements.
+    ///     The central entry point for interacting with a file system and its elements.
     ///     See remarks for details.
     /// </summary>
     /// <remarks>
@@ -51,7 +51,7 @@
     {
         /// <summary>
         ///     Gets a <see cref="PathInformation"/> instance which provides information about
-        ///     certain components of a path in this file system implementation.
+        ///     special path characteristics in this file system implementation.
         /// </summary>
         public abstract PathInformation PathInformation { get; }
 

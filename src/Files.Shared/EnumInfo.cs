@@ -18,7 +18,7 @@
     /// </summary>
     internal static class EnumInfo
     {
-        public static bool IsDefined<T>(T value) where T : struct, Enum, IConvertible
+        internal static bool IsDefined<T>(T value) where T : struct, Enum, IConvertible
         {
             var intValue = value.ToInt32(CultureInfo.InvariantCulture);
             return EnumCache<T>.IsFlagged

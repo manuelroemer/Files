@@ -1,6 +1,7 @@
 ﻿namespace Files
 {
     using System;
+    using System.ComponentModel;
     using System.Diagnostics;
     using System.IO;
     using System.Text;
@@ -11,7 +12,7 @@
     /// <summary>
     ///     An immutable representation of a file in a file system.
     /// </summary>
-    [DebuggerDisplay("StorageFile at {ToString()}")]
+    [DebuggerDisplay("📄 {ToString()}")]
     public abstract class StorageFile : StorageElement
     {
         private readonly Lazy<StorageFolder> _parentLazy;
@@ -42,6 +43,15 @@
                 return FileSystem.GetFolder(parentPath);
             });
         }
+
+        /// <inheritdoc/>
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        public sealed override StorageFile AsFile() =>
+            this;
+
+        /// <inheritdoc/>
+        public sealed override StorageFolder AsFolder() =>
+            FileSystem.GetFolder(Path);
 
         /// <summary>
         ///     Returns basic properties of the file.

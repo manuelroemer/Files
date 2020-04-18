@@ -1,13 +1,12 @@
 ﻿namespace Files
 {
     /// <summary>
-    ///     Defines different ways to react to file or folder name collisions.
+    ///     Defines different ways to react to name collisions during file and folder operations.
     /// </summary>
     public enum NameCollisionOption
     {
         /// <summary>
-        ///     The method should throw an exception if a file or folder already exists at the same 
-        ///     location.
+        ///     The method should throw an exception if a file or folder already exists at the same location.
         /// </summary>
         Fail = CreationCollisionOption.Fail,
 

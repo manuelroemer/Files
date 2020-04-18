@@ -6,7 +6,7 @@
     using System.Linq;
 
     /// <summary>
-    ///     Provides information about certain components of a path in a file system implementation.
+    ///     Provides information about special path characteristics in a file system implementation.
     /// </summary>
     public sealed class PathInformation
     {
