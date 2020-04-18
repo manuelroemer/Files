@@ -37,11 +37,11 @@
         }
 
         /// <inheritdoc/>
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public sealed override StorageFile AsFile() =>
             FileSystem.GetFile(Path);
 
         /// <inheritdoc/>
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
         public sealed override StorageFolder AsFolder() =>
             this;
 
