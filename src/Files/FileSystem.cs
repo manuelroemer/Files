@@ -8,7 +8,7 @@
     ///     See remarks for details.
     /// </summary>
     /// <remarks>
-    ///     The <see cref="FileSystem"/> class as the central factory for the various file system
+    ///     The <see cref="FileSystem"/> class is the central factory for the various file system
     ///     members exposed by this library, e.g. <see cref="StoragePath"/>, <see cref="StorageFile"/>
     ///     or <see cref="StorageFolder"/>.
     /// 
