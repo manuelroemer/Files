@@ -14,7 +14,7 @@
     /// 
     ///     <see cref="FileSystem"/> is an abstract class which must be implemented to support a
     ///     specific file system. By only using this abstraction in your code, you will be able
-    ///     to seamlessly switch between different file system implementations, e.g. an implementation
+    ///     to seamlessly switch between different file system implementations, for example an implementation
     ///     targeting a user's actual physical file system and an in-memory implementation for testing.
     ///     
     ///     In most cases, an application should only be using one <see cref="FileSystem"/> implementation
