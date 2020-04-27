@@ -19,15 +19,11 @@
 
         // Shortcuts for the separator, because typing PathInformation.DirectorySeparatorChar.ToString()
         // adds too much noise in the test data below.
-        private readonly string Sep;
-        private readonly string AltSep;
+        private string Sep => PathInformation.DirectorySeparatorChar.ToString();
+        private string AltSep => PathInformation.AltDirectorySeparatorChar.ToString();
 
         public StoragePathSpecificationTests(FileSystemTestContext context)
-            : base(context)
-        {
-            Sep = PathInformation.DirectorySeparatorChar.ToString();
-            AltSep = PathInformation.DirectorySeparatorChar.ToString();
-        }
+            : base(context) { }
 
         #region Kind Tests
 

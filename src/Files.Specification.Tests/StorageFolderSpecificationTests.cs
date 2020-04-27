@@ -10,6 +10,7 @@
     using Files.Specification.Tests.Attributes;
     using Files.Specification.Tests.Setup;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
+    using Moq;
     using Shouldly;
 
     public abstract class StorageFolderSpecificationTests : FileSystemTestBase
@@ -19,6 +20,8 @@
                 .Append(FileSystem.PathInformation.VolumeSeparatorChar)
                 .Distinct()
                 .ToArray();
+
+        public abstract IEnumerable<object[]> InvalidPathsData { get; }
 
         public StorageFolderSpecificationTests(FileSystemTestContext context)
             : base(context) { }
@@ -673,11 +676,23 @@
         }
 
         [TestMethod]
-        public async Task CopyAsync_ForeignFileSystemPath_ThrowsArgumentException()
+        public async Task CopyAsync_ValidForeignFileSystemPath_UsesForeignFileSystemPath()
         {
-            var foldr = await TestFolder.SetupFileAsync(Default.FolderName);
-            var dst = TestFolder.GetPath(Default.DstFolderSegments);
-            await Should.ThrowAsync<ArgumentException>(async () => await foldr.CopyAsync(Default.ForeignFileSystemPath));
+            var folder = await TestFolder.SetupFolderAsync(Default.FolderName);
+            var dstFolder = TestFolder.GetFolder(Default.DstFolderSegments);
+            var foreignDstPathMock = new Mock<StoragePath>(dstFolder.Path.ToString()) { CallBase = true };
+            await TestFolder.SetupFolderAsync(Default.DstParentFolderName);
+            await folder.CopyAsync(foreignDstPathMock.Object);
+            await dstFolder.ShouldExistAsync();
+        }
+
+        [TestMethod]
+        [DynamicInstanceData(nameof(InvalidPathsData))]
+        public async Task CopyAsync_InvalidForeignFileSystemPath_ThrowsArgumentException(string invalidPathString)
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            var foreignDstPathMock = new Mock<StoragePath>(invalidPathString) { CallBase = true };
+            await Should.ThrowAsync<ArgumentException>(async () => await folder.CopyAsync(foreignDstPathMock.Object));
         }
 
         [DataTestMethod]
@@ -855,11 +870,23 @@
         }
 
         [TestMethod]
-        public async Task MoveAsync_ForeignFileSystemPath_ThrowsArgumentException()
+        public async Task MoveAsync_ValidForeignFileSystemPath_UsesForeignFileSystemPath()
         {
-            var folder = await TestFolder.SetupFileAsync(Default.FolderName);
-            var dst = TestFolder.GetPath(Default.DstFolderSegments);
-            await Should.ThrowAsync<ArgumentException>(async () => await folder.MoveAsync(Default.ForeignFileSystemPath));
+            var folder = await TestFolder.SetupFolderAsync(Default.FolderName);
+            var dstFolder = TestFolder.GetFolder(Default.DstFolderSegments);
+            var foreignDstPathMock = new Mock<StoragePath>(dstFolder.Path.ToString()) { CallBase = true };
+            await TestFolder.SetupFolderAsync(Default.DstParentFolderName);
+            await folder.MoveAsync(foreignDstPathMock.Object);
+            await dstFolder.ShouldExistAsync();
+        }
+
+        [TestMethod]
+        [DynamicInstanceData(nameof(InvalidPathsData))]
+        public async Task MoveAsync_InvalidForeignFileSystemPath_ThrowsArgumentException(string invalidPathString)
+        {
+            var folder = TestFolder.GetFolder(Default.FolderName);
+            var foreignDstPathMock = new Mock<StoragePath>(invalidPathString) { CallBase = true };
+            await Should.ThrowAsync<ArgumentException>(async () => await folder.MoveAsync(foreignDstPathMock.Object));
         }
 
         [TestMethod]
