@@ -77,6 +77,10 @@
             // There's no "native" API for setting file/folder attributes.
             // We can try to use System.IO's API - it should at least work in certain locations
             // like the application data.
+            if (!EnumInfo.IsDefined(attributes))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(attributes), nameof(attributes));
+            }
 
             return Task.Run(async () =>
             {
@@ -122,6 +126,11 @@
             CancellationToken cancellationToken = default
         )
         {
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             await EnsureNoConflictingFolderExistsAsync(cancellationToken).ConfigureAwait(false);
 
             WinStorageFolder parentFolder;
@@ -152,6 +161,11 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             if (destinationPath.FullPath.Parent is null)
             {
@@ -177,6 +191,11 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             if (destinationPath.FullPath.Parent is null)
             {
@@ -218,6 +237,11 @@
                 );
             }
 
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             var destinationPath = _fullParentPath.Join(newName).FullPath;
             var destinationFile = FileSystem.GetFile(destinationPath);
 
@@ -232,6 +256,11 @@
 
         public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
         {
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             return options switch
             {
                 DeletionOption.Fail => FailImpl(),
@@ -264,6 +293,11 @@
 
         public override async Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default)
         {
+            if (!EnumInfo.IsDefined(fileAccess))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileAccess), nameof(fileAccess));
+            }
+
             var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
             var fileAccessMode = fileAccess switch
             {

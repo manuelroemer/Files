@@ -114,6 +114,13 @@
         #region SetAttributesAsync Tests
 
         [TestMethod]
+        public async Task SetAttributesAsync_InvalidFileAttributes_ThrowsArgumentException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await Should.ThrowAsync<ArgumentException>(async () => await file.SetAttributesAsync(Default.InvalidFileAttributes));
+        }
+
+        [TestMethod]
         public async Task SetAttributesAsync_ExistingFile_DoesNotThrow()
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
@@ -795,10 +802,10 @@
         #region OpenAsync Tests
 
         [TestMethod]
-        public async Task RenameAsync_InvalidFileAccess_ThrowsArgumentException()
+        public async Task OpenAsync_InvalidFileAccess_ThrowsArgumentException()
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
-            await Should.ThrowAsync<ArgumentException>(async () => await file.OpenAsync((FileAccess)(-1)));
+            await Should.ThrowAsync<ArgumentException>(async () => await file.OpenAsync(Default.InvalidFileAccess));
         }
 
         [TestMethod]

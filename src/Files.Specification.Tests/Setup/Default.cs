@@ -1,6 +1,7 @@
 ﻿namespace Files.Specification.Tests.Setup
 {
     using System;
+    using System.IO;
     using System.Text;
     using Moq;
 
@@ -56,6 +57,8 @@
 
 
 
+        public static FileAttributes InvalidFileAttributes => (FileAttributes)(-1);
+        public static FileAccess InvalidFileAccess => (FileAccess)(-1);
         public static CreationCollisionOption InvalidCreationCollisionOption => (CreationCollisionOption)(-1);
         public static NameCollisionOption InvalidNameCollisionOption => (NameCollisionOption)(-1);
         public static DeletionOption InvalidDeletionOption => (DeletionOption)(-1);

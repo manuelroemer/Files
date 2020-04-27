@@ -3,11 +3,9 @@
   <PropertyGroup>
     <TargetFramework>uap10.0.16299</TargetFramework>
     <DefineConstants>$(DefineConstants);UAP</DefineConstants>
-    <IsPackable>true</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nullable" Version="1.*" PrivateAssets="All" />
     <ProjectReference Include="..\Files\Files.csproj" />
   </ItemGroup>
 

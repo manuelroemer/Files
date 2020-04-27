@@ -336,6 +336,13 @@
         #region SetAttributesAsync Tests
 
         [TestMethod]
+        public async Task SetAttributesAsync_InvalidFileAttributes_ThrowsArgumentException()
+        {
+            var folder = await TestFolder.SetupFolderAsync(Default.FileName);
+            await Should.ThrowAsync<ArgumentException>(async () => await folder.SetAttributesAsync(Default.InvalidFileAttributes));
+        }
+
+        [TestMethod]
         public async Task SetAttributesAsync_ExistingFolder_DoesNotThrow()
         {
             var folder = await TestFolder.SetupFolderAsync(Default.FolderName);

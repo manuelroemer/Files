@@ -2,12 +2,7 @@
 
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
-    <IsPackable>true</IsPackable>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Nullable" Version="1.*" PrivateAssets="All" />
-  </ItemGroup>
 
   <Import Project="..\Files.Shared\Files.Shared.projitems" />
 

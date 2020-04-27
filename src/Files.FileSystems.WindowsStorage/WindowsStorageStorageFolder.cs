@@ -67,6 +67,10 @@
             // There's no "native" API for setting file/folder attributes.
             // We can at least try to use System.IO's API - it should at least work in certain locations
             // like the application data.
+            if (!EnumInfo.IsDefined(attributes))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(attributes), nameof(attributes));
+            }
 
             return Task.Run(async () =>
             {
@@ -120,7 +124,12 @@
             CancellationToken cancellationToken = default
         )
         {
-            // We cannot reasonably create a root directory with the API.
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
+            // We cannot reasonably create a root directory with the Windows Storage API.
             // If someone tries to do so, we'll simply deny the call. In most cases, the root
             // folder will exist anyway.
             if (_fullParentPath is null)
@@ -158,6 +167,11 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
             if (destinationPath.FullPath.Parent is null)
             {
@@ -207,6 +221,11 @@
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
 
             var fullDestinationPath = destinationPath.FullPath;
@@ -248,6 +267,11 @@
                     ExceptionStrings.StorageFolder.NewNameContainsInvalidChar(FileSystem.PathInformation),
                     nameof(newName)
                 );
+            }
+
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
             var srcFolder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
@@ -307,6 +331,11 @@
 
         public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
         {
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
             return options switch
             {
                 DeletionOption.Fail => FailImpl(),

@@ -4,6 +4,7 @@
     ///     Represents an element which is associated with an arbitrary file system.
     ///     See remarks for details.
     /// </summary>
+    /// <remarks>
     ///     The <see cref="IFileSystemElement"/> interface is implemented by every member
     ///     which can be created by the <see cref="Files.FileSystem"/> class.
     ///     The interface gives you access to the file system with which the implementing element

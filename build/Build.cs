@@ -145,7 +145,7 @@ class Build : NukeBuild
         {
             foreach (var appxRecipePath in SourceDirectory.GlobFiles("**/*.appxrecipe"))
             {
-                VSTest(s => s
+               VSTest(s => s
                     .SetToolPath(FindVsTestExe())
                     .SetWorkingDirectory(appxRecipePath.Parent)
                     .AddTestAssemblies(Path.GetFileName(appxRecipePath))
