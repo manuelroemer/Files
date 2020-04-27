@@ -28,7 +28,11 @@
             pathMock
                 .SetupGet(x => x.FileSystem)
                 .Returns(fileSystem);
-            
+
+            pathMock
+                .SetupGet(x => x.FullPath)
+                .Returns(() => pathMock.Object);
+
             return pathMock;
         }
     }

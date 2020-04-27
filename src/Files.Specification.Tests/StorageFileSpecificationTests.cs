@@ -1128,16 +1128,5 @@
         }
 
         #endregion
-
-        #region ToString Tests
-
-        [TestMethod]
-        public void ToString_ReturnsFullPathString()
-        {
-            var file = TestFolder.GetFile(Default.FileName);
-            file.ToString().ShouldBe(file.Path.FullPath.ToString());
-        }
-
-        #endregion
     }
 }
