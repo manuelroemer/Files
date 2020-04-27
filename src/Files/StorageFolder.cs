@@ -36,11 +36,23 @@
             });
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Returns a new <see cref="StorageFile"/> with the same path as this
+        ///     <see cref="StorageFolder"/> instance.
+        /// </summary>
+        /// <returns>
+        ///     A new <see cref="StorageFile"/> with the same path as this <see cref="StorageFolder"/> instance.
+        /// </returns>
+        /// <remarks>
+        ///     Using this method is equivalent to calling <c>element.FileSystem.GetFile(folder.Path)</c>.
+        /// </remarks>
         public sealed override StorageFile AsFile() =>
             FileSystem.GetFile(Path);
 
-        /// <inheritdoc/>
+        /// <summary>
+        ///     Returns the same <see cref="StorageFolder"/> instance.
+        /// </summary>
+        /// <returns>The same <see cref="StorageFolder"/> instance.</returns>
         [EditorBrowsable(EditorBrowsableState.Advanced)]
         public sealed override StorageFolder AsFolder() =>
             this;

@@ -40,7 +40,7 @@
         }
 
         /// <summary>
-        ///     Returns a <see cref="StorageFile"/> which uses the same path as this element.
+        ///     Returns a <see cref="StorageFile"/> with the same path as this element.
         /// </summary>
         /// <returns>
         ///     If this element is a <see cref="StorageFile"/>, returns the same instance;
@@ -48,14 +48,14 @@
         ///     <see cref="Path"/> otherwise.
         /// </returns>
         /// <remarks>
-        ///     Using this method is similar to calling <c>element.FileSystem.GetFile(element.Path)</c>,
+        ///     Using this method is equivalent to calling <c>element.FileSystem.GetFile(element.Path)</c>,
         ///     but has the benefit of reusing the same object instance if the element already is a
         ///     <see cref="StorageFile"/>.
         /// </remarks>
         public abstract StorageFile AsFile();
 
         /// <summary>
-        ///     Returns a <see cref="StorageFolder"/> which uses the same path as this element.
+        ///     Returns a <see cref="StorageFolder"/> with the same path as this element.
         /// </summary>
         /// <returns>
         ///     If this element is a <see cref="StorageFolder"/>, returns the same instance;
@@ -63,7 +63,7 @@
         ///     <see cref="Path"/> otherwise.
         /// </returns>
         /// <remarks>
-        ///     Using this method is similar to calling <c>element.FileSystem.GetFolder(element.Path)</c>,
+        ///     Using this method is equivalent to calling <c>element.FileSystem.GetFolder(element.Path)</c>,
         ///     but has the benefit of reusing the same object instance if the element already is a
         ///     <see cref="StorageFolder"/>.
         /// </remarks>
