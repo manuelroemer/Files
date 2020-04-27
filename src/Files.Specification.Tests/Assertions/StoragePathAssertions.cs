@@ -4,17 +4,40 @@
 
     public static class StoragePathAssertions
     {
+        public static void ShouldBeWithNormalizedPathSeparators(this StoragePath? path, string? other)
+        {
+            var first = NormalizePathSeparators(path?.ToString(), path?.FileSystem.PathInformation);
+            var second = NormalizePathSeparators(other, path?.FileSystem.PathInformation);
+            first.ShouldBe(second);
+        }
+        
+        public static void ShouldNotBeWithNormalizedPathSeparators(this StoragePath? path, string? other)
+        {
+            var first = NormalizePathSeparators(path?.ToString(), path?.FileSystem.PathInformation);
+            var second = NormalizePathSeparators(other, path?.FileSystem.PathInformation);
+            first.ShouldNotBe(second);
+        }
+
+        private static string? NormalizePathSeparators(string? str, PathInformation? pathInformation)
+        {
+            if (str is null || pathInformation is null)
+            {
+                return null;
+            }
+            return str.Replace(pathInformation.AltDirectorySeparatorChar, pathInformation.DirectorySeparatorChar);
+        }
+
         public static void ShouldBeEffectivelyEqualTo(this StoragePath? path, StoragePath? other)
         {
-            PseudoNormalize(path).ShouldBe(PseudoNormalize(other));
+            NormalizeFull(path).ShouldBe(NormalizeFull(other));
         }
         
         public static void ShouldNotBeEffectivelyEqualTo(this StoragePath? path, StoragePath? other)
         {
-            PseudoNormalize(path).ShouldNotBe(PseudoNormalize(other));
+            NormalizeFull(path).ShouldNotBe(NormalizeFull(other));
         }
 
-        private static StoragePath? PseudoNormalize(StoragePath? path)
+        private static StoragePath? NormalizeFull(StoragePath? path)
         {
             // We cannot really normalize the paths since there is no corresponding method.
             // The best we can do is to grab a full path and then remove any trailing separators.

@@ -13,6 +13,13 @@
         internal const char ExtensionSeparatorChar = '.';
         internal const string CurrentDirectorySegment = ".";
         internal const string ParentDirectorySegment = "..";
+        internal static readonly char[] DirectorySeparatorChars = new[]
+            {
+                Path.DirectorySeparatorChar,
+                Path.AltDirectorySeparatorChar,
+            }
+            .Distinct()
+            .ToArray();
 
         internal static readonly char[] InvalidNewNameCharacters =
             new[]

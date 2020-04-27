@@ -233,6 +233,34 @@
 
         public abstract StoragePath Join(string other);
 
+        public bool TryLink(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
+            TryLink(other?._underlyingString, out result);
+
+        public virtual bool TryLink(string? other, [NotNullWhen(true)] out StoragePath? result)
+        {
+            if (other is null)
+            {
+                result = null;
+                return false;
+            }
+
+            try
+            {
+                result = Link(other);
+                return true;
+            }
+            catch
+            {
+                result = null;
+                return false;
+            }
+        }
+
+        public StoragePath Link(StoragePath other) =>
+            Link(other?._underlyingString!);
+
+        public abstract StoragePath Link(string other);
+
         int IComparable.CompareTo(object? obj) => obj switch
         {
             StoragePath path => CompareTo(path),

@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using Files.Specification.Tests.Assertions;
     using Files.Specification.Tests.Attributes;
     using Files.Specification.Tests.Setup;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -176,7 +177,7 @@
         public void FullPath_StandardPath_ReturnsFullPath(string pathString, string fullPath)
         {
             var path = FileSystem.GetPath(pathString);
-            path.FullPath.ToString().ShouldBe(fullPath);
+            path.FullPath.ShouldBeWithNormalizedPathSeparators(fullPath);
         }
 
         #endregion
@@ -565,7 +566,7 @@
         {
             var path = FileSystem.GetPath(initialPathString);
             var finalPath = path.Append(part);
-            finalPath.ToString().ShouldBe(expectedPathString);
+            finalPath.ShouldBeWithNormalizedPathSeparators(expectedPathString);
         }
 
         [DataTestMethod]
@@ -596,7 +597,7 @@
             var result = path.TryAppend(part, out var finalPath);
             result.ShouldBeTrue();
             finalPath.ShouldNotBeNull();
-            finalPath!.ToString().ShouldBe(expectedPathString);
+            finalPath.ShouldBeWithNormalizedPathSeparators(expectedPathString);
         }
 
         [TestMethod]
@@ -633,6 +634,38 @@
                 Default.PathName,
                 Default.PathName + AltSep + Default.PathName,
             },
+            new[]
+            {
+                Default.PathName + Sep + Sep,
+                Default.PathName,
+                Default.PathName + Sep + Sep + Default.PathName,
+            },
+            new[]
+            {
+                Sep,
+                Default.PathName,
+                Sep + Default.PathName,
+            },
+            new[]
+            {
+                Default.PathName,
+                Sep,
+                Sep,
+            },
+
+            // Combine discards the first path on subsequent separators.
+            new[]
+            {
+                Default.PathName + Sep,
+                Sep + Default.PathName,
+                Sep + Default.PathName,
+            },
+            new[]
+            {
+                Default.PathName + AltSep,
+                AltSep + Default.PathName,
+                AltSep + Default.PathName,
+            },
         };
 
         public abstract IEnumerable<object[]> CombinePathsWithInvalidOthersData { get; }
@@ -649,24 +682,15 @@
         {
             var path = FileSystem.GetPath(initialPathString);
             var finalPath = path.Combine(other);
-            finalPath.ToString().ShouldBe(expectedPathString);
+            finalPath.ShouldBeWithNormalizedPathSeparators(expectedPathString);
         }
 
         [TestMethod]
         [DynamicInstanceData(nameof(CombinePathsWithInvalidOthersData))]
-        public void Combine_StandardPathAndValidOther_CombinesPaths(string initialPathString, string other)
+        public void Combine_StandardPathAndInvalidOther_ThrowsArgumentException(string initialPathString, string other)
         {
             var path = FileSystem.GetPath(initialPathString);
             Should.Throw<ArgumentException>(() => path.Combine(other));
-        }
-
-        [TestMethod]
-        public void Combine_TwoAbsolutePaths_ReturnsSecondPath()
-        {
-            var path1 = AbsolutePath / "Foo";
-            var path2 = AbsolutePath / "Bar";
-            var combinedPath = path1.Combine(path2);
-            combinedPath.ToString().ShouldBe(path2.ToString());
         }
 
         #endregion
@@ -689,12 +713,12 @@
             var result = path.TryCombine(other, out var finalPath);
             result.ShouldBeTrue();
             finalPath.ShouldNotBeNull();
-            finalPath!.ToString().ShouldBe(expectedPathString);
+            finalPath.ShouldBeWithNormalizedPathSeparators(expectedPathString);
         }
 
         [TestMethod]
         [DynamicInstanceData(nameof(CombinePathsWithInvalidOthersData))]
-        public void TryCombine_StandardPathAndValidOther_ReturnsFalseAndNull(string initialPathString, string other)
+        public void TryCombine_StandardPathAndInvalidOther_ReturnsFalseAndNull(string initialPathString, string other)
         {
             var path = FileSystem.GetPath(initialPathString);
             var result = path.TryCombine(other, out var finalPath);
@@ -713,7 +737,7 @@
             var result = path1.TryCombine(path2, out var combinedPath);
             result.ShouldBeTrue();
             combinedPath.ShouldNotBeNull();
-            combinedPath!.ToString().ShouldBe(path2.ToString());
+            combinedPath.ShouldBeWithNormalizedPathSeparators(path2.ToString());
         }
 
         #endregion
@@ -740,19 +764,51 @@
                 Default.PathName,
                 Default.PathName + AltSep + Default.PathName,
             },
+            
+            // Join preservers any separators >= 2.
             new[]
             {
-                // Join doesn't merge two separators.
                 Default.PathName + Sep,
                 Sep + Default.PathName,
                 Default.PathName + Sep + Sep + Default.PathName,
             },
             new[]
             {
-                // Join preserves any separators >= 2.
+                Default.PathName + AltSep,
+                AltSep + Default.PathName,
+                Default.PathName + AltSep + AltSep + Default.PathName,
+            },
+            new[]
+            {
                 Default.PathName + Sep + Sep,
                 Sep + Sep + Default.PathName,
                 Default.PathName + Sep + Sep + Sep + Sep + Default.PathName,
+            },
+            new[]
+            {
+                Default.PathName + Sep + Sep,
+                Default.PathName,
+                Default.PathName + Sep + Sep + Default.PathName,
+            },
+            new[]
+            {
+                Default.PathName,
+                Sep + Sep + Default.PathName,
+                Default.PathName + Sep + Sep + Default.PathName,
+            },
+            new[]
+            {
+                Default.PathName,
+                Sep,
+                Default.PathName + Sep,
+            },
+
+            // Join returns the first path if the other one is empty
+            new[]
+            {
+                Default.PathName,
+                "",
+                Default.PathName,
             },
         };
 
@@ -770,34 +826,15 @@
         {
             var path = FileSystem.GetPath(initialPathString);
             var finalPath = path.Join(other);
-            finalPath.ToString().ShouldBe(expectedPathString);
+            finalPath.ShouldBeWithNormalizedPathSeparators(expectedPathString);
         }
 
         [TestMethod]
         [DynamicInstanceData(nameof(JoinPathsWithInvalidOthersData))]
-        public void Join_StandardPathAndValidOther_JoinsPaths(string initialPathString, string other)
+        public void Join_StandardPathAndInvalidOther_ThrowsArgumentException(string initialPathString, string other)
         {
             var path = FileSystem.GetPath(initialPathString);
             Should.Throw<ArgumentException>(() => path.Join(other));
-        }
-
-        [TestMethod]
-        public void Join_TwoAbsolutePaths_JoinsOrConcatenatesPaths()
-        {
-            var path1 = AbsolutePath / "Foo";
-            var path2 = AbsolutePath / "Bar";
-            var expected = FakeJoin(path1.ToString(), path2.ToString());
-
-            // Depending on whether two concatenated absolute paths are considered valid or not,
-            // we allow ArgumentExceptions with Join.
-            try
-            {
-                var result = path1.Join(path2);
-                result.ToString().ShouldBe(expected);
-            }
-            catch (ArgumentException)
-            {
-            }
         }
 
         #endregion
@@ -820,12 +857,12 @@
             var result = path.TryJoin(other, out var finalPath);
             result.ShouldBeTrue();
             finalPath.ShouldNotBeNull();
-            finalPath!.ToString().ShouldBe(expectedPathString);
+            finalPath.ShouldBeWithNormalizedPathSeparators(expectedPathString);
         }
 
         [TestMethod]
         [DynamicInstanceData(nameof(JoinPathsWithInvalidOthersData))]
-        public void TryJoin_StandardPathAndValidOther_ReturnsFalseAndNull(string initialPathString, string other)
+        public void TryJoin_StandardPathAndInvalidOther_ReturnsFalseAndNull(string initialPathString, string other)
         {
             var path = FileSystem.GetPath(initialPathString);
             var result = path.TryJoin(other, out var finalPath);
@@ -833,44 +870,144 @@
             finalPath.ShouldBeNull();
         }
 
-        [TestMethod]
-        public void TryJoin_TwoAbsolutePaths_ReturnsExpectedPath()
-        {
-            var path1 = AbsolutePath / "Foo";
-            var path2 = AbsolutePath / "Bar";
-            var expected = FakeJoin(path1.ToString(), path2.ToString());
+        #endregion
 
-            // Depending on whether two concatenated absolute paths are considered valid or not,
-            // Join is also allowed to return false.
-            var result = path1.TryJoin(path2, out var joinedPath);
-            
-            if (result)
+        #region Link Tests
+
+        public virtual IEnumerable<object[]> LinkPathsWithValidOthersData => new[]
+        {
+            new[]
             {
-                joinedPath!.ToString().ShouldBe(expected);
-            }
-            else
+                Default.PathName,
+                Default.PathName,
+                Default.PathName + Sep + Default.PathName,
+            },
+            new[]
             {
-                joinedPath.ShouldBeNull();
-            }
+                Default.PathName + Sep,
+                Default.PathName,
+                Default.PathName + Sep + Default.PathName,
+            },
+            new[]
+            {
+                Default.PathName + AltSep,
+                Default.PathName,
+                Default.PathName + AltSep + Default.PathName,
+            },
+
+            // Link strips all separators but one.
+            new[]
+            {
+                Default.PathName + Sep,
+                Sep + Default.PathName,
+                Default.PathName + Sep + Default.PathName,
+            },
+            new[]
+            {
+                Default.PathName + AltSep,
+                AltSep + Default.PathName,
+                Default.PathName + AltSep + Default.PathName,
+            },
+            new[]
+            {
+                Default.PathName + Sep + Sep,
+                Sep + Sep + Default.PathName,
+                Default.PathName + Sep + Default.PathName,
+            },
+            new[]
+            {
+                Default.PathName + Sep + Sep,
+                Default.PathName,
+                Default.PathName + Sep + Default.PathName,
+            },
+            new[]
+            {
+                Default.PathName,
+                Sep + Sep + Default.PathName,
+                Default.PathName + Sep + Default.PathName,
+            },
+
+            // Link returns the other path if one is empty after trimming.
+            new[]
+            {
+                Default.PathName,
+                Sep,
+                Default.PathName,
+            },
+            new[]
+            {
+                Sep,
+                Default.PathName,
+                Default.PathName,
+            },
+
+            // Link returns a separator if both paths are empty after trimming.
+            new[]
+            {
+                Sep,
+                Sep,
+                Sep,
+            },
+        };
+
+        public abstract IEnumerable<object[]> LinkPathsWithInvalidOthersData { get; }
+
+        [TestMethod]
+        public void Link_NullParameters_ThrowsArgumentNullException()
+        {
+            Should.Throw<ArgumentNullException>(() => TestFolder.Path.Link((string)null!));
+        }
+
+        [TestMethod]
+        [DynamicInstanceData(nameof(LinkPathsWithValidOthersData))]
+        public void Link_StandardPathAndValidOther_LinksPaths(string initialPathString, string other, string expectedPathString)
+        {
+            var path = FileSystem.GetPath(initialPathString);
+            var finalPath = path.Link(other);
+            finalPath.ShouldBeWithNormalizedPathSeparators(expectedPathString);
+        }
+
+        [TestMethod]
+        [DynamicInstanceData(nameof(LinkPathsWithInvalidOthersData))]
+        public void Link_StandardPathAndInvalidOther_ThrowsArgumentException(string initialPathString, string other)
+        {
+            var path = FileSystem.GetPath(initialPathString);
+            Should.Throw<ArgumentException>(() => path.Link(other));
         }
 
         #endregion
 
-        private string FakeJoin(string path1, string path2)
+        #region TryLink Tests
+
+        [TestMethod]
+        public void TryLink_NullParameters_ReturnsFalseAndNull()
         {
-            if (!EndsWithSeparator(path1) && !StartsWithSeparator(path2))
-            {
-                return path1 + Sep + path2;
-            }
-            return path1 + path2;
-
-            bool StartsWithSeparator(string str) =>
-                   str.StartsWith(Sep)
-                || str.StartsWith(AltSep);
-
-            bool EndsWithSeparator(string str) =>
-                   str.EndsWith(Sep)
-                || str.EndsWith(AltSep);
+            var result = TestFolder.Path.TryLink((string?)null, out var finalPath);
+            result.ShouldBeFalse();
+            finalPath.ShouldBeNull();
         }
+
+        [TestMethod]
+        [DynamicInstanceData(nameof(LinkPathsWithValidOthersData))]
+        public void TryLink_StandardPathAndValidOther_LinksPaths(string initialPathString, string other, string expectedPathString)
+        {
+            var path = FileSystem.GetPath(initialPathString);
+            var result = path.TryLink(other, out var finalPath);
+            result.ShouldBeTrue();
+            finalPath.ShouldNotBeNull();
+            finalPath.ShouldBeWithNormalizedPathSeparators(expectedPathString);
+        }
+
+        [TestMethod]
+        [DynamicInstanceData(nameof(LinkPathsWithInvalidOthersData))]
+        public void TryLink_StandardPathAndInvalidOther_ReturnsFalseAndNull(string initialPathString, string other)
+        {
+            var path = FileSystem.GetPath(initialPathString);
+            var result = path.TryLink(other, out var finalPath);
+            result.ShouldBeFalse();
+            finalPath.ShouldBeNull();
+        }
+
+        #endregion
     }
 }

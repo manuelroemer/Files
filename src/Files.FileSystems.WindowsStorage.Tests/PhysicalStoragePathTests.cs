@@ -23,6 +23,11 @@
             new[] { Default.PathName, '\0'.ToString() },
         };
 
+        public override IEnumerable<object[]> LinkPathsWithInvalidOthersData => new[]
+        {
+            new[] { Default.PathName, '\0'.ToString() },
+        };
+
         public PhysicalStoragePathTests()
             : base(WindowsStorageFileSystemTestContext.Instance) { }
     }

@@ -149,6 +149,35 @@
             return FileSystem.GetPath(PathPolyfills.Join(ToString(), other));
         }
 
+        public override StoragePath Link(string other)
+        {
+            _ = other ?? throw new ArgumentNullException(nameof(other));
+            if (other.Length == 0)
+            {
+                return this;
+            }
+
+            var part1 = ToString().TrimEnd(PhysicalPathHelper.DirectorySeparatorChars);
+            var part2 = other.TrimStart(PhysicalPathHelper.DirectorySeparatorChars);
+
+            if (part1.Length == 0 && part2.Length == 0)
+            {
+                return FileSystem.GetPath($"{Path.DirectorySeparatorChar}");
+            }
+            else if (part1.Length == 0)
+            {
+                return FileSystem.GetPath(other);
+            }
+            else if (part2.Length == 0)
+            {
+                return this;
+            }
+            else
+            {
+                return FileSystem.GetPath($"{part1}{Path.DirectorySeparatorChar}{part2}");
+            }
+        }
+
         public override StoragePath TrimEndingDirectorySeparator() =>
             _pathWithoutEndingDirectorySeparatorLazy.Value;
 

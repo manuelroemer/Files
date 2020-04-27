@@ -2,8 +2,11 @@
 <ClassDiagram MajorVersion="1" MinorVersion="1">
   <Class Name="Files.StorageFile">
     <Position X="4.75" Y="5.25" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
     <TypeIdentifier>
-      <HashCode>ACAAAAAAAAAAAQAAAAAAgAAARAAAgACIAAAAAAQAAEA=</HashCode>
+      <HashCode>ACAAAAIAAAAAAQAAAAAAwAAERAAAgACIAAAAAAAAAEA=</HashCode>
       <FileName>StorageFile.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -13,25 +16,28 @@
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>AAAAAISAAAAAAAIEAAAAAAAIAAAAAAABAAAQAYAAAIA=</HashCode>
+      <HashCode>AAAAAISAAAAAAAIEAAAAAAAMAAAAgAABAAAQAYAAAIA=</HashCode>
       <FileName>StorageElement.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
   </Class>
   <Class Name="Files.StorageFolder">
     <Position X="8.25" Y="5.25" Width="2.5" />
-    <TypeIdentifier>
-      <HashCode>ACAAAAAAAAAAAAAAAAAAgSAAUAAAgAAAAAAEAAQAAAA=</HashCode>
-      <FileName>StorageFolder.cs</FileName>
-    </TypeIdentifier>
-  </Class>
-  <Class Name="Files.StoragePath">
-    <Position X="11.75" Y="1" Width="2.5" />
     <Compartments>
       <Compartment Name="Fields" Collapsed="true" />
     </Compartments>
     <TypeIdentifier>
-      <HashCode>CCAAUACAAABAACgEwAQAQFRQQAAgAYAAAAABAAAAAiA=</HashCode>
+      <HashCode>ACAAAAIAAAAAAAAAAAAAwSAEUAAAgAAAAAAEAAAAAAA=</HashCode>
+      <FileName>StorageFolder.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Files.StoragePath">
+    <Position X="11.75" Y="1.25" Width="2.5" />
+    <Compartments>
+      <Compartment Name="Fields" Collapsed="true" />
+    </Compartments>
+    <TypeIdentifier>
+      <HashCode>CCAAUACQAABAACwEwAQAQFRQQgAgAYAAAAABQAAAAiA=</HashCode>
       <FileName>StoragePath.cs</FileName>
     </TypeIdentifier>
     <Lollipop Position="0.2" />
