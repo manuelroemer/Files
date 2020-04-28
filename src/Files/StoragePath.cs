@@ -259,6 +259,12 @@
         ///     first.Combine("///secondPath"); // Returns "///secondPath".
         ///     </code>
         /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="other"/> is <see langword="null"/>-
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     Concatenating the two paths results in a path with an invalid format.
+        /// </exception>
         /// <seealso cref="Combine(StoragePath)"/>
         /// <seealso cref="Join(string)"/>
         /// <seealso cref="Join(StoragePath)"/>
@@ -338,6 +344,12 @@
         ///     first.Join("///secondPath"); // Returns "firstPath//////secondPath".
         ///     </code>
         /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="other"/> is <see langword="null"/>-
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     Concatenating the two paths results in a path with an invalid format.
+        /// </exception>
         /// <seealso cref="Combine(string)"/>
         /// <seealso cref="Combine(StoragePath)"/>
         /// <seealso cref="Join(StoragePath)"/>
@@ -399,11 +411,17 @@
         ///     <see cref="Link(string)"/> removes any leading/trailing directory separator chars of both
         ///     <paramref name="other"/> and this path before concatenating them. This ensures that
         ///     exactly one directory separator character is present between the two paths.
-        ///     In comparison to the alternatives, this method is the safest option when dealing
+        ///     In comparison to the alternatives, this method is the ideal when dealing
         ///     with user input, as the result will, most likely, be a valid path without an
         ///     excess number of directory separator characters.
         ///     In comparison to <see cref="Join(string)"/> specifically, results like <c>firstPath//secondPath</c>
         ///     are not possible with this method.
+        ///     
+        ///     Be aware that using this method can change the meaning/format of <paramref name="other"/> if it
+        ///     is a special path. If <paramref name="other"/> is, for example, a UNC path, trimming
+        ///     the two leading directory separator chars <c>//</c> will inevitably change the path's meaning.
+        ///     Then again, such a path (and absolute paths in general) should most likely not be
+        ///     concatenated with other paths in the first place.
         ///     
         ///     The following code demonstrates the behavior of <see cref="Link(string)"/>:
         ///     
@@ -426,6 +444,12 @@
         ///     first.Join("///secondPath"); // Returns "firstPath/secondPath".
         ///     </code>
         /// </remarks>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="other"/> is <see langword="null"/>-
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     Concatenating the two paths results in a path with an invalid format.
+        /// </exception>
         /// <seealso cref="Combine(string)"/>
         /// <seealso cref="Combine(StoragePath)"/>
         /// <seealso cref="Join(string)"/>
@@ -515,7 +539,7 @@
             _ => false
         };
 
-        /// <inheritdoc cref="Equals(string?, StringComparison)"/>
+        /// <inheritdoc cref="Equals(string?)"/>
         public bool Equals(StoragePath? path) =>
             Equals(path?._underlyingString, FileSystem.PathInformation.DefaultStringComparison);
 
@@ -573,12 +597,28 @@
         public sealed override string ToString() =>
             _underlyingString;
 
+        /// <inheritdoc cref="operator /(StoragePath, string)"/>
         public static StoragePath operator /(StoragePath path1, StoragePath path2)
         {
             // The called overload validates for null.
             return path1 / path2?._underlyingString!;
         }
 
+        /// <summary>
+        ///     Concatenates the two paths via the <see cref="Join(string)"/> method.
+        ///     Please see <see cref="Join(string)"/> for details the specifics of the concatenation.
+        /// </summary>
+        /// <param name="path1">The first path.</param>
+        /// <param name="path2">The second path.</param>
+        /// <returns>The resulting concatenated path.</returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="path1"/> or <paramref name="path2"/> is <see langword="null"/>.
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     Concatenating the two paths results in a path with an invalid format.
+        /// </exception>
+        /// <seealso cref="Join(string)"/>
+        /// <seealso cref="Join(StoragePath)"/>
         public static StoragePath operator /(StoragePath path1, string path2)
         {
             _ = path1 ?? throw new ArgumentNullException(nameof(path1));
@@ -586,6 +626,26 @@
             return path1.Join(path2);
         }
 
+        /// <summary>
+        ///     Appends the specified <paramref name="part"/> to the end of the <paramref name="path"/>.
+        /// </summary>
+        /// <param name="path">
+        ///     The path to which the specified <paramref name="part"/> should be appended.
+        /// </param>
+        /// <param name="part">
+        ///     The part to be appended to the path.
+        /// </param>
+        /// <returns>
+        ///     A new <see cref="StoragePath"/> instance which represents the path after appending the
+        ///     specified <paramref name="part"/>.
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="part"/>
+        /// </exception>
+        /// <exception cref="ArgumentException">
+        ///     Appending <paramref name="part"/> would result in an invalid path.
+        /// </exception>
+        /// <seealso cref="Append(string)"/>
         public static StoragePath operator +(StoragePath path, string part)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
@@ -593,21 +653,47 @@
             return path.Append(part);
         }
 
+        /// <inheritdoc cref="operator ==(string?, StoragePath?)"/>
         public static bool operator ==(StoragePath? path1, StoragePath? path2) =>
             path1?.Equals(path2) ?? path2?.Equals(path1) ?? true;
 
+        /// <inheritdoc cref="operator !=(string?, StoragePath?)"/>
         public static bool operator !=(StoragePath? path1, StoragePath? path2) =>
             !(path1 == path2);
 
+        /// <inheritdoc cref="operator ==(string?, StoragePath?)"/>
         public static bool operator ==(StoragePath? path1, string? path2) =>
             path1?.Equals(path2) ?? path2 is null;
 
+        /// <inheritdoc cref="operator !=(string?, StoragePath?)"/>
         public static bool operator !=(StoragePath? path1, string? path2) =>
             !(path1 == path2);
 
+        /// <summary>
+        ///     Compares the two paths for string equality.
+        ///     The comparison is done using the <see cref="PathInformation.DefaultStringComparison"/>
+        ///     of this path's file system.
+        /// </summary>
+        /// <param name="path1">The first path.</param>
+        /// <param name="path2">The second path.</param>
+        /// <returns>
+        ///     <see langword="true"/> if the two paths are considered equal;
+        ///     <see langword="false"/> if not.
+        /// </returns>
         public static bool operator ==(string? path1, StoragePath? path2) =>
             path2?.Equals(path1) ?? path1 is null;
 
+        /// <summary>
+        ///     Compares the two paths for string inequality.
+        ///     The comparison is done using the <see cref="PathInformation.DefaultStringComparison"/>
+        ///     of this path's file system.
+        /// </summary>
+        /// <param name="path1">The first path.</param>
+        /// <param name="path2">The second path.</param>
+        /// <returns>
+        ///     <see langword="true"/> if the two paths are considered unequal;
+        ///     <see langword="false"/> if not.
+        /// </returns>
         public static bool operator !=(string? path1, StoragePath? path2) =>
             !(path1 == path2);
 
