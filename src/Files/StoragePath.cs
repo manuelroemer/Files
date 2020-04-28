@@ -13,7 +13,36 @@
     /// <summary>
     ///     An immutable representation of a path which points to an element in a file system.
     ///     Instances can be created via the <see cref="Files.FileSystem"/> class.
+    ///     See remarks for details.
     /// </summary>
+    /// <remarks>
+    ///     A <see cref="StoragePath"/> is, in essence, a wrapper around a simple string.
+    ///     Depending on the underlying file system implementation, the class is able to interpret
+    ///     this underlying string as a path and therefore return path specific information, e.g.
+    ///     whether the path is absolute or relative.
+    ///     
+    ///     In addition, the <see cref="StoragePath"/> allows you to perform file system specific
+    ///     path operations, for example concatenating two paths.
+    ///     
+    ///     <see cref="StoragePath"/> instances can be obtained via the <see cref="FileSystem"/>
+    ///     class or via properties/methods like <see cref="StorageElement.Path"/>.
+    ///     
+    ///     Both users and implementers of this class should be aware that a <see cref="StoragePath"/>
+    ///     is, at its core, nothing else but a layer on top of a string. The string is and remains
+    ///     the lowest common denominator between different file system implementations.
+    ///     
+    ///     Library authors specifically should take care when accepting a <see cref="StoragePath"/>
+    ///     as a parameter.
+    ///     This is important, because it is entirely possible (albeit not recommended) for users
+    ///     to pass a <see cref="StoragePath"/> of a different file system implementation to
+    ///     the method.
+    ///     Accessing the <see cref="StoragePath"/>'s members can then lead to unexpected results
+    ///     and exceptions due to differences in the file system implementation.
+    ///     In general, the best way to guard against such cases is to transform every single
+    ///     <see cref="StoragePath"/> parameter to a <see cref="StoragePath"/> of the own
+    ///     <see cref="Files.FileSystem"/> implementation or by simply operating on the
+    ///     underlying string of the provided <see cref="StoragePath"/>.
+    /// </remarks>
     public abstract class StoragePath :
         IFileSystemElement,
         IEquatable<string?>,
@@ -114,6 +143,20 @@
             _underlyingString = path;
         }
 
+        /// <summary>
+        ///     Attempts to trim one trailing directory separator character from this path and
+        ///     return the resulting path.
+        /// </summary>
+        /// <param name="result">
+        ///     An <see langword="out"/> parameter which will, if the operation succeedes,
+        ///     hold the new <see cref="StoragePath"/> where one trailing directory separator has been
+        ///     trimmed.
+        ///     If this path doesn't have a trailing directory separator character, the same path
+        ///     instance is returned.
+        /// </param>
+        /// <returns>
+        ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
+        /// </returns>
         public virtual bool TryTrimEndingDirectorySeparator([NotNullWhen(true)] out StoragePath? result)
         {
             if (!EndsInDirectorySeparator)
@@ -150,6 +193,21 @@
         /// </exception>
         public abstract StoragePath TrimEndingDirectorySeparator();
 
+        /// <summary>
+        ///     Attempts to append the specified <paramref name="part"/> to the end of this path and
+        ///     return the resulting path.
+        /// </summary>
+        /// <param name="part">
+        ///     The part to be appended to the path.
+        /// </param>
+        /// <param name="result">
+        ///     An <see langword="out"/> parameter which will, if the operation succeedes,
+        ///     hold a new <see cref="StoragePath"/> instance which represents the path after appending the
+        ///     specified <paramref name="part"/>.
+        /// </param>
+        /// <returns>
+        ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
+        /// </returns>
         public virtual bool TryAppend(string? part, [NotNullWhen(true)] out StoragePath? result)
         {
             if (part is null)
@@ -171,7 +229,7 @@
         }
 
         /// <summary>
-        ///     Appends the specified <paramref name="part"/> string to the end of the path.
+        ///     Appends the specified <paramref name="part"/> to the end of this path.
         /// </summary>
         /// <param name="part">
         ///     The part to be appended to the path.
@@ -188,9 +246,29 @@
         /// </exception>
         public abstract StoragePath Append(string part);
 
+        /// <inheritdoc cref="TryCombine(string?, out StoragePath?)"/>
         public bool TryCombine(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
             TryCombine(other?._underlyingString, out result);
-        
+
+        /// <summary>
+        ///     Attempts to concatenate the two paths while also ensuring that <i>at least one</i> directory separator
+        ///     character is inserted between them.
+        ///     
+        ///     If <paramref name="other"/> is rooted or starts with a directory separator character,
+        ///     this path is discarded and the resulting path will simply be <paramref name="other"/>.
+        ///     
+        ///     See remarks of <see cref="Combine(string)"/> for details and examples.
+        /// </summary>
+        /// <param name="other">
+        ///     Another path to be concatenated with this path.
+        /// </param>
+        /// <param name="result">
+        ///     An <see langword="out"/> parameter which will, if the operation succeedes,
+        ///     hold the resulting concatenated path.
+        /// </param>
+        /// <returns>
+        ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
+        /// </returns>
         public virtual bool TryCombine(string? other, [NotNullWhen(true)] out StoragePath? result)
         {
             if (other is null)
@@ -272,9 +350,29 @@
         /// <seealso cref="Link(StoragePath)"/>
         public abstract StoragePath Combine(string other);
 
+        /// <inheritdoc cref="TryJoin(string?, out StoragePath?)"/>
         public bool TryJoin(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
             TryJoin(other?._underlyingString, out result);
 
+        /// <summary>
+        ///     Attempts to concatenate the two paths while also ensuring that <i>at least one</i> directory separator
+        ///     character is inserted between them.
+        ///     
+        ///     All leading/trailing directory separator chars of <paramref name="other"/> and this path
+        ///     are preserved. Neither path is discarded.
+        ///     
+        ///     See remarks of <see cref="Join(string)"/> for details and examples.
+        /// </summary>
+        /// <param name="other">
+        ///     Another path to be concatenated with this path.
+        /// </param>
+        /// <param name="result">
+        ///     An <see langword="out"/> parameter which will, if the operation succeedes,
+        ///     hold the resulting concatenated path.
+        /// </param>
+        /// <returns>
+        ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
+        /// </returns>
         public virtual bool TryJoin(string? other, [NotNullWhen(true)] out StoragePath? result)
         {
             if (other is null)
@@ -357,9 +455,29 @@
         /// <seealso cref="Link(StoragePath)"/>
         public abstract StoragePath Join(string other);
 
+        /// <inheritdoc cref="TryLink(string?, out StoragePath?)"/>
         public bool TryLink(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
             TryLink(other?._underlyingString, out result);
 
+        /// <summary>
+        ///     Attempts to concatenate the two paths while also ensuring that <i>exactly one</i> directory separator
+        ///     character is inserted between them.
+        ///     
+        ///     Excess leading/trailing directory separators are removed from <paramref name="other"/>/this path
+        ///     in order to end up with exactly one separator between them. Neither path is discarded.
+        ///     
+        ///     See remarks of <see cref="Link(string)"/> for details and examples.
+        /// </summary>
+        /// <param name="other">
+        ///     Another path to be concatenated with this path.
+        /// </param>
+        /// <param name="result">
+        ///     An <see langword="out"/> parameter which will, if the operation succeedes,
+        ///     hold the resulting concatenated path.
+        /// </param>
+        /// <returns>
+        ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
+        /// </returns>
         public virtual bool TryLink(string? other, [NotNullWhen(true)] out StoragePath? result)
         {
             if (other is null)

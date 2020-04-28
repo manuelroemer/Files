@@ -162,7 +162,7 @@
         /// </param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     holds the new <see cref="StoragePath"/> instance which locates the folder represented
+        ///     hold the new <see cref="StoragePath"/> instance which locates the folder represented
         ///     by the <paramref name="knownFolder"/> parameter.
         /// </param>
         /// <returns>
@@ -236,7 +236,7 @@
         /// <param name="path">The path which locates a file.</param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     holds the new <see cref="StorageFile"/> instance which represents a file at the
+        ///     hold the new <see cref="StorageFile"/> instance which represents a file at the
         ///     specified <paramref name="path"/>.
         /// </param>
         /// <returns>
@@ -271,7 +271,7 @@
         /// <param name="path">The path which locates a file.</param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     holds the new <see cref="StorageFile"/> instance which represents a file at the
+        ///     hold the new <see cref="StorageFile"/> instance which represents a file at the
         ///     specified <paramref name="path"/>.
         /// </param>
         /// <returns>
@@ -375,7 +375,7 @@
         /// <param name="path">The path which locates a folder.</param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     holds the new <see cref="StorageFolder"/> instance which represents a folder at the
+        ///     hold the new <see cref="StorageFolder"/> instance which represents a folder at the
         ///     specified <paramref name="path"/>.
         /// </param>
         /// <returns>
@@ -410,7 +410,7 @@
         /// <param name="path">The path which locates a folder.</param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     holds the new <see cref="StorageFolder"/> instance which represents a folder at the
+        ///     hold the new <see cref="StorageFolder"/> instance which represents a folder at the
         ///     specified <paramref name="path"/>.
         /// </param>
         /// <returns>
@@ -447,7 +447,7 @@
         /// </param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     holds the new <see cref="StorageFolder"/> instance which represents the folder
+        ///     hold the new <see cref="StorageFolder"/> instance which represents the folder
         ///     represented by the <paramref name="knownFolder"/> parameter.
         /// </param>
         /// <returns>
