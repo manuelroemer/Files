@@ -84,6 +84,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the element is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the element's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
         ///     conflicting folder (or file) exists at its path.
@@ -128,6 +131,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the element is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the element's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
         ///     conflicting folder (or file) exists at its path.
@@ -166,6 +172,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the element is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the element's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     An undefined I/O error occured while interacting with the file system.
         /// </exception>
@@ -192,6 +201,9 @@
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the element is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the element's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     The element already exists.
@@ -239,6 +251,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the element is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the element's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     The element already exists.
         ///     
@@ -279,6 +294,9 @@
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the element is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the element's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     The element already exists and <paramref name="options"/> has the value
@@ -331,6 +349,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the element is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the element's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     The element already exists and <paramref name="options"/> has the value
         ///     <see cref="CreationCollisionOption.Fail"/>.
@@ -371,6 +392,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the element is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the element's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a
         ///     conflicting folder (or file) exists at its path.
@@ -409,6 +433,9 @@
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the element is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the element's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     The element is a <see cref="StorageFile"/> (or <see cref="StorageFolder"/>) and a

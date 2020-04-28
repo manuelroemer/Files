@@ -12,6 +12,7 @@
 
     /// <summary>
     ///     An immutable representation of a path which points to an element in a file system.
+    ///     Instances can be created via the <see cref="Files.FileSystem"/> class.
     /// </summary>
     public abstract class StoragePath :
         IFileSystemElement,

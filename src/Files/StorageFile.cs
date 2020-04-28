@@ -11,6 +11,7 @@
 
     /// <summary>
     ///     An immutable representation of a file in a file system.
+    ///     Instances can be created via the <see cref="FileSystem"/> class.
     /// </summary>
     [DebuggerDisplay("📄 {ToString()}")]
     public abstract class StorageFile : StorageElement
@@ -77,6 +78,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
@@ -101,17 +105,22 @@
         ///     A <see cref="StorageFile"/> instance representing the newly created copy of this file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="destinationPath"/>
+        ///     <paramref name="destinationPath"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="destinationPath"/> has a type which is not compatible with this file's
-        ///     file system implementation.
+        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance representing a path
+        ///     which is considered invalid by this file system implementation.
+        ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
+        ///     simultaneously.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file or the destination folder is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
@@ -136,8 +145,7 @@
         ///     The location to which the file should be copied.
         /// </param>
         /// <param name="options">
-        ///     Defines how to react if another element with a conflicting name already exists in the
-        ///     destination folder.
+        ///     Defines how to react if another file with a conflicting name already exists at the destination.
         /// </param>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
@@ -146,17 +154,22 @@
         ///     A <see cref="StorageFile"/> instance representing the newly created copy of this file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="destinationPath"/>
+        ///     <paramref name="destinationPath"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="destinationPath"/> has a type which is not compatible with this file's
-        ///     file system implementation.
+        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance representing a path
+        ///     which is considered invalid by this file system implementation.
+        ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
+        ///     simultaneously.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file or the destination folder is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
@@ -190,17 +203,22 @@
         ///     A <see cref="StorageFile"/> instance representing the new location of the moved file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="destinationPath"/>
+        ///     <paramref name="destinationPath"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="destinationPath"/> has a type which is not compatible with this file's
-        ///     file system implementation.
+        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance representing a path
+        ///     which is considered invalid by this file system implementation.
+        ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
+        ///     simultaneously.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file or the destination folder is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
@@ -225,8 +243,7 @@
         ///     The location to which the file should be moved.
         /// </param>
         /// <param name="options">
-        ///     Defines how to react if another element with a conflicting name already exists in the
-        ///     destination folder.
+        ///     Defines how to react if another file with a conflicting name already exists at the destination.
         /// </param>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
@@ -235,17 +252,22 @@
         ///     A <see cref="StorageFile"/> instance representing the new location of the moved file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="destinationPath"/>
+        ///     <paramref name="destinationPath"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="destinationPath"/> has a type which is not compatible with this file's
-        ///     file system implementation.
+        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance representing a path
+        ///     which is considered invalid by this file system implementation.
+        ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
+        ///     simultaneously.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file or the destination folder is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
@@ -274,7 +296,7 @@
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
         /// <returns>
-        ///     A <see cref="StorageFile"/> instance representing the new location of the renamed file.
+        ///     A <see cref="StorageFile"/> instance representing the renamed file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="newName"/> is <see langword="null"/>.
@@ -285,16 +307,13 @@
         ///     
         ///     <list type="bullet">
         ///         <item>
-        ///             <description>The (alt) directory separator character</description>
+        ///             <description>The directory separator character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>The alternative directory separator character</description>
         ///         </item>
         ///         <item>
         ///             <description>The volume separator character</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>Any invalid path character</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>Any invalid file name character</description>
         ///         </item>
         ///     </list>
         ///     
@@ -306,6 +325,9 @@
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
@@ -324,14 +346,13 @@
         /// </summary>
         /// <param name="newName">The new name of the file.</param>
         /// <param name="options">
-        ///     Defines how to react if another file with a conflicting name already exists in the
-        ///     current folder.
+        ///     Defines how to react if another file with a conflicting name already exists at the destination.
         /// </param>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
         /// <returns>
-        ///     A <see cref="StorageFile"/> instance representing the new location of the renamed file.
+        ///     A <see cref="StorageFile"/> instance representing the renamed file.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="newName"/> is <see langword="null"/>.
@@ -342,16 +363,13 @@
         ///     
         ///     <list type="bullet">
         ///         <item>
-        ///             <description>The (alt) directory separator character</description>
+        ///             <description>The directory separator character</description>
+        ///         </item>
+        ///         <item>
+        ///             <description>The alternative directory separator character</description>
         ///         </item>
         ///         <item>
         ///             <description>The volume separator character</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>Any invalid path character</description>
-        ///         </item>
-        ///         <item>
-        ///             <description>Any invalid file name character</description>
         ///         </item>
         ///     </list>
         ///     
@@ -363,6 +381,9 @@
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
@@ -400,6 +421,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
@@ -435,6 +459,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
@@ -461,6 +488,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
@@ -486,6 +516,9 @@
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
@@ -519,6 +552,9 @@
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
         /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
@@ -544,10 +580,13 @@
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="bytes"/>
+        ///     <paramref name="bytes"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
@@ -571,10 +610,13 @@
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="text"/>
+        ///     <paramref name="text"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.
@@ -604,10 +646,13 @@
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
         /// <exception cref="ArgumentNullException">
-        ///     * <paramref name="text"/>
+        ///     <paramref name="text"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
         ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
         ///     An I/O error occured while interacting with the file system.

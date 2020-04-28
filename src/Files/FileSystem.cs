@@ -47,6 +47,29 @@
     ///     // not match the path of the mocked, in-memory file system.
     ///     </code>
     /// </remarks>
+    /// <example>
+    ///     The following code demonstrates how the <see cref="FileSystem"/> can be used to interact
+    ///     with files and folders.
+    ///     
+    ///     <code>
+    ///     // Please note that the code below can be drastically simplified by calling different
+    ///     // methods and method overloads - the main goal is demonstrating how the various file
+    ///     // system members play together.
+    ///     public void WriteTextToFile(FileSystem fs)
+    ///     {
+    ///         StoragePath tempFolderPath = fs.GetFolder(KnownFolder.TemporaryData);
+    ///         StoragePath parentFolderPath = tempFolderPath / "Parent Folder";
+    ///         StoragePath filePath = parentFolderPath / "File.txt";
+    ///         
+    ///         StorageFolder parentFolder = fs.GetFolder(parentFolderPath);
+    ///         StorageFile file = fs.GetFile(filePath);
+    ///         
+    ///         await parentFolder.CreateAsync();
+    ///         await file.CreateAsync();
+    ///         await file.WriteTextAsync("Hello World!");
+    ///     }
+    ///     </code>
+    /// </example>
     public abstract class FileSystem
     {
         /// <summary>
@@ -139,7 +162,7 @@
         /// </param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     hold the new <see cref="StoragePath"/> instance which locates the folder represented
+        ///     holds the new <see cref="StoragePath"/> instance which locates the folder represented
         ///     by the <paramref name="knownFolder"/> parameter.
         /// </param>
         /// <returns>
@@ -199,7 +222,7 @@
         /// </exception>
         /// <exception cref="ArgumentException">
         ///     <paramref name="path"/> is a <see cref="StoragePath"/> instance representing a path
-        ///     which has an otherwise invalid format.
+        ///     which is considered invalid by this file system implementation.
         ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
         ///     simultaneously.
         /// </exception>
@@ -213,7 +236,7 @@
         /// <param name="path">The path which locates a file.</param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     hold the new <see cref="StorageFile"/> instance which represents a file at the
+        ///     holds the new <see cref="StorageFile"/> instance which represents a file at the
         ///     specified <paramref name="path"/>.
         /// </param>
         /// <returns>
@@ -248,7 +271,7 @@
         /// <param name="path">The path which locates a file.</param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     hold the new <see cref="StorageFile"/> instance which represents a file at the
+        ///     holds the new <see cref="StorageFile"/> instance which represents a file at the
         ///     specified <paramref name="path"/>.
         /// </param>
         /// <returns>
@@ -317,7 +340,7 @@
         /// </exception>
         /// <exception cref="ArgumentException">
         ///     <paramref name="path"/> is a <see cref="StoragePath"/> instance representing a path
-        ///     which has an otherwise invalid format.
+        ///     which is considered invalid by this file system implementation.
         ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
         ///     simultaneously.
         /// </exception>
@@ -352,7 +375,7 @@
         /// <param name="path">The path which locates a folder.</param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     hold the new <see cref="StorageFolder"/> instance which represents a folder at the
+        ///     holds the new <see cref="StorageFolder"/> instance which represents a folder at the
         ///     specified <paramref name="path"/>.
         /// </param>
         /// <returns>
@@ -387,7 +410,7 @@
         /// <param name="path">The path which locates a folder.</param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     hold the new <see cref="StorageFolder"/> instance which represents a folder at the
+        ///     holds the new <see cref="StorageFolder"/> instance which represents a folder at the
         ///     specified <paramref name="path"/>.
         /// </param>
         /// <returns>
@@ -424,7 +447,7 @@
         /// </param>
         /// <param name="result">
         ///     An <see langword="out"/> parameter which will, if the operation succeedes,
-        ///     hold the new <see cref="StorageFolder"/> instance which represents the folder
+        ///     holds the new <see cref="StorageFolder"/> instance which represents the folder
         ///     represented by the <paramref name="knownFolder"/> parameter.
         /// </param>
         /// <returns>

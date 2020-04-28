@@ -21,7 +21,7 @@
 
         /// <summary>
         ///     Gets the real extension of the element without the file system's extension separator.
-        ///     If the element doesn't have an extension, this returns <see langword="null"/>.
+        ///     If the element doesn't have an extension this returns <see langword="null"/>.
         /// </summary>
         public string? Extension { get; }
 
