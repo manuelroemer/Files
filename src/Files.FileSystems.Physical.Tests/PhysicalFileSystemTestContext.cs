@@ -10,7 +10,7 @@
     {
         public static PhysicalFileSystemTestContext Instance { get; } = new PhysicalFileSystemTestContext();
 
-        public override FileSystem FileSystem => PhysicalFileSystem.Default;
+        public override FileSystem FileSystem => new PhysicalFileSystem();
 
         private PhysicalFileSystemTestContext()
         {
