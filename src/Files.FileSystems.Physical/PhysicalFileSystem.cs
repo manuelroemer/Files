@@ -26,11 +26,6 @@
     /// </remarks>
     public sealed class PhysicalFileSystem : FileSystem
     {
-        /// <summary>
-        ///     Gets a default instance of the <see cref="PhysicalFileSystem"/> class.
-        /// </summary>
-        public static PhysicalFileSystem Default { get; } = new PhysicalFileSystem();
-
         /// <inheritdoc/>
         public override PathInformation PathInformation => PhysicalPathHelper.PhysicalPathInformation;
 

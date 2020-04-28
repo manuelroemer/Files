@@ -37,7 +37,7 @@
 
   <ItemGroup>
     <PackageReference Include="Nullable" Version="1.*" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="*" PrivateAssets="All" />
   </ItemGroup>
 
   <ItemGroup Condition=" $(IsTestProject) ">
