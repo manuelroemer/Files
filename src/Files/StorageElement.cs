@@ -228,7 +228,7 @@
         ///     An exception is thrown if the element already exists.
         /// </summary>
         /// <param name="recursive">
-        ///     A value indicating whether the element's parent folder should be created recursively
+        ///     A value indicating whether the element's parent folders should be created recursively
         ///     if they don't already exist.
         ///     
         ///     If <see langword="true"/>, every parent folder which does not exist will be created
@@ -321,7 +321,7 @@
         ///     Creates the element.
         /// </summary>
         /// <param name="recursive">
-        ///     A value indicating whether the element's parent folder should be created recursively
+        ///     A value indicating whether the element's parent folders should be created recursively
         ///     if they don't already exist.
         ///     
         ///     If <see langword="true"/>, every parent folder which does not exist will be created
@@ -377,6 +377,7 @@
 
         /// <summary>
         ///     Deletes the element (and all of its children if it is a <see cref="StorageFolder"/>).
+        ///     An exception is thrown if the element does not exist.
         /// </summary>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.

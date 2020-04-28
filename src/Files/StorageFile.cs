@@ -94,6 +94,7 @@
 
         /// <summary>
         ///     Copies the file to the specified location.
+        ///     An exception is thrown if a file exists at the destination.
         /// </summary>
         /// <param name="destinationPath">
         ///     The location to which the file should be copied.
@@ -123,6 +124,14 @@
         ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another file already exists at the destination.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting folder exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
@@ -172,6 +181,15 @@
         ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another file already exists at the destination and <paramref name="options"/> has
+        ///     the value <see cref="CreationCollisionOption.Fail"/>.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting folder exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
@@ -192,6 +210,7 @@
 
         /// <summary>
         ///     Moves the file to the specified location.
+        ///     An exception is thrown if a file already exists at the destination.
         /// </summary>
         /// <param name="destinationPath">
         ///     The location to which the file should be moved.
@@ -221,6 +240,14 @@
         ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another file already exists at the destination.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting folder exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
@@ -270,6 +297,15 @@
         ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another file already exists at the destination and <paramref name="options"/> has
+        ///     the value <see cref="CreationCollisionOption.Fail"/>.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting folder exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
@@ -290,6 +326,7 @@
 
         /// <summary>
         ///     Renames the file.
+        ///     An exception is thrown if a file already exists at the rename destination.
         /// </summary>
         /// <param name="newName">The new name of the file.</param>
         /// <param name="cancellationToken">
@@ -330,6 +367,14 @@
         ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another file already exists at the destination.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting folder exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
@@ -386,6 +431,15 @@
         ///     The length of the file's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another file already exists at the destination and <paramref name="options"/> has
+        ///     the value <see cref="CreationCollisionOption.Fail"/>.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting folder exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">

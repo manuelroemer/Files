@@ -295,7 +295,7 @@
 
         /// <summary>
         ///     Concatenates the two paths while also ensuring that <i>at least one</i> directory separator
-        ///     character is inserted between them.
+        ///     character is present between them.
         ///     
         ///     If <paramref name="other"/> is rooted or starts with a directory separator character,
         ///     this path is discarded and the resulting path will simply be <paramref name="other"/>.
@@ -399,7 +399,7 @@
 
         /// <summary>
         ///     Concatenates the two paths while also ensuring that <i>at least one</i> directory separator
-        ///     character is inserted between them.
+        ///     character is present between them.
         ///     
         ///     All leading/trailing directory separator chars of <paramref name="other"/> and this path
         ///     are preserved. Neither path is discarded.
@@ -504,7 +504,7 @@
 
         /// <summary>
         ///     Concatenates the two paths while also ensuring that <i>exactly one</i> directory separator
-        ///     character is inserted between them.
+        ///     character is present between them.
         ///     
         ///     Excess leading/trailing directory separators are removed from <paramref name="other"/>/this path
         ///     in order to end up with exactly one separator between them. Neither path is discarded.

@@ -139,6 +139,7 @@
 
         /// <summary>
         ///     Copies the folder and all of its contents to the specified location.
+        ///     An exception is thrown if a folder already exists at the destination.
         /// </summary>
         /// <param name="destinationPath">
         ///     The location to which the folder should be copied.
@@ -168,13 +169,21 @@
         ///     The length of the folder's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another folder already exists at the destination.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting file exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
         ///     The folder does not exist.
         ///     
         ///     -or-
-        ///     
+        /// 
         ///     One of the folder's parent folders does not exist.
         ///     
         ///     -or-
@@ -197,7 +206,7 @@
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
         /// </param>
         /// <returns>
-        ///     A <see cref="StorageFolder"/> instance representing the newly created copy of this file.
+        ///     A <see cref="StorageFolder"/> instance representing the newly created copy of this folder.
         /// </returns>
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="destinationPath"/> is <see langword="null"/>.
@@ -212,23 +221,33 @@
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
         /// <exception cref="UnauthorizedAccessException">
-        ///     Access to the file or the destination folder is restricted.
+        ///     Access to the folder or the destination folder is restricted.
         /// </exception>
         /// <exception cref="PathTooLongException">
-        ///     The length of the file's path exceeds the system-defined maximum length.
+        ///     The length of the folder's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another folder already exists at the destination and <paramref name="options"/> has
+        ///     the value <see cref="CreationCollisionOption.Fail"/>.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting file exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
-        ///     One of the file's parent folders does not exist.
+        ///     The folder does not exist.
+        ///     
+        ///     -or-
+        /// 
+        ///     One of the folder's parent folders does not exist.
         ///     
         ///     -or-
         ///     
         ///     The destination folder does not exist.
-        /// </exception>
-        /// <exception cref="FileNotFoundException">
-        ///     The file does not exist.
         /// </exception>
         public abstract Task<StorageFolder> CopyAsync(
             StoragePath destinationPath,
@@ -238,6 +257,7 @@
 
         /// <summary>
         ///     Moves the folder and all of its contents to the specified location.
+        ///     An exception is thrown if a folder already exists at the destination.
         /// </summary>
         /// <param name="destinationPath">
         ///     The location to which the folder should be moved.
@@ -267,6 +287,14 @@
         ///     The length of the folder's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another folder already exists at the destination.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting file exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
@@ -274,7 +302,7 @@
         ///     
         ///     -or-
         ///     
-        ///     One of the file's parent folders does not exist.
+        ///     One of the folder's parent folders does not exist.
         ///     
         ///     -or-
         ///     
@@ -317,14 +345,23 @@
         ///     The length of the folder's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
-        ///     An I/O error occured while interacting with the file system.
-        /// </exception>
-        /// <exception cref="DirectoryNotFoundException">
-        ///     The file does not exist.
+        ///     Another folder already exists at the destination and <paramref name="options"/> has
+        ///     the value <see cref="CreationCollisionOption.Fail"/>.
         ///     
         ///     -or-
         ///     
-        ///     One of the file's parent folders does not exist.
+        ///     A conflicting file exists at the destination.
+        ///     
+        ///     -or-
+        ///     
+        ///     An I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     The folder does not exist.
+        ///     
+        ///     -or-
+        ///     
+        ///     One of the folder's parent folders does not exist.
         ///     
         ///     -or-
         ///     
@@ -338,6 +375,7 @@
 
         /// <summary>
         ///     Renames the folder.
+        ///     An exception is thrown if a folder already exists at the rename destination.
         /// </summary>
         /// <param name="newName">The new name of the folder.</param>
         /// <param name="cancellationToken">
@@ -378,6 +416,14 @@
         ///     The length of the folder's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another folder already exists at the destination.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting file exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">
@@ -435,6 +481,15 @@
         ///     The length of the folder's path exceeds the system-defined maximum length.
         /// </exception>
         /// <exception cref="IOException">
+        ///     Another folder already exists at the destination and <paramref name="options"/> has
+        ///     the value <see cref="CreationCollisionOption.Fail"/>.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting file exists at the destination.
+        ///     
+        ///     -or-
+        ///     
         ///     An I/O error occured while interacting with the file system.
         /// </exception>
         /// <exception cref="DirectoryNotFoundException">

@@ -12,7 +12,7 @@
         Fail,
 
         /// <summary>
-        ///     The existing file or folder should be overwritten or replaced.
+        ///     An existing file or folder should be replaced.
         ///     
         ///     Specifying this flag only replaces elements of the same type.
         ///     If a folder already exists in the location where a file is supposed to be created
@@ -21,7 +21,7 @@
         ReplaceExisting,
 
         /// <summary>
-        ///     The existing file or folder should be used instead of creating a new one.
+        ///     An existing file or folder should be preserved and used instead of creating a new one.
         ///     The operation will ignore the creation attempt and finish without modifying the 
         ///     file system.
         ///     
