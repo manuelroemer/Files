@@ -13,7 +13,7 @@
         {
             CreationCollisionOption.Fail => WinCreationCollisionOption.FailIfExists,
             CreationCollisionOption.ReplaceExisting => WinCreationCollisionOption.ReplaceExisting,
-            CreationCollisionOption.Ignore => WinCreationCollisionOption.OpenIfExists,
+            CreationCollisionOption.UseExisting => WinCreationCollisionOption.OpenIfExists,
             _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
         };
 

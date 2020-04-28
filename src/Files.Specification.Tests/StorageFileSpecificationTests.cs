@@ -273,10 +273,10 @@
         [DataTestMethod]
         [DataRow(CreationCollisionOption.Fail, true)]
         [DataRow(CreationCollisionOption.ReplaceExisting, true)]
-        [DataRow(CreationCollisionOption.Ignore, true)]
+        [DataRow(CreationCollisionOption.UseExisting, true)]
         [DataRow(CreationCollisionOption.Fail, false)]
         [DataRow(CreationCollisionOption.ReplaceExisting, false)]
-        [DataRow(CreationCollisionOption.Ignore, false)]
+        [DataRow(CreationCollisionOption.UseExisting, false)]
         public async Task CreateAsync_NonExistingFile_CreatesFile(CreationCollisionOption options, bool recursive)
         {
             var file = TestFolder.GetFile(Default.FileName);
@@ -287,7 +287,7 @@
         [DataTestMethod]
         [DataRow(CreationCollisionOption.Fail)]
         [DataRow(CreationCollisionOption.ReplaceExisting)]
-        [DataRow(CreationCollisionOption.Ignore)]
+        [DataRow(CreationCollisionOption.UseExisting)]
         public async Task CreateAsync_RecursiveAndNonExistingParent_CreatesFileAndParent(CreationCollisionOption options)
         {
             var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
@@ -298,7 +298,7 @@
         [DataTestMethod]
         [DataRow(CreationCollisionOption.Fail)]
         [DataRow(CreationCollisionOption.ReplaceExisting)]
-        [DataRow(CreationCollisionOption.Ignore)]
+        [DataRow(CreationCollisionOption.UseExisting)]
         public async Task CreateAsync_NotRecursiveAndNonExistingParent_ThrowsDirectoryNotFoundException(CreationCollisionOption options)
         {
             var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
@@ -331,12 +331,12 @@
         [DataTestMethod]
         [DataRow(true)]
         [DataRow(false)]
-        public async Task CreateAsync_IgnoreAndExistingFile_DoesNothing(bool recursive)
+        public async Task CreateAsync_UseExistingAndExistingFile_DoesNothing(bool recursive)
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.WriteTextAsync(Default.TextContent);
             
-            await file.CreateAsync(recursive, CreationCollisionOption.Ignore);
+            await file.CreateAsync(recursive, CreationCollisionOption.UseExisting);
 
             await file.ShouldExistAsync();
             await file.ShouldHaveContentAsync(Default.TextContent);
@@ -345,10 +345,10 @@
         [DataTestMethod]
         [DataRow(CreationCollisionOption.Fail, true)]
         [DataRow(CreationCollisionOption.ReplaceExisting, true)]
-        [DataRow(CreationCollisionOption.Ignore, true)]
+        [DataRow(CreationCollisionOption.UseExisting, true)]
         [DataRow(CreationCollisionOption.Fail, false)]
         [DataRow(CreationCollisionOption.ReplaceExisting, false)]
-        [DataRow(CreationCollisionOption.Ignore, false)]
+        [DataRow(CreationCollisionOption.UseExisting, false)]
         public async Task CreateAsync_ConflictingFolderExistsAtLocation_ThrowsIOException(CreationCollisionOption options, bool recursive)
         {
             var file = await TestFolder.SetupFolderAndGetFileAtSameLocation(Default.SharedFileFolderName);
@@ -416,7 +416,7 @@
         [DataTestMethod]
         [DataRow(CreationCollisionOption.Fail)]
         [DataRow(CreationCollisionOption.ReplaceExisting)]
-        [DataRow(CreationCollisionOption.Ignore)]
+        [DataRow(CreationCollisionOption.UseExisting)]
         public async Task CreateAsync_RecursiveAndConflictingFileExistsAtParentLocation_ThrowsIOException(CreationCollisionOption options)
         {
             var parentFolder = await TestFolder.SetupFileAndGetFolderAtSameLocation(Default.SharedFileFolderName);

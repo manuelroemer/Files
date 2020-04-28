@@ -29,6 +29,6 @@
         ///     If a folder already exists in the location where a file is supposed to be created
         ///     the creation will fail (and vice versa).
         /// </summary>
-        Ignore,
+        UseExisting,
     }
 }

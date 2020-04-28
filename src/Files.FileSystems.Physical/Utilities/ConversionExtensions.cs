@@ -17,7 +17,7 @@
         {
             CreationCollisionOption.Fail => FileMode.CreateNew,
             CreationCollisionOption.ReplaceExisting => FileMode.Create,
-            CreationCollisionOption.Ignore => FileMode.OpenOrCreate,
+            CreationCollisionOption.UseExisting => FileMode.OpenOrCreate,
             _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
         };
     }

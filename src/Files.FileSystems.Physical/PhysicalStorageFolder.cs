@@ -137,7 +137,7 @@
                         case CreationCollisionOption.ReplaceExisting:
                             await DeleteAsync(DeletionOption.IgnoreMissing, cancellationToken).ConfigureAwait(false);
                             break;
-                        case CreationCollisionOption.Ignore:
+                        case CreationCollisionOption.UseExisting:
                             return;
                         default:
                             throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
