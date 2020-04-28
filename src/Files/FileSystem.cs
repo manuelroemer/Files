@@ -42,7 +42,7 @@
     ///     }
     ///     
     ///     // The code above will compile without problems.
-    ///     // At runtime, it will most likely fail though, since the path to the file system's
+    ///     // At runtime it will most likely fail since the path to the file system's
     ///     // temporary data folder of the real world's physical file system will most likely
     ///     // not match the path of the mocked, in-memory file system.
     ///     </code>
