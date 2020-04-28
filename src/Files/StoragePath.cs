@@ -388,9 +388,8 @@
         ///     Concatenates the two paths while also ensuring that <i>exactly one</i> directory separator
         ///     character is inserted between them.
         ///     
-        ///     Excess leading/trailing directory separators are removed from both <paramref name="other"/>
-        ///     and this path in order to end up with exactly one separator between them.
-        ///     Neither path is discarded.
+        ///     Excess leading/trailing directory separators are removed from <paramref name="other"/>/this path
+        ///     in order to end up with exactly one separator between them. Neither path is discarded.
         ///     
         ///     See remarks for details and examples.
         /// </summary>
@@ -408,8 +407,8 @@
         ///     <c>path.join([...paths])</c> method: https://nodejs.org/api/path.html#path_path_join_paths
         ///     
         ///     In comparison to the alternatives (<see cref="Combine(string)"/> and <see cref="Join(string)"/>),
-        ///     <see cref="Link(string)"/> removes any leading/trailing directory separator chars of both
-        ///     <paramref name="other"/> and this path before concatenating them. This ensures that
+        ///     <see cref="Link(string)"/> removes excess leading/trailing directory separator chars of
+        ///     <paramref name="other"/>/this path before concatenating them. This ensures that
         ///     exactly one directory separator character is present between the two paths.
         ///     In comparison to the alternatives, this method is the ideal when dealing
         ///     with user input, as the result will, most likely, be a valid path without an
