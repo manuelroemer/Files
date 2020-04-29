@@ -648,6 +648,12 @@
                 Sep,
                 Sep,
             },
+            new[]
+            {
+                Sep,
+                Sep,
+                Sep,
+            },
 
             // Combine discards the first path on subsequent separators.
             new[]
@@ -661,6 +667,14 @@
                 Default.PathName + AltSep,
                 AltSep + Default.PathName,
                 AltSep + Default.PathName,
+            },
+
+            // Combine returns the first path if the other one is empty.
+            new[]
+            {
+                Default.PathName,
+                "",
+                Default.PathName,
             },
         };
 
@@ -760,6 +774,25 @@
                 Default.PathName,
                 Default.PathName + AltSep + Default.PathName,
             },
+            new[]
+            {
+                Default.PathName,
+                Sep,
+                Default.PathName + Sep,
+            },
+            new[]
+            {
+                Sep,
+                Default.PathName,
+                Sep + Default.PathName,
+            },
+            // Fails on old .NET versions because // is an invalid UNC path. Should still be supported.
+            // new[]
+            // {
+            //     Sep,
+            //     Sep,
+            //     Sep + Sep,
+            // },
             
             // Join preservers any separators >= 2.
             new[]
@@ -799,7 +832,7 @@
                 Default.PathName + Sep,
             },
 
-            // Join returns the first path if the other one is empty
+            // Join returns the first path if the other one is empty.
             new[]
             {
                 Default.PathName,
@@ -923,18 +956,18 @@
                 Default.PathName + Sep + Default.PathName,
             },
 
-            // Link returns the other path if one is empty after trimming.
+            // Link inserts a separator even if one path is empty after trimming.
             new[]
             {
                 Default.PathName,
                 Sep,
-                Default.PathName,
+                Default.PathName + Sep,
             },
             new[]
             {
                 Sep,
                 Default.PathName,
-                Default.PathName,
+                Sep + Default.PathName,
             },
 
             // Link returns a separator if both paths are empty after trimming.
@@ -943,6 +976,14 @@
                 Sep,
                 Sep,
                 Sep,
+            },
+
+            // Link returns the first path if the second one is empty.
+            new[]
+            {
+                Default.PathName,
+                "",
+                Default.PathName,
             },
         };
 

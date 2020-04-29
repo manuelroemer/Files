@@ -46,7 +46,7 @@
             );
 
             var fullPath = GetFullPathOrThrow(path);
-            var rootPath = Path.GetPathRoot(ToString());
+            var rootPath = Path.GetPathRoot(path);
             var pathWithoutTrailingSeparator = PathPolyfills.TrimEndingDirectorySeparator(path);
             var directoryPath = Path.GetDirectoryName(pathWithoutTrailingSeparator);
             var name = Path.GetFileName(pathWithoutTrailingSeparator);
@@ -159,23 +159,7 @@
 
             var part1 = ToString().TrimEnd(PhysicalPathHelper.DirectorySeparatorChars);
             var part2 = other.TrimStart(PhysicalPathHelper.DirectorySeparatorChars);
-
-            if (part1.Length == 0 && part2.Length == 0)
-            {
-                return FileSystem.GetPath($"{Path.DirectorySeparatorChar}");
-            }
-            else if (part1.Length == 0)
-            {
-                return FileSystem.GetPath(other);
-            }
-            else if (part2.Length == 0)
-            {
-                return this;
-            }
-            else
-            {
-                return FileSystem.GetPath($"{part1}{Path.DirectorySeparatorChar}{part2}");
-            }
+            return FileSystem.GetPath($"{part1}{Path.DirectorySeparatorChar}{part2}");
         }
 
         public override StoragePath TrimEndingDirectorySeparator() =>
