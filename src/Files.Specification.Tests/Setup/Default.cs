@@ -3,7 +3,6 @@
     using System;
     using System.IO;
     using System.Text;
-    using Moq;
 
     /// <summary>
     ///     Defines default values for file system structures which are used by the tests.
