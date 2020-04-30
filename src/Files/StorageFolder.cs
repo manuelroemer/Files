@@ -154,10 +154,16 @@
         ///     <paramref name="destinationPath"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance representing a path
-        ///     which is considered invalid by this file system implementation.
-        ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
-        ///     simultaneously.
+        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance which is incompatible
+        ///     with this <see cref="FileSystem"/> implementation.
+        ///     This exception generally occurs when you are using multiple <see cref="FileSystem"/>
+        ///     implementations simultaneously.
+        /// 
+        ///     This exception is <b>always</b> thrown when the type of <paramref name="destinationPath"/>
+        ///     doesn't match the specific <see cref="StoragePath"/> type created by the current
+        ///     <see cref="FileSystem"/> implementation.
+        ///     This condition <b>may</b>, however, be enhanced by any <see cref="FileSystem"/>
+        ///     implementation.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -212,10 +218,16 @@
         ///     <paramref name="destinationPath"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance representing a path
-        ///     which is considered invalid by this file system implementation.
-        ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
-        ///     simultaneously.
+        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance which is incompatible
+        ///     with this <see cref="FileSystem"/> implementation.
+        ///     This exception generally occurs when you are using multiple <see cref="FileSystem"/>
+        ///     implementations simultaneously.
+        /// 
+        ///     This exception is <b>always</b> thrown when the type of <paramref name="destinationPath"/>
+        ///     doesn't match the specific <see cref="StoragePath"/> type created by the current
+        ///     <see cref="FileSystem"/> implementation.
+        ///     This condition <b>may</b>, however, be enhanced by any <see cref="FileSystem"/>
+        ///     implementation.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -272,10 +284,16 @@
         ///     <paramref name="destinationPath"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance representing a path
-        ///     which is considered invalid by this file system implementation.
-        ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
-        ///     simultaneously.
+        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance which is incompatible
+        ///     with this <see cref="FileSystem"/> implementation.
+        ///     This exception generally occurs when you are using multiple <see cref="FileSystem"/>
+        ///     implementations simultaneously.
+        /// 
+        ///     This exception is <b>always</b> thrown when the type of <paramref name="destinationPath"/>
+        ///     doesn't match the specific <see cref="StoragePath"/> type created by the current
+        ///     <see cref="FileSystem"/> implementation.
+        ///     This condition <b>may</b>, however, be enhanced by any <see cref="FileSystem"/>
+        ///     implementation.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -330,10 +348,16 @@
         ///     <paramref name="destinationPath"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance representing a path
-        ///     which is considered invalid by this file system implementation.
-        ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
-        ///     simultaneously.
+        ///     <paramref name="destinationPath"/> is a <see cref="StoragePath"/> instance which is incompatible
+        ///     with this <see cref="FileSystem"/> implementation.
+        ///     This exception generally occurs when you are using multiple <see cref="FileSystem"/>
+        ///     implementations simultaneously.
+        /// 
+        ///     This exception is <b>always</b> thrown when the type of <paramref name="destinationPath"/>
+        ///     doesn't match the specific <see cref="StoragePath"/> type created by the current
+        ///     <see cref="FileSystem"/> implementation.
+        ///     This condition <b>may</b>, however, be enhanced by any <see cref="FileSystem"/>
+        ///     implementation.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.

@@ -38,14 +38,32 @@
         public override StorageFile GetFile(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new PhysicalStorageFile(this, path.ToPhysicalStoragePath(this));
+
+            if (!(path is PhysicalStoragePath physicalStoragePath))
+            {
+                throw new ArgumentException(
+                    ExceptionStrings.FsCompatibility.StoragePathTypeNotSupported(),
+                    nameof(path)
+                );
+            }
+            
+            return new PhysicalStorageFile(this, physicalStoragePath);
         }
 
         /// <inheritdoc/>
         public override StorageFolder GetFolder(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new PhysicalStorageFolder(this, path.ToPhysicalStoragePath(this));
+            
+            if (!(path is PhysicalStoragePath physicalStoragePath))
+            {
+                throw new ArgumentException(
+                    ExceptionStrings.FsCompatibility.StoragePathTypeNotSupported(),
+                    nameof(path)
+                );
+            }
+            
+            return new PhysicalStorageFolder(this, physicalStoragePath);
         }
 
         /// <inheritdoc/>

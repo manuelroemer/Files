@@ -161,7 +161,13 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
+            if (!(destinationPath is PhysicalStoragePath))
+            {
+                throw new ArgumentException(
+                    ExceptionStrings.FsCompatibility.StoragePathTypeNotSupported(),
+                    nameof(destinationPath)
+                );
+            }
 
             return Task.Run(() =>
             {
@@ -216,7 +222,13 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
+            if (!(destinationPath is PhysicalStoragePath))
+            {
+                throw new ArgumentException(
+                    ExceptionStrings.FsCompatibility.StoragePathTypeNotSupported(),
+                    nameof(destinationPath)
+                );
+            }
 
             return Task.Run(() =>
             {

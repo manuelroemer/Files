@@ -172,7 +172,14 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
+            if (!(destinationPath is PhysicalStoragePath))
+            {
+                throw new ArgumentException(
+                    ExceptionStrings.FsCompatibility.StoragePathTypeNotSupported(),
+                    nameof(destinationPath)
+                );
+            }
+
             if (destinationPath.FullPath.Parent is null)
             {
                 throw new IOException(ExceptionStrings.StorageFolder.CannotMoveToRootLocation());
@@ -226,7 +233,13 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            destinationPath = destinationPath.ToPhysicalStoragePath(FileSystem);
+            if (!(destinationPath is PhysicalStoragePath))
+            {
+                throw new ArgumentException(
+                    ExceptionStrings.FsCompatibility.StoragePathTypeNotSupported(),
+                    nameof(destinationPath)
+                );
+            }
 
             var fullDestinationPath = destinationPath.FullPath;
             var destinationFolder = FileSystem.GetFolder(fullDestinationPath);

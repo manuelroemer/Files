@@ -52,14 +52,32 @@
         public override StorageFile GetFile(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new WindowsStorageStorageFile(this, path.ToPhysicalStoragePath(this));
+
+            if (!(path is PhysicalStoragePath physicalStoragePath))
+            {
+                throw new ArgumentException(
+                    ExceptionStrings.FsCompatibility.StoragePathTypeNotSupported(),
+                    nameof(path)
+                );
+            }
+
+            return new WindowsStorageStorageFile(this, physicalStoragePath);
         }
 
         /// <inheritdoc/>
         public override StorageFolder GetFolder(StoragePath path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
-            return new WindowsStorageStorageFolder(this, path.ToPhysicalStoragePath(this));
+
+            if (!(path is PhysicalStoragePath physicalStoragePath))
+            {
+                throw new ArgumentException(
+                    ExceptionStrings.FsCompatibility.StoragePathTypeNotSupported(),
+                    nameof(path)
+                );
+            }
+
+            return new WindowsStorageStorageFolder(this, physicalStoragePath);
         }
 
         /// <inheritdoc/>

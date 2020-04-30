@@ -17,17 +17,19 @@
     ///     to seamlessly switch between different file system implementations, for example an implementation
     ///     targeting a user's actual physical file system and an in-memory implementation for testing.
     ///     
-    ///     In most cases, an application should only be using one <see cref="FileSystem"/> implementation
-    ///     at a single point in time. While using multiple implementations at once is possible
-    ///     from an API standpoint (see the code example below), it will, in most cases, lead to
-    ///     errors at some point in time.
-    ///     An exception to this rule are proxy file system implementations which leverage other
-    ///     file system implementations.
+    ///     An application should ideally only use one <see cref="FileSystem"/> instance at once,
+    ///     for example via Dependency Injection. Each <see cref="FileSystem"/> implementation is
+    ///     supposed to guard against accidential implementation mixing. This means that you will
+    ///     get exceptions if you pass the members of one implementation (for example the fictional
+    ///     class <c>StoragePathA</c>) to the members of another implemenation (for example the
+    ///     fictional class <c>StorageFileB</c>).
+    ///     The only exception to this rule are proxy <see cref="FileSystem"/> implementations which
+    ///     ensure an appropriate conversion between the different types.
+    ///     The code below demonstrates how such errors can occur.
     ///     
     ///     <code>
     ///     // DO NOT USE!
-    ///     // This example demonstrates how multiple file system implementations *can* be used
-    ///     // together and why this shouldn't be done.
+    ///     // This example demonstrates how using multiple file system implementations can lead to exceptions.
     ///     
     ///     FileSystem inMemoryFs = new InMemoryFileSystem();
     ///     FileSystem physicalFs = new PhysicalFileSystem();
@@ -42,9 +44,9 @@
     ///     }
     ///     
     ///     // The code above will compile without problems.
-    ///     // At runtime it will most likely fail since the path to the file system's
-    ///     // temporary data folder of the real world's physical file system will most likely
-    ///     // not match the path of the mocked, in-memory file system.
+    ///     // At runtime, the PhysicalFileSystem will throw an ArgumentException in the line
+    ///     //   var file = physicalFs.GetPath(path);
+    ///     // because "path" is not a path created by the PhysicalFileSystem.
     ///     </code>
     /// </remarks>
     /// <example>
@@ -221,10 +223,16 @@
         ///     <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="path"/> is a <see cref="StoragePath"/> instance representing a path
-        ///     which is considered invalid by this file system implementation.
-        ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
-        ///     simultaneously.
+        ///     <paramref name="path"/> is a <see cref="StoragePath"/> instance which is incompatible
+        ///     with this <see cref="FileSystem"/> implementation.
+        ///     This exception generally occurs when you are using multiple <see cref="FileSystem"/>
+        ///     implementations simultaneously.
+        /// 
+        ///     This exception is <b>always</b> thrown when the type of <paramref name="path"/>
+        ///     doesn't match the specific <see cref="StoragePath"/> type created by the current
+        ///     <see cref="FileSystem"/> implementation.
+        ///     This condition <b>may</b>, however, be enhanced by any <see cref="FileSystem"/>
+        ///     implementation.
         /// </exception>
         /// <seealso cref="TryGetFile(StoragePath?, out StorageFile?)"/>
         public abstract StorageFile GetFile(StoragePath path);
@@ -339,10 +347,16 @@
         ///     <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
         /// <exception cref="ArgumentException">
-        ///     <paramref name="path"/> is a <see cref="StoragePath"/> instance representing a path
-        ///     which is considered invalid by this file system implementation.
-        ///     This can occur if you are using multiple <see cref="FileSystem"/> implementations
-        ///     simultaneously.
+        ///     <paramref name="path"/> is a <see cref="StoragePath"/> instance which is incompatible
+        ///     with this <see cref="FileSystem"/> implementation.
+        ///     This exception generally occurs when you are using multiple <see cref="FileSystem"/>
+        ///     implementations simultaneously.
+        /// 
+        ///     This exception is <b>always</b> thrown when the type of <paramref name="path"/>
+        ///     doesn't match the specific <see cref="StoragePath"/> type created by the current
+        ///     <see cref="FileSystem"/> implementation.
+        ///     This condition <b>may</b>, however, be enhanced by any <see cref="FileSystem"/>
+        ///     implementation.
         /// </exception>
         /// <seealso cref="TryGetFolder(StoragePath?, out StorageFolder?)"/>
         public abstract StorageFolder GetFolder(StoragePath path);

@@ -30,18 +30,13 @@
     ///     Both users and implementers of this class should be aware that a <see cref="StoragePath"/>
     ///     is, at its core, nothing else but a layer on top of a string. The string is and remains
     ///     the lowest common denominator between different file system implementations.
-    ///     
-    ///     Library authors specifically should take care when accepting a <see cref="StoragePath"/>
-    ///     as a parameter.
-    ///     This is important, because it is entirely possible (albeit not recommended) for users
-    ///     to pass a <see cref="StoragePath"/> of a different file system implementation to
-    ///     the method.
-    ///     Accessing the <see cref="StoragePath"/>'s members can then lead to unexpected results
-    ///     and exceptions due to differences in the file system implementation.
-    ///     In general, the best way to guard against such cases is to transform every single
-    ///     <see cref="StoragePath"/> parameter to a <see cref="StoragePath"/> of the own
-    ///     <see cref="Files.FileSystem"/> implementation or by simply operating on the
-    ///     underlying string of the provided <see cref="StoragePath"/>.
+    ///     This is, for example, important if you wish to implement conversion logic between
+    ///     different <see cref="Files.FileSystem"/> implementations. Methods like
+    ///     <see cref="Files.FileSystem.GetFile(StoragePath)"/> throw an exception if the provided
+    ///     <see cref="StoragePath"/> was created by a <see cref="Files.FileSystem"/> instance
+    ///     of a different type. This can be avoided by falling back to the underlying string of
+    ///     the <see cref="StoragePath"/> and by creating a new <see cref="StoragePath"/> of the
+    ///     appropriate type with that string.
     /// </remarks>
     public abstract class StoragePath :
         IFileSystemElement,

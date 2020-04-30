@@ -25,16 +25,26 @@
                 $"The object cannot be compared to objects of type {type.FullName}.";
         }
 
+        internal static class FsCompatibility
+        {
+            internal static string StoragePathTypeNotSupported() =>
+                $"The specified {nameof(StoragePath)} has a type that is incompatible with the " +
+                $"current file system implementation. " +
+                $"Ensure that you are not accidently using multiple file system implementations at " +
+                $"the same or that you are appropriately converting the paths between multiple " +
+                $"different implementations.";
+        }
+
         internal static class FileSystem
         {
-            public static string KnownFolderNotSupported(KnownFolder value) =>
+            internal static string KnownFolderNotSupported(KnownFolder value) =>
                 $"The file system doesn't support or provide a folder matching the " +
                 $"\"{nameof(KnownFolder)}.{value}\" value.";
         }
 
         internal static class StorageFile
         {
-            public static string HasNoParentPath() =>
+            internal static string HasNoParentPath() =>
                 "The parent folder of the current file could not be resolved from the path. " +
                 "This is most likely an error in the underlying file system implementation, " +
                 "because each file should have a parent folder.";
