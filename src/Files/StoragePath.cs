@@ -330,6 +330,19 @@
         ///     first.Combine("secondPath");    // Returns "firstPath///secondPath".
         ///     first.Combine("/secondPath");   // Returns "/secondPath".
         ///     first.Combine("///secondPath"); // Returns "///secondPath".
+        ///     
+        ///     first = fs.GetPath("firstPath");
+        ///     first.Join("");              // Returns "firstPath".
+        /// 
+        ///     first = fs.GetPath("/");
+        ///     first.Join("");              // Returns "/".
+        ///     first.Join("/");             // Returns "/".
+        ///     first.Join("//");            // Returns "//".
+        ///     
+        ///     first = fs.GetPath("//");
+        ///     first.Join("");              // Returns "//".
+        ///     first.Join("/");             // Returns "/".
+        ///     first.Join("//");            // Returns "//".
         ///     </code>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -435,6 +448,19 @@
         ///     first.Join("secondPath");    // Returns "firstPath///secondPath".
         ///     first.Join("/secondPath");   // Returns "firstPath////secondPath".
         ///     first.Join("///secondPath"); // Returns "firstPath//////secondPath".
+        ///     
+        ///     first = fs.GetPath("firstPath");
+        ///     first.Join("");              // Returns "firstPath".
+        /// 
+        ///     first = fs.GetPath("/");
+        ///     first.Join("");              // Returns "/".
+        ///     first.Join("/");             // Returns "//".
+        ///     first.Join("//");            // Returns "///".
+        ///     
+        ///     first = fs.GetPath("//");
+        ///     first.Join("");              // Returns "//".
+        ///     first.Join("/");             // Returns "///".
+        ///     first.Join("//");            // Returns "////".
         ///     </code>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
@@ -554,6 +580,19 @@
         ///     first.Join("secondPath");    // Returns "firstPath/secondPath".
         ///     first.Join("/secondPath");   // Returns "firstPath/secondPath".
         ///     first.Join("///secondPath"); // Returns "firstPath/secondPath".
+        ///     
+        ///     first = fs.GetPath("firstPath");
+        ///     first.Join("");              // Returns "firstPath".
+        /// 
+        ///     first = fs.GetPath("/");
+        ///     first.Join("");              // Returns "/".
+        ///     first.Join("/");             // Returns "/".
+        ///     first.Join("//");            // Returns "/".
+        ///     
+        ///     first = fs.GetPath("//");
+        ///     first.Join("");              // Returns "//".
+        ///     first.Join("/");             // Returns "/".
+        ///     first.Join("//");            // Returns "/".
         ///     </code>
         /// </remarks>
         /// <exception cref="ArgumentNullException">
