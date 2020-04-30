@@ -3,7 +3,10 @@
     using System;
     using System.Diagnostics;
     using System.Diagnostics.CodeAnalysis;
+    using System.Linq;
+    using System.Runtime.CompilerServices;
     using Files.Shared;
+    using static System.Diagnostics.DebuggerBrowsableState;
 
 #pragma warning disable CA1036
     // Override methods on comparable types, i.e. implement <, >, <=, >= operators due to IComparable.
@@ -47,6 +50,9 @@
         IComparable<StoragePath?>
     {
         private readonly string _underlyingString;
+        
+        [DebuggerBrowsable(Collapsed)]
+        private readonly Lazy<StoragePath> _pathWithoutTrailingDirectorySeparatorLazy;
 
         /// <inheritdoc/>
         public abstract FileSystem FileSystem { get; }
@@ -61,7 +67,7 @@
         ///     Gets a value indicating whether this path is an absolute or relative path.
         /// </summary>
         public abstract PathKind Kind { get; }
-        
+
         /// <summary>
         ///     Gets a <see cref="StoragePath"/> which represent's this path's root directory.
         ///     If the path doesn't have a root directory (for example if it is a relative path),
@@ -111,9 +117,16 @@
         public abstract string? Extension { get; }
 
         /// <summary>
-        ///     Gets a value indicating whether the path ends in a directory separator character.
+        ///     Gets a value indicating whether the path starts with a directory separator character.
         /// </summary>
-        public abstract bool EndsInDirectorySeparator { get; }
+        public bool StartsWithDirectorySeparator =>
+            IsDirectorySeparator(_underlyingString[0]);
+
+        /// <summary>
+        ///     Gets a value indicating whether the path ends with a directory separator character.
+        /// </summary>
+        public bool EndsWithDirectorySeparator =>
+            IsDirectorySeparator(_underlyingString[_underlyingString.Length - 1]);
 
         /// <summary>
         ///     Initializes a new <see cref="StoragePath"/> instance from the specified <paramref name="path"/> string.
@@ -136,6 +149,7 @@
             }
 
             _underlyingString = path;
+            _pathWithoutTrailingDirectorySeparatorLazy = new Lazy<StoragePath>(TrimEndingDirectorySeparatorImpl);
         }
 
         /// <summary>
@@ -152,9 +166,9 @@
         /// <returns>
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
-        public virtual bool TryTrimEndingDirectorySeparator([NotNullWhen(true)] out StoragePath? result)
+        public bool TryTrimEndingDirectorySeparator([NotNullWhen(true)] out StoragePath? result)
         {
-            if (!EndsInDirectorySeparator)
+            if (!EndsWithDirectorySeparator)
             {
                 result = this;
                 return true;
@@ -175,6 +189,7 @@
         /// <summary>
         ///     Trims one trailing directory separator character from this path and returns the
         ///     resulting path.
+        ///     See remarks for details.
         /// </summary>
         /// <returns>
         ///     A new <see cref="StoragePath"/> instance where one trailing directory separator has been
@@ -182,11 +197,53 @@
         ///     If this path doesn't have a trailing directory separator character, the same path
         ///     instance is returned.
         /// </returns>
+        /// <remarks>
+        ///     As described, the method trims exactly one trailing directory separator character
+        ///     from the path (if one exists - otherwise, the same path is returned).
+        ///     
+        ///     In comparison to .NET's <c>System.IO.Path.TrimEndingDirectorySeparator(string path)</c>
+        ///     method, <see cref="TrimEndingDirectorySeparator"/> also trims a directory separator
+        ///     character if the path is a root path.
+        ///     This can lead to trouble in certain scenarios, for example if the path is <c>"/"</c> on
+        ///     Unix. Trimming this character would result in an empty path <c>""</c> which is illegal.
+        ///     In such cases (and other scenarios where an invalid path is the result of trimming)
+        ///     this method throws an <see cref="InvalidOperationException"/>.
+        ///     If you are unsure whether trimming a path is possible, consider using
+        ///     <see cref="TryTrimEndingDirectorySeparator(out StoragePath?)"/>.
+        /// </remarks>
         /// <exception cref="InvalidOperationException">
-        ///     Trimming the trailing directory separator character is not possible.
-        ///     This happens when the path consists of one directory separator character only.
+        ///     Trimming the trailing directory separator character is not possible because the
+        ///     resulting path is invalid.
         /// </exception>
-        public abstract StoragePath TrimEndingDirectorySeparator();
+        public StoragePath TrimEndingDirectorySeparator() =>
+            _pathWithoutTrailingDirectorySeparatorLazy.Value;
+
+        private StoragePath TrimEndingDirectorySeparatorImpl()
+        {
+            if (!EndsWithDirectorySeparator)
+            {
+                return this;
+            }
+
+            if (Length == 1)
+            {
+                throw new InvalidOperationException(ExceptionStrings.StoragePath.TrimmingResultsInEmptyPath());
+            }
+
+            var trimmedPath = _underlyingString.Substring(0, _underlyingString.Length - 1);
+
+            try
+            {
+                return FileSystem.GetPath(trimmedPath);
+            }
+            catch (Exception ex)
+            {
+                throw new InvalidOperationException(
+                    ExceptionStrings.StoragePath.TrimmingResultsInInvalidPath(),
+                    ex
+                );
+            }
+        }
 
         /// <summary>
         ///     Attempts to append the specified <paramref name="part"/> to the end of this path and
@@ -203,7 +260,7 @@
         /// <returns>
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
-        public virtual bool TryAppend(string? part, [NotNullWhen(true)] out StoragePath? result)
+        public bool TryAppend(string? part, [NotNullWhen(true)] out StoragePath? result)
         {
             if (part is null)
             {
@@ -239,7 +296,16 @@
         /// <exception cref="ArgumentException">
         ///     Appending <paramref name="part"/> would result in an invalid path.
         /// </exception>
-        public abstract StoragePath Append(string part);
+        public StoragePath Append(string part)
+        {
+            _ = part ?? throw new ArgumentNullException(nameof(part));
+            if (part.Length == 0)
+            {
+                return this;
+            }
+
+            return FileSystem.GetPath(_underlyingString + part);
+        }
 
         /// <inheritdoc cref="TryCombine(string?, out StoragePath?)"/>
         public bool TryCombine(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
@@ -264,7 +330,7 @@
         /// <returns>
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
-        public virtual bool TryCombine(string? other, [NotNullWhen(true)] out StoragePath? result)
+        public bool TryCombine(string? other, [NotNullWhen(true)] out StoragePath? result)
         {
             if (other is null)
             {
@@ -292,7 +358,7 @@
         ///     Concatenates the two paths while also ensuring that <i>at least one</i> directory separator
         ///     character is present between them.
         ///     
-        ///     If <paramref name="other"/> is rooted or starts with a directory separator character,
+        ///     If <paramref name="other"/> is rooted (i.e. it starts with a directory separator character),
         ///     this path is discarded and the resulting path will simply be <paramref name="other"/>.
         ///     
         ///     See remarks for details and examples.
@@ -356,7 +422,22 @@
         /// <seealso cref="Join(StoragePath)"/>
         /// <seealso cref="Link(string)"/>
         /// <seealso cref="Link(StoragePath)"/>
-        public abstract StoragePath Combine(string other);
+        public StoragePath Combine(string other)
+        {
+            _ = other ?? throw new ArgumentNullException(nameof(other));
+            if (other.Length == 0)
+            {
+                return this;
+            }
+
+            var otherStoragePath = FileSystem.GetPath(other);
+            if (otherStoragePath.Root is object)
+            {
+                return otherStoragePath;
+            }
+
+            return Join(other);
+        }
 
         /// <inheritdoc cref="TryJoin(string?, out StoragePath?)"/>
         public bool TryJoin(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
@@ -381,7 +462,7 @@
         /// <returns>
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
-        public virtual bool TryJoin(string? other, [NotNullWhen(true)] out StoragePath? result)
+        public bool TryJoin(string? other, [NotNullWhen(true)] out StoragePath? result)
         {
             if (other is null)
             {
@@ -474,7 +555,24 @@
         /// <seealso cref="Join(StoragePath)"/>
         /// <seealso cref="Link(string)"/>
         /// <seealso cref="Link(StoragePath)"/>
-        public abstract StoragePath Join(string other);
+        public StoragePath Join(string other)
+        {
+            _ = other ?? throw new ArgumentNullException(nameof(other));
+            if (other.Length == 0)
+            {
+                return this;
+            }
+
+            var hasSeparator =
+                IsDirectorySeparator(_underlyingString[_underlyingString.Length - 1]) ||
+                IsDirectorySeparator(other[0]);
+            
+            var joinedPath = hasSeparator
+                ? $"{_underlyingString}{other}"
+                : $"{_underlyingString}{FileSystem.PathInformation.DirectorySeparatorChar}{other}";
+
+            return FileSystem.GetPath(joinedPath);
+        }
 
         /// <inheritdoc cref="TryLink(string?, out StoragePath?)"/>
         public bool TryLink(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
@@ -499,7 +597,7 @@
         /// <returns>
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
-        public virtual bool TryLink(string? other, [NotNullWhen(true)] out StoragePath? result)
+        public bool TryLink(string? other, [NotNullWhen(true)] out StoragePath? result)
         {
             if (other is null)
             {
@@ -606,7 +704,18 @@
         /// <seealso cref="Join(string)"/>
         /// <seealso cref="Join(StoragePath)"/>
         /// <seealso cref="Link(StoragePath)"/>
-        public abstract StoragePath Link(string other);
+        public StoragePath Link(string other)
+        {
+            _ = other ?? throw new ArgumentNullException(nameof(other));
+            if (other.Length == 0)
+            {
+                return this;
+            }
+
+            var part1 = _underlyingString.TrimEnd(FileSystem.PathInformation.DirectorySeparatorChars.ToArray());
+            var part2 = other.TrimStart(FileSystem.PathInformation.DirectorySeparatorChars.ToArray());
+            return FileSystem.GetPath($"{part1}{FileSystem.PathInformation.DirectorySeparatorChar}{part2}");
+        }
 
         /// <summary>
         ///     Compares this path with another path based on the path strings.
@@ -747,6 +856,13 @@
         [DebuggerStepThrough]
         public sealed override string ToString() =>
             _underlyingString;
+
+        [MethodImpl(MethodImplOptions.AggressiveInlining)]
+        private bool IsDirectorySeparator(char c)
+        {
+            return c == FileSystem.PathInformation.DirectorySeparatorChar
+                || c == FileSystem.PathInformation.AltDirectorySeparatorChar;
+        }
 
         /// <inheritdoc cref="operator /(StoragePath, string)"/>
         public static StoragePath operator /(StoragePath path1, StoragePath path2)

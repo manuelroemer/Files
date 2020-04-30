@@ -382,9 +382,9 @@
 
         #endregion
 
-        #region EndsInDirectorySeparator Tests
+        #region EndsWithDirectorySeparator Tests
 
-        public virtual IEnumerable<object[]> EndsInDirectorySeparatorPathsWithTrailingDirectorySeparatorData => new[]
+        public virtual IEnumerable<object[]> EndsWithDirectorySeparatorPathsWithTrailingDirectorySeparatorData => new[]
         {
             new[] { Sep },
             new[] { AltSep },
@@ -392,7 +392,7 @@
             new[] { Default.PathName + AltSep },
         };
 
-        public virtual IEnumerable<object[]> EndsInDirectorySeparatorPathsWithoutTrailingDirectorySeparatorData => new[]
+        public virtual IEnumerable<object[]> EndsWithDirectorySeparatorPathsWithoutTrailingDirectorySeparatorData => new[]
         {
             new[] { Default.PathName },
             new[] { Default.PathName + Sep + " " },
@@ -400,19 +400,19 @@
         };
 
         [TestMethod]
-        [DynamicInstanceData(nameof(EndsInDirectorySeparatorPathsWithTrailingDirectorySeparatorData))]
-        public void EndsInDirectorySeparator_PathWithTrailingDirectorySeparator_ReturnsTrue(string pathString)
+        [DynamicInstanceData(nameof(EndsWithDirectorySeparatorPathsWithTrailingDirectorySeparatorData))]
+        public void EndsWithDirectorySeparator_PathWithTrailingDirectorySeparator_ReturnsTrue(string pathString)
         {
             var path = FileSystem.GetPath(pathString);
-            path.EndsInDirectorySeparator.ShouldBeTrue();
+            path.EndsWithDirectorySeparator.ShouldBeTrue();
         }
 
         [TestMethod]
-        [DynamicInstanceData(nameof(EndsInDirectorySeparatorPathsWithoutTrailingDirectorySeparatorData))]
-        public void EndsInDirectorySeparator_PathWithoutTrailingDirectorySeparator_ReturnsFalse(string pathString)
+        [DynamicInstanceData(nameof(EndsWithDirectorySeparatorPathsWithoutTrailingDirectorySeparatorData))]
+        public void EndsWithDirectorySeparator_PathWithoutTrailingDirectorySeparator_ReturnsFalse(string pathString)
         {
             var path = FileSystem.GetPath(pathString);
-            path.EndsInDirectorySeparator.ShouldBeFalse();
+            path.EndsWithDirectorySeparator.ShouldBeFalse();
         }
 
         #endregion

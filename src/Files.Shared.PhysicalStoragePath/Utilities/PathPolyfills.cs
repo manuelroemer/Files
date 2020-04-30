@@ -102,7 +102,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
         private const int WindowsUncExtendedPrefixLength = 8;
 
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L21
-        internal static bool EndsInDirectorySeparator(string path)
+        internal static bool EndsWithDirectorySeparator(string path)
         {
             return path.Length != 0 && IsDirectorySeparator(path[path.Length - 1]);
         }
@@ -110,7 +110,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
         // See https://github.com/dotnet/runtime/blob/f30675618fc379e112376acc6f1efa53733ee881/src/libraries/System.Private.CoreLib/src/System/IO/PathInternal.cs#L226
         internal static string TrimEndingDirectorySeparator(string path)
         {
-            if (EndsInDirectorySeparator(path) && !IsRoot(path))
+            if (EndsWithDirectorySeparator(path) && !IsRoot(path))
             {
                 return path.Substring(0, path.Length - 1);
             }
@@ -253,7 +253,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
             return (value >= 'A' && value <= 'Z') || (value >= 'a' && value <= 'z');
         }
 #else
-        internal static bool EndsInDirectorySeparator(string path)
+        internal static bool EndsWithDirectorySeparator(string path)
         {
             return Path.EndsInDirectorySeparator(path);
         }

@@ -20,27 +20,11 @@
         public override string Name => ToString();
         public override string NameWithoutExtension => ToString();
         public override string? Extension => "";
-        public override bool EndsInDirectorySeparator => false;
-        
+
         public StoragePathStub(FileSystem fileSystem, string path)
             : base(path)
         {
             FileSystem = fileSystem;
         }
-
-        public override StoragePath Append(string part) =>
-            this;
-
-        public override StoragePath Combine(string other) =>
-            this;
-
-        public override StoragePath Join(string other) =>
-            this;
-
-        public override StoragePath Link(string other) =>
-            this;
-
-        public override StoragePath TrimEndingDirectorySeparator() =>
-            this;
     }
 }

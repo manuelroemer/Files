@@ -6,6 +6,7 @@
     using Files;
     using Files.Shared;
     using Files.Shared.PhysicalStoragePath.Utilities;
+    using static System.Diagnostics.DebuggerBrowsableState;
 
     internal sealed class PhysicalStoragePath : StoragePath
     {
@@ -13,10 +14,14 @@
         // expand/walk a path tree whenever a path is initialized.
         // Consider for example the path foo/bar/baz.
         // Without Lazy<T>, three path instances would be created immediately through the Parent property.
+        [DebuggerBrowsable(Collapsed)]
         private readonly Lazy<StoragePath?> _rootLazy;
+        
+        [DebuggerBrowsable(Collapsed)]
         private readonly Lazy<StoragePath?> _parentLazy;
+        
+        [DebuggerBrowsable(Collapsed)]
         private readonly Lazy<StoragePath> _fullPathLazy;
-        private readonly Lazy<StoragePath> _pathWithoutEndingDirectorySeparatorLazy;
 
         public override FileSystem FileSystem { get; }
 
@@ -33,8 +38,6 @@
         public override string NameWithoutExtension { get; }
 
         public override string? Extension { get; }
-
-        public override bool EndsInDirectorySeparator { get; }
 
         internal PhysicalStoragePath(string path, FileSystem fileSystem)
             : base(path)
@@ -53,14 +56,12 @@
             var nameWithoutExtension = GetNameWithoutExtension(name);
             var extension = PhysicalPathHelper.GetExtensionWithoutTrailingExtensionSeparator(pathWithoutTrailingSeparator);
             var isPathFullyQualified = PathPolyfills.IsPathFullyQualified(path);
-            var endsInDirectorySeparator = PathPolyfills.EndsInDirectorySeparator(path);
 
             FileSystem = fileSystem;
             Kind = isPathFullyQualified ? PathKind.Absolute : PathKind.Relative;
             Name = name;
             NameWithoutExtension = nameWithoutExtension;
             Extension = string.IsNullOrEmpty(extension) ? null : extension;
-            EndsInDirectorySeparator = endsInDirectorySeparator;
 
             _rootLazy = new Lazy<StoragePath?>(
                 () => string.IsNullOrEmpty(rootPath) ? null : fileSystem.GetPath(rootPath)
@@ -73,8 +74,6 @@
             _fullPathLazy = new Lazy<StoragePath>(
                 () => fileSystem.GetPath(fullPath)
             );
-
-            _pathWithoutEndingDirectorySeparatorLazy = new Lazy<StoragePath>(TrimEndingDirectorySeparatorImpl);
 
             static string GetFullPathOrThrow(string path)
             {
@@ -95,7 +94,7 @@
                 )
                 {
                     throw new ArgumentException(
-                        ExceptionStrings.PhysicalStoragePath.InvalidFormat(),
+                        ExceptionStrings.StoragePath.InvalidFormat(),
                         nameof(path),
                         ex
                     );
@@ -113,84 +112,6 @@
                     return name;
                 }
                 return Path.GetFileNameWithoutExtension(name);
-            }
-        }
-
-        public override StoragePath Append(string part)
-        {
-            _ = part ?? throw new ArgumentNullException(nameof(part));
-            if (part.Length == 0)
-            {
-                return this;
-            }
-
-            return FileSystem.GetPath(ToString() + part);
-        }
-
-        public override StoragePath Combine(string other)
-        {
-            _ = other ?? throw new ArgumentNullException(nameof(other));
-            if (other.Length == 0)
-            {
-                return this;
-            }
-
-            return FileSystem.GetPath(Path.Combine(ToString(), other));
-        }
-
-        public override StoragePath Join(string other)
-        {
-            _ = other ?? throw new ArgumentNullException(nameof(other));
-            if (other.Length == 0)
-            {
-                return this;
-            }
-
-            return FileSystem.GetPath(PathPolyfills.Join(ToString(), other));
-        }
-
-        public override StoragePath Link(string other)
-        {
-            _ = other ?? throw new ArgumentNullException(nameof(other));
-            if (other.Length == 0)
-            {
-                return this;
-            }
-
-            var part1 = ToString().TrimEnd(PhysicalPathHelper.DirectorySeparatorChars);
-            var part2 = other.TrimStart(PhysicalPathHelper.DirectorySeparatorChars);
-            return FileSystem.GetPath($"{part1}{Path.DirectorySeparatorChar}{part2}");
-        }
-
-        public override StoragePath TrimEndingDirectorySeparator() =>
-            _pathWithoutEndingDirectorySeparatorLazy.Value;
-
-        private StoragePath TrimEndingDirectorySeparatorImpl()
-        {
-            if (!EndsInDirectorySeparator)
-            {
-                return this;
-            }
-
-            // Path.TrimEndingDirectorySeparator doesn't trim a one character string.
-            // We must manually throw here. Trimming isn't possible because StoragePaths cannot be empty strings.
-            if (Length == 1)
-            {
-                throw new InvalidOperationException(ExceptionStrings.PhysicalStoragePath.TrimmingResultsInEmptyPath());
-            }
-
-            var trimmedPath = PathPolyfills.TrimEndingDirectorySeparator(ToString());
-
-            try
-            {
-                return FileSystem.GetPath(trimmedPath);
-            }
-            catch (ArgumentException ex)
-            {
-                throw new InvalidOperationException(
-                    ExceptionStrings.PhysicalStoragePath.TrimmingResultsInInvalidPath(),
-                    ex
-                );
             }
         }
     }

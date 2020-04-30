@@ -42,6 +42,18 @@
                 $"\"{nameof(KnownFolder)}.{value}\" value.";
         }
 
+        internal static class StoragePath
+        {
+            internal static string InvalidFormat() =>
+                $"The specified path has an invalid format.";
+
+            internal static string TrimmingResultsInEmptyPath() =>
+                $"Trimming the trailing directory separator results in an empty path.";
+
+            internal static string TrimmingResultsInInvalidPath() =>
+                "Trimming the trailing directory separator results in an invalid path.";
+        }
+
         internal static class StorageFile
         {
             internal static string HasNoParentPath() =>
@@ -120,19 +132,6 @@
                 $"which is used by this file system implementation does not provide an actual physical " +
                 $"path within the file system. " +
                 $"This can happen if the file is not stored in the actual file system.";
-        }
-
-        internal static class PhysicalStoragePath
-        {
-            internal static string InvalidFormat() =>
-                $"The specified path has an invalid format.";
-
-            internal static string TrimmingResultsInEmptyPath() =>
-                $"Trimming the trailing directory separator results in an empty path string which " +
-                $"is not supported by the {nameof(StoragePath)} class.";
-
-            internal static string TrimmingResultsInInvalidPath() =>
-                "Trimming the trailing directory separator results in an invalid path.";
         }
     }
 }
