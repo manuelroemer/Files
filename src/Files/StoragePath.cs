@@ -757,7 +757,7 @@
 
         /// <summary>
         ///     Concatenates the two paths via the <see cref="Join(string)"/> method.
-        ///     Please see <see cref="Join(string)"/> for details the specifics of the concatenation.
+        ///     Please see <see cref="Join(string)"/> for details on the specifics of the concatenation.
         /// </summary>
         /// <param name="path1">The first path.</param>
         /// <param name="path2">The second path.</param>
