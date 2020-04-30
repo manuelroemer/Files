@@ -7,8 +7,8 @@
     using System.Threading;
     using System.Threading.Tasks;
     using Files;
-    using Files.Shared;
     using Files.FileSystems.WindowsStorage.Utilities;
+    using Files.Shared;
     using Files.Shared.PhysicalStoragePath;
     using Files.Shared.PhysicalStoragePath.Utilities;
     using Windows.Storage;
@@ -22,21 +22,12 @@
 
     internal sealed class WindowsStorageStorageFolder : StorageFolder
     {
-        private readonly StoragePath _path;
         private readonly StoragePath _fullPath;
         private readonly StoragePath? _fullParentPath;
 
-        public override FileSystem FileSystem { get; }
-
-        public override StoragePath Path => _path;
-
         public WindowsStorageStorageFolder(WindowsStorageFileSystem fileSystem, PhysicalStoragePath path)
+            : base(fileSystem, path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _ = path ?? throw new ArgumentNullException(nameof(path));
-
-            FileSystem = fileSystem;
-            _path = path;
             _fullPath = Path.FullPath;
             _fullParentPath = _fullPath.Parent;
         }

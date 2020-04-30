@@ -18,25 +18,35 @@
         internal const NameCollisionOption DefaultNameCollisionOption = NameCollisionOption.Fail;
         internal const DeletionOption DefaultDeletionOption = DeletionOption.Fail;
 
-        /// <inheritdoc/>
-        public abstract FileSystem FileSystem { get; }
+        /// <summary>
+        ///     Gets the file system with which the <see cref="StorageElement"/> is associated.
+        /// </summary>
+        public FileSystem FileSystem { get; }
 
         /// <summary>
-        ///     Gets the path which identifies this element.
+        ///     Gets the path which locates this element.
         /// </summary>
-        public abstract StoragePath Path { get; }
+        public StoragePath Path { get; }
 
         /// <summary>
         ///     Initializes a new instance of the <see cref="StorageElement"/> class.
         /// </summary>
-        /// <remarks>
-        ///     This internal constructor ensures that only the <see cref="StorageFile"/> and
-        ///     <see cref="StorageFolder"/> classes can be derived from this base class.
-        /// </remarks>
-        private protected StorageElement()
+        /// <param name="fileSystem">
+        ///     The file system with which this <see cref="StorageElement"/> is associated.
+        /// </param>
+        /// <param name="path">
+        ///     The path which locates this element.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="fileSystem"/> or <paramref name="path"/> is <see langword="null"/>.
+        /// </exception>
+        private protected StorageElement(FileSystem fileSystem, StoragePath path)
         {
             // Never make this public or protected!
             // Only the file/folder classes within this library are supposed to inherit from this base.
+            
+            FileSystem = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+            Path = path ?? throw new ArgumentNullException(nameof(path));
         }
 
         /// <summary>

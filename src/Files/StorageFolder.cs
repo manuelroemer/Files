@@ -26,7 +26,17 @@
         /// <summary>
         ///     Initializes a new instance of the <see cref="StorageFolder"/> class.
         /// </summary>
-        public StorageFolder()
+        /// <param name="fileSystem">
+        ///     The file system with which this <see cref="StorageElement"/> is associated.
+        /// </param>
+        /// <param name="path">
+        ///     The path which locates this element.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="fileSystem"/> or <paramref name="path"/> is <see langword="null"/>.
+        /// </exception>
+        public StorageFolder(FileSystem fileSystem, StoragePath path)
+            : base(fileSystem, path)
         {
             _parentLazy = new Lazy<StorageFolder?>(() =>
             {

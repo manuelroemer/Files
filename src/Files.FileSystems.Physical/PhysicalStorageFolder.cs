@@ -8,29 +8,19 @@
     using System.Threading.Tasks;
     using Files;
     using Files.FileSystems.Physical.Utilities;
+    using Files.Shared;
     using Files.Shared.PhysicalStoragePath;
     using Files.Shared.PhysicalStoragePath.Utilities;
-    using Files.Shared;
     using IOPath = System.IO.Path;
 
     internal sealed class PhysicalStorageFolder : StorageFolder
     {
-        private readonly FileSystem _fileSystem;
-        private readonly StoragePath _path;
         private readonly StoragePath _fullPath;
         private readonly StoragePath? _fullParentPath;
 
-        public override FileSystem FileSystem => _fileSystem;
-
-        public override StoragePath Path => _path;
-
         public PhysicalStorageFolder(PhysicalFileSystem fileSystem, PhysicalStoragePath path)
+            : base(fileSystem, path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _ = path ?? throw new ArgumentNullException(nameof(path));
-
-            _fileSystem = fileSystem;
-            _path = path;
             _fullPath = path.FullPath;
             _fullParentPath = path.FullPath.Parent;
         }

@@ -10,7 +10,7 @@
     /// </summary>
     public sealed class FileSystemStub : FileSystem
     {
-        public override PathInformation PathInformation { get; } = new PathInformation(
+        private static readonly PathInformation StubPathInformation = new PathInformation(
             Path.GetInvalidPathChars(),
             Path.GetInvalidFileNameChars(),
             '/',
@@ -21,6 +21,9 @@
             "..",
             StringComparison.Ordinal
         );
+
+        public FileSystemStub()
+            : base(StubPathInformation) { }
 
         public override StorageFile GetFile(StoragePath path) =>
             throw new NotImplementedException();

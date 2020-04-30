@@ -40,13 +40,11 @@
     /// </remarks>
     public sealed class WindowsStorageFileSystem : FileSystem
     {
-        /// <inheritdoc/>
-        public override PathInformation PathInformation => PhysicalPathHelper.PhysicalPathInformation;
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="WindowsStorageFileSystem"/> class.
         /// </summary>
-        public WindowsStorageFileSystem() { }
+        public WindowsStorageFileSystem()
+            : base(PhysicalPathHelper.PhysicalPathInformation) { }
 
         /// <inheritdoc/>
         public override StorageFile GetFile(StoragePath path)
@@ -86,7 +84,7 @@
             _ = path ?? throw new ArgumentNullException(nameof(path));
             return new PhysicalStoragePath(path, this);
         }
-
+        
         /// <inheritdoc/>
         public override StoragePath GetPath(KnownFolder knownFolder)
         {

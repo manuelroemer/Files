@@ -37,22 +37,19 @@
 
         public static Mock<FileSystem> Create(PathInformation pathInformation)
         {
-            var fsMock = new Mock<FileSystem>() { CallBase = true };
-            fsMock
-                .SetupGet(x => x.PathInformation)
-                .Returns(pathInformation);
-            
+            var fsMock = new Mock<FileSystem>(pathInformation) { CallBase = true };
+
             fsMock
                 .Setup(x => x.GetPath(It.IsAny<string>()))
-                .Returns((string path) => StoragePathMocks.Create(path, fsMock.Object).Object);
+                .Returns((string path) => StoragePathMocks.Create(fsMock.Object, path).Object);
 
             fsMock
                 .Setup(x => x.GetFile(It.IsAny<StoragePath>()))
-                .Returns((StoragePath path) => StorageFileMocks.Create(path, fsMock.Object).Object);
+                .Returns((StoragePath path) => StorageFileMocks.Create(fsMock.Object, path).Object);
 
             fsMock
                 .Setup(x => x.GetFolder(It.IsAny<StoragePath>()))
-                .Returns((StoragePath path) => StorageFolderMocks.Create(path, fsMock.Object).Object);
+                .Returns((StoragePath path) => StorageFolderMocks.Create(fsMock.Object, path).Object);
 
             return fsMock;
         }

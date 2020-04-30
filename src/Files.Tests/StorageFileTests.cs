@@ -39,7 +39,7 @@
         public void ToString_ReturnsFullPathString()
         {
             var pathMock = CreateOrdinalPathMock();
-            var fileMock = StorageFileMocks.Create(pathMock.Object, pathMock.Object.FileSystem);
+            var fileMock = StorageFileMocks.Create(pathMock.Object.FileSystem, pathMock.Object);
             var result = fileMock.Object.ToString();
             result.ShouldBe(pathMock.Object.FullPath);
         }

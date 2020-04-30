@@ -26,13 +26,11 @@
     /// </remarks>
     public sealed class PhysicalFileSystem : FileSystem
     {
-        /// <inheritdoc/>
-        public override PathInformation PathInformation => PhysicalPathHelper.PhysicalPathInformation;
-
         /// <summary>
         ///     Initializes a new instance of the <see cref="PhysicalFileSystem"/> class.
         /// </summary>
-        public PhysicalFileSystem() { }
+        public PhysicalFileSystem()
+            : base(PhysicalPathHelper.PhysicalPathInformation) { }
 
         /// <inheritdoc/>
         public override StorageFile GetFile(StoragePath path)

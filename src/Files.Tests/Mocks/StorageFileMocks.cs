@@ -7,21 +7,11 @@
     public static class StorageFileMocks
     {
         public static Mock<StorageFile> CreateOrdinalFileMock() =>
-            Create(CreateOrdinalPathMock().Object, CreateOrdinalFsMock().Object);
+            Create(CreateOrdinalFsMock().Object, CreateOrdinalPathMock().Object);
 
-        public static Mock<StorageFile> Create(StoragePath path, FileSystem fileSystem)
+        public static Mock<StorageFile> Create(FileSystem fileSystem, StoragePath path)
         {
-            var fileMock = new Mock<StorageFile>() { CallBase = true };
-
-            fileMock
-                .SetupGet(x => x.FileSystem)
-                .Returns(fileSystem);
-
-            fileMock
-                .SetupGet(x => x.Path)
-                .Returns(path);
-
-            return fileMock;
+            return new Mock<StorageFile>(fileSystem, path) { CallBase = true };
         }
     }
 }

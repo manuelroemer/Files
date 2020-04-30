@@ -23,8 +23,6 @@
         [DebuggerBrowsable(Collapsed)]
         private readonly Lazy<StoragePath> _fullPathLazy;
 
-        public override FileSystem FileSystem { get; }
-
         public override PathKind Kind { get; }
 
         public override StoragePath? Root => _rootLazy.Value;
@@ -40,7 +38,7 @@
         public override string? Extension { get; }
 
         internal PhysicalStoragePath(string path, FileSystem fileSystem)
-            : base(path)
+            : base(fileSystem, path)
         {
             Debug.Assert(
                 ReferenceEquals(fileSystem.PathInformation, PhysicalPathHelper.PhysicalPathInformation),
@@ -57,7 +55,6 @@
             var extension = PhysicalPathHelper.GetExtensionWithoutTrailingExtensionSeparator(pathWithoutTrailingSeparator);
             var isPathFullyQualified = PathPolyfills.IsPathFullyQualified(path);
 
-            FileSystem = fileSystem;
             Kind = isPathFullyQualified ? PathKind.Absolute : PathKind.Relative;
             Name = name;
             NameWithoutExtension = nameWithoutExtension;

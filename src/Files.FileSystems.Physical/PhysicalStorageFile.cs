@@ -7,28 +7,20 @@
     using System.Threading.Tasks;
     using Files;
     using Files.FileSystems.Physical.Utilities;
+    using Files.Shared;
     using Files.Shared.PhysicalStoragePath;
     using Files.Shared.PhysicalStoragePath.Utilities;
-    using Files.Shared;
     using IOPath = System.IO.Path;
 
     internal sealed class PhysicalStorageFile : StorageFile
     {
-        private readonly FileSystem _fileSystem;
-        private readonly StoragePath _path;
         private readonly StoragePath _fullPath;
         private readonly StoragePath _fullParentPath;
         private readonly FileInfo _fileInfo;
 
-        public override FileSystem FileSystem => _fileSystem;
-
-        public override StoragePath Path => _path;
-
         internal PhysicalStorageFile(PhysicalFileSystem fileSystem, PhysicalStoragePath path)
+            : base(fileSystem, path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _ = path ?? throw new ArgumentNullException(nameof(path));
-
             if (path.FullPath.Parent is null)
             {
                 throw new ArgumentException(
@@ -37,8 +29,6 @@
                 );
             }
 
-            _fileSystem = fileSystem;
-            _path = path;
             _fullPath = path.FullPath;
             _fullParentPath = path.FullPath.Parent;
             _fileInfo = new FileInfo(_fullPath.ToString());

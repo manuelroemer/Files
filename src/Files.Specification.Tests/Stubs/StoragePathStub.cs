@@ -12,7 +12,6 @@
         // The properties/methods (apart from ToString()) should ideally never be used and do not
         // have to make any sense, as long as they return a valid object.
 
-        public override FileSystem FileSystem { get; }
         public override PathKind Kind => PathKind.Absolute;
         public override StoragePath? Root => this;
         public override StoragePath? Parent => null;
@@ -22,9 +21,6 @@
         public override string? Extension => "";
 
         public StoragePathStub(FileSystem fileSystem, string path)
-            : base(path)
-        {
-            FileSystem = fileSystem;
-        }
+            : base(fileSystem, path) { }
     }
 }

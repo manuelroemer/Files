@@ -54,8 +54,10 @@
         [DebuggerBrowsable(Collapsed)]
         private readonly Lazy<StoragePath> _pathWithoutTrailingDirectorySeparatorLazy;
 
-        /// <inheritdoc/>
-        public abstract FileSystem FileSystem { get; }
+        /// <summary>
+        ///     The file system with which this <see cref="StoragePath"/> is associated.
+        /// </summary>
+        public FileSystem FileSystem { get; }
 
         /// <summary>
         ///     Gets the number of characters in the underlying string with which this path has
@@ -131,6 +133,9 @@
         /// <summary>
         ///     Initializes a new <see cref="StoragePath"/> instance from the specified <paramref name="path"/> string.
         /// </summary>
+        /// <param name="fileSystem">
+        ///     The file system with which this <see cref="StoragePath"/> is associated.
+        /// </param>
         /// <param name="path">
         ///     The string on which this <see cref="StoragePath"/> instance is based.
         /// </param>
@@ -140,14 +145,17 @@
         /// <exception cref="ArgumentException">
         ///     <paramref name="path"/> is an empty string.
         /// </exception>
-        protected StoragePath(string path)
+        protected StoragePath(FileSystem fileSystem, string path)
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
+            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
+
             if (path.Length == 0)
             {
                 throw new ArgumentException(ExceptionStrings.String.CannotBeEmpty(), nameof(path));
             }
 
+            FileSystem = fileSystem;
             _underlyingString = path;
             _pathWithoutTrailingDirectorySeparatorLazy = new Lazy<StoragePath>(TrimEndingDirectorySeparatorImpl);
         }

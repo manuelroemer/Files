@@ -78,7 +78,22 @@
         ///     Gets a <see cref="PathInformation"/> instance which provides information about
         ///     special path characteristics in this file system implementation.
         /// </summary>
-        public abstract PathInformation PathInformation { get; }
+        public PathInformation PathInformation { get; }
+
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="FileSystem"/> class.
+        /// </summary>
+        /// <param name="pathInformation">
+        ///     A <see cref="PathInformation"/> instance which provides information about
+        ///     special path characteristics in this file system implementation.
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        ///     <paramref name="pathInformation"/> is <see langword="null"/>.
+        /// </exception>
+        public FileSystem(PathInformation pathInformation)
+        {
+            PathInformation = pathInformation ?? throw new ArgumentNullException(nameof(pathInformation));
+        }
 
         /// <summary>
         ///     Creates and returns a <see cref="StoragePath"/> instance from a string.
@@ -134,7 +149,7 @@
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
         /// <seealso cref="GetPath(string)"/>
-        public virtual bool TryGetPath(string? path, [NotNullWhen(true)] out StoragePath? result)
+        public bool TryGetPath(string? path, [NotNullWhen(true)] out StoragePath? result)
         {
             // Fast path without a (guaranteed) exception.
             if (string.IsNullOrEmpty(path))
@@ -171,7 +186,7 @@
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
         /// <seealso cref="GetPath(KnownFolder)"/>
-        public virtual bool TryGetPath(KnownFolder knownFolder, [NotNullWhen(true)] out StoragePath? result)
+        public bool TryGetPath(KnownFolder knownFolder, [NotNullWhen(true)] out StoragePath? result)
         {
             try
             {
@@ -207,7 +222,7 @@
         ///     <paramref name="path"/> is an empty string or has an otherwise invalid format.
         /// </exception>
         /// <seealso cref="TryGetFile(string?, out StorageFile?)"/>
-        public virtual StorageFile GetFile(string path) =>
+        public StorageFile GetFile(string path) =>
             GetFile(GetPath(path));
 
         /// <summary>
@@ -251,7 +266,7 @@
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
         /// <seealso cref="GetFile(string)"/>
-        public virtual bool TryGetFile(string? path, [NotNullWhen(true)] out StorageFile? result)
+        public bool TryGetFile(string? path, [NotNullWhen(true)] out StorageFile? result)
         {
             // Fast path without a (guaranteed) exception.
             if (string.IsNullOrEmpty(path))
@@ -286,7 +301,7 @@
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
         /// <seealso cref="GetFile(StoragePath)"/>
-        public virtual bool TryGetFile(StoragePath? path, [NotNullWhen(true)] out StorageFile? result)
+        public bool TryGetFile(StoragePath? path, [NotNullWhen(true)] out StorageFile? result)
         {
             // Fast path without a (guaranteed) exception.
             if (path is null)
@@ -329,7 +344,7 @@
         ///     <paramref name="path"/> is an empty string or has an otherwise invalid format.
         /// </exception>
         /// <seealso cref="TryGetFolder(string?, out StorageFolder?)"/>
-        public virtual StorageFolder GetFolder(string path) =>
+        public StorageFolder GetFolder(string path) =>
             GetFolder(GetPath(path));
 
         /// <summary>
@@ -379,7 +394,7 @@
         ///     The requested folder is not supported by this file system implementation.
         /// </exception>
         /// <seealso cref="TryGetFolder(KnownFolder, out StorageFolder?)"/>
-        public virtual StorageFolder GetFolder(KnownFolder knownFolder) =>
+        public StorageFolder GetFolder(KnownFolder knownFolder) =>
             GetFolder(GetPath(knownFolder));
 
         /// <summary>
@@ -396,7 +411,7 @@
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
         /// <seealso cref="GetFolder(string)"/>
-        public virtual bool TryGetFolder(string? path, [NotNullWhen(true)] out StorageFolder? result)
+        public bool TryGetFolder(string? path, [NotNullWhen(true)] out StorageFolder? result)
         {
             // Fast path without a (guaranteed) exception.
             if (string.IsNullOrEmpty(path))
@@ -431,7 +446,7 @@
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
         /// <seealso cref="GetFolder(StoragePath)"/>
-        public virtual bool TryGetFolder(StoragePath? path, [NotNullWhen(true)] out StorageFolder? result)
+        public bool TryGetFolder(StoragePath? path, [NotNullWhen(true)] out StorageFolder? result)
         {
             // Fast path without a (guaranteed) exception.
             if (path is null)
@@ -468,7 +483,7 @@
         ///     <see langword="true"/> if the operation succeeded; <see langword="false"/> if not.
         /// </returns>
         /// <seealso cref="GetFolder(KnownFolder)"/>
-        public virtual bool TryGetFolder(KnownFolder knownFolder, [NotNullWhen(true)] out StorageFolder? result)
+        public bool TryGetFolder(KnownFolder knownFolder, [NotNullWhen(true)] out StorageFolder? result)
         {
             if (TryGetPath(knownFolder, out var path))
             {

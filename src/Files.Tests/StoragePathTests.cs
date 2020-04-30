@@ -1,9 +1,11 @@
 ﻿namespace Files.Tests
 {
     using System;
+    using Files.Tests.Mocks;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Moq;
     using Shouldly;
+    using static Files.Tests.Mocks.FileSystemMocks;
     using static Files.Tests.Mocks.StoragePathMocks;
 
     [TestClass]
@@ -15,7 +17,7 @@
         public void Constructor_NullParameters_ThrowsArgumentNullException()
         {
             Should
-                .Throw<Exception>(() => new Mock<StoragePath>(args: new[] { (string?)null }) { CallBase = true }.Object)
+                .Throw<Exception>(() => new Mock<StoragePath>(CreateOrdinalFsMock().Object, null) { CallBase = true }.Object)
                 .InnerException.ShouldBeOfType<ArgumentNullException>();
         }
         
@@ -23,7 +25,7 @@
         public void Constructor_EmptyString_ThrowsArgumentException()
         {
             Should
-                .Throw<Exception>(() => new Mock<StoragePath>(args: new[] { "" }) { CallBase = true }.Object)
+                .Throw<Exception>(() => new Mock<StoragePath>(CreateOrdinalFsMock().Object, "") { CallBase = true }.Object)
                 .InnerException.ShouldBeOfType<ArgumentException>();
         }
 
@@ -35,54 +37,6 @@
         public void Length_StandardPath_ReturnsUnderlyingStringLength()
         {
             CreateOrdinalPathMock().Object.Length.ShouldBe(MockedPathString.Length);
-        }
-
-        #endregion
-
-        #region Combine Tests
-
-        [TestMethod]
-        public void Combine_StoragePath_CallsCombineString()
-        {
-            var mock = CreateOrdinalPathMock();
-            mock.Object.Combine(CreateOrdinalPathMock().Object);
-            mock.Verify(path => path.Combine(MockedPathString));
-        }
-
-        #endregion
-
-        #region TryCombine Tests
-
-        [TestMethod]
-        public void TryCombine_StoragePath_CallsTryCombineString()
-        {
-            var mock = CreateOrdinalPathMock();
-            _ = mock.Object.TryCombine(mock.Object, out var result);
-            mock.Verify(path => path.TryCombine(MockedPathString, out result));
-        }
-
-        #endregion
-
-        #region Join Tests
-
-        [TestMethod]
-        public void Join_StoragePath_CallsJoinString()
-        {
-            var mock = CreateOrdinalPathMock();
-            mock.Object.Join(CreateOrdinalPathMock().Object);
-            mock.Verify(path => path.Join(MockedPathString));
-        }
-
-        #endregion
-
-        #region TryJoin Tests
-
-        [TestMethod]
-        public void TryJoin_StoragePath_CallsTryJoinString()
-        {
-            var mock = CreateOrdinalPathMock();
-            _ = mock.Object.TryJoin(mock.Object, out var result);
-            mock.Verify(path => path.TryJoin(MockedPathString, out result));
         }
 
         #endregion
@@ -103,7 +57,7 @@
         [DataRow(LowerMockedPathString)]
         public void CompareTo_StandardPath_ReturnsStringCompareResult(string otherPathStr)
         {
-            var otherPath = new Mock<StoragePath>(otherPathStr) { CallBase = true }.Object;
+            var otherPath = StoragePathMocks.Create(CreateOrdinalFsMock().Object, otherPathStr).Object;
             var expected = string.Compare(MockedPathString, otherPathStr, StringComparison.Ordinal);
 
             ((IComparable)CreateOrdinalPathMock().Object).CompareTo(otherPathStr).ShouldBe(expected);
@@ -203,14 +157,6 @@
             Should.Throw<ArgumentNullException>(() => CreateOrdinalPathMock().Object + null!);
         }
 
-        [TestMethod]
-        public void OpAddition_ValidParameters_CallsAppend()
-        {
-            var mock = CreateOrdinalPathMock();
-            _ = mock.Object + "";
-            mock.Verify(path => path.Append(""));
-        }
-
         #endregion
 
         #region operator/ Tests
@@ -221,22 +167,6 @@
             Should.Throw<ArgumentNullException>(() => (StoragePath)null! / "");
             Should.Throw<ArgumentNullException>(() => CreateOrdinalPathMock().Object / (string)null!);
             Should.Throw<ArgumentNullException>(() => CreateOrdinalPathMock().Object / (StoragePath)null!);
-        }
-
-        [TestMethod]
-        public void OpDivision_String_ValidParameters_CallsJoin()
-        {
-            var mock = CreateOrdinalPathMock();
-            _ = mock.Object / MockedPathString;
-            mock.Verify(path => path.Join(MockedPathString));
-        }
-        
-        [TestMethod]
-        public void OpDivision_StoragePath_ValidParameters_CallsJoin()
-        {
-            var mock = CreateOrdinalPathMock();
-            _ = mock.Object / mock.Object;
-            mock.Verify(path => path.Join(MockedPathString));
         }
 
         #endregion

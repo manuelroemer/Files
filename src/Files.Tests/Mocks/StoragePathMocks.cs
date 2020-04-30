@@ -10,25 +10,21 @@
         public const string LowerMockedPathString = "mockpathstring";
 
         public static Mock<StoragePath> CreateOrdinalPathMock() =>
-            Create(MockedPathString, CreateOrdinalFsMock().Object);
+            Create(CreateOrdinalFsMock().Object, MockedPathString);
 
         public static Mock<StoragePath> CreateOrdinalIgnoreCasePathMock() =>
-            Create(MockedPathString, CreateOrdinalIgnoreCaseFsMock().Object);
+            Create(CreateOrdinalIgnoreCaseFsMock().Object, MockedPathString);
 
         public static Mock<StoragePath> CreateOrdinalUpperPathMock() =>
-            Create(UpperMockedPathString, CreateOrdinalFsMock().Object);
+            Create(CreateOrdinalFsMock().Object, UpperMockedPathString);
 
         public static Mock<StoragePath> CreateOrdinalLowerPathMock() =>
-            Create(LowerMockedPathString, CreateOrdinalFsMock().Object);
+            Create(CreateOrdinalFsMock().Object, LowerMockedPathString);
 
-        public static Mock<StoragePath> Create(string path, FileSystem fileSystem)
+        public static Mock<StoragePath> Create(FileSystem fileSystem, string path)
         {
-            var pathMock = new Mock<StoragePath>(path) { CallBase = true };
+            var pathMock = new Mock<StoragePath>(fileSystem, path) { CallBase = true };
             
-            pathMock
-                .SetupGet(x => x.FileSystem)
-                .Returns(fileSystem);
-
             pathMock
                 .SetupGet(x => x.FullPath)
                 .Returns(() => pathMock.Object);

@@ -9,6 +9,7 @@
     using System.Threading.Tasks;
     using Files;
     using Files.FileSystems.WindowsStorage.Utilities;
+    using Files.Shared;
     using Files.Shared.PhysicalStoragePath;
     using Files.Shared.PhysicalStoragePath.Utilities;
     using Windows.Storage;
@@ -19,23 +20,15 @@
     using StorageFile = StorageFile;
     using WinStorageFolder = Windows.Storage.StorageFolder;
     using WinUnicodeEncoding = Windows.Storage.Streams.UnicodeEncoding;
-    using Files.Shared;
 
     internal sealed class WindowsStorageStorageFile : StorageFile
     {
-        private readonly StoragePath _path;
         private readonly StoragePath _fullPath;
         private readonly StoragePath _fullParentPath;
 
-        public override FileSystem FileSystem { get; }
-
-        public override StoragePath Path => _path;
-
         public WindowsStorageStorageFile(WindowsStorageFileSystem fileSystem, PhysicalStoragePath path)
+            : base(fileSystem, path)
         {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            _ = path ?? throw new ArgumentNullException(nameof(path));
-
             if (path.FullPath.Parent is null)
             {
                 throw new ArgumentException(
@@ -44,8 +37,6 @@
                 );
             }
 
-            FileSystem = fileSystem;
-            _path = path;
             _fullPath = Path.FullPath;
             _fullParentPath = path.FullPath.Parent;
         }
