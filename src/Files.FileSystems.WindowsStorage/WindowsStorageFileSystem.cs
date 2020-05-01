@@ -29,11 +29,6 @@
     ///     paths for certain <see cref="KnownFolder"/> values, e.g. the application's own temporary
     ///     data folder.
     ///     
-    ///     Apart from this, this file system implementation is compatible with any other file system
-    ///     implementation using the Win32 path format. Apart from the <see cref="KnownFolder"/>
-    ///     differences, it should be possible to switch between this implementation and similar ones
-    ///     (for example the <c>PhysicalFileSystem</c>) without too much effort.
-    ///     
     ///     While it is possible without errors to create multiple instances of the
     ///     <see cref="WindowsStorageFileSystem"/>, you should ideally create and reuse a single
     ///     instance of this class.
