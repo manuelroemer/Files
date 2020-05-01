@@ -22,7 +22,7 @@
     ///     Therefore, all restrictions which apply to a sandboxed application also apply to this
     ///     file system. This means that, by default, most operations on locations which are not
     ///     accessible out of the box will throw an <see cref="UnauthorizedAccessException"/>.
-    ///     To access additional locations, you must be granted access by the application' user,
+    ///     To access additional locations, you must be granted access by the application's user,
     ///     for example via the <see cref="Windows.Storage.Pickers.FileOpenPicker"/>.
     ///     
     ///     Due to these restrictions, this file system implementation returns application specific
