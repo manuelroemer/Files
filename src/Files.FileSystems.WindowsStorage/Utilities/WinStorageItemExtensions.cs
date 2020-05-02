@@ -6,7 +6,7 @@
 
     internal static class WinStorageItemExtensions
     {
-        public static string GetPathOrThrow(this IStorageItem storageItem)
+        internal static string GetPathOrThrow(this IStorageItem storageItem)
         {
             return storageItem.Path ?? throw new IOException(
                 ExceptionStrings.WindowsStorageCompatibility.WindowsStorageElementHasNoPath()
