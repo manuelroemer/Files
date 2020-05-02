@@ -9,7 +9,7 @@
 
     internal static class ConversionExtensions
     {
-        public static WinCreationCollisionOption ToWinOptions(this CreationCollisionOption options) => options switch
+        internal static WinCreationCollisionOption ToWinOptions(this CreationCollisionOption options) => options switch
         {
             CreationCollisionOption.Fail => WinCreationCollisionOption.FailIfExists,
             CreationCollisionOption.ReplaceExisting => WinCreationCollisionOption.ReplaceExisting,
@@ -17,21 +17,21 @@
             _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
         };
 
-        public static WinNameCollisionOption ToWinOptions(this NameCollisionOption options) => options switch
+        internal static WinNameCollisionOption ToWinOptions(this NameCollisionOption options) => options switch
         {
             NameCollisionOption.Fail => WinNameCollisionOption.FailIfExists,
             NameCollisionOption.ReplaceExisting => WinNameCollisionOption.ReplaceExisting,
             _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
         };
 
-        public static IOFileAttributes ToIOFileAttributes(this WinFileAttributes fileAttributes) => fileAttributes switch
+        internal static IOFileAttributes ToIOFileAttributes(this WinFileAttributes fileAttributes) => fileAttributes switch
         {
             // Normal is the only attribute with a different value (0 vs. 128).
             WinFileAttributes.Normal => IOFileAttributes.Normal,
             _ => (IOFileAttributes)fileAttributes,
         };
 
-        public static WinFileAttributes ToWinFileAttributes(this IOFileAttributes fileAttributes) => fileAttributes switch
+        internal static WinFileAttributes ToWinFileAttributes(this IOFileAttributes fileAttributes) => fileAttributes switch
         {
             // Normal is the only attribute with a different value (0 vs. 128).
             IOFileAttributes.Normal => WinFileAttributes.Normal,
