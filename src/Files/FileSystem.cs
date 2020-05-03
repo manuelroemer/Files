@@ -485,9 +485,8 @@
         /// <seealso cref="GetFolder(KnownFolder)"/>
         public bool TryGetFolder(KnownFolder knownFolder, [NotNullWhen(true)] out StorageFolder? result)
         {
-            if (TryGetPath(knownFolder, out var path))
+            if (TryGetPath(knownFolder, out var path) && TryGetFolder(path, out result))
             {
-                result = GetFolder(path);
                 return true;
             }
             else
