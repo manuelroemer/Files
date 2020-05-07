@@ -74,11 +74,16 @@
 
             static string GetFullPathOrThrow(string path)
             {
+                // This method, apart from returning the full path, has another goal:
+                // Validate that the path has the correct format.
                 // Path rules are incredibly complex depending on the current OS. It's best to not try
-                // and emulate these rules here, but to actually use the OS/FS APIs directly.
-                // One way to do this is by calling GetFullPath() and checking whether that throws.
-                // If not, the path is good.
-                // It certainly looks nasty, but it is the most reliant way to get this right.
+                // and emulate these rules here, but to actually use the OS/FS APIs, i.e. GetFullPath, directly.
+                // One thing to note is that there are differences between the different .NET runtimes here.
+                // Older versions have stricter path validations and throw ArgumentExceptions here while
+                // newer implementations delay that and throw IOExceptions for invalid paths in the various
+                // File/Directory APIs.
+                // There is not much we can do about this. Again, emulating and artifically supporting this is
+                // incredibly complex. Therefore we simply allow this and document this fact.
 
                 try
                 {
