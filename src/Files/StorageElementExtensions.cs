@@ -1,4 +1,4 @@
-﻿namespace Files.Extensions
+﻿namespace Files
 {
     using System;
     using System.IO;
