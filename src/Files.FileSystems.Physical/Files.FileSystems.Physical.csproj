@@ -9,7 +9,6 @@
       netcoreapp2.2;
       netcoreapp3.0
     </TargetFrameworks>
-    <OutputType>library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
