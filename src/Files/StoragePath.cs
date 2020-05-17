@@ -648,8 +648,6 @@
         ///     <c>System.IO.Path.Join(ReadOnlySpan&lt;char&gt;, ReadOnlySpan&lt;char&gt;)</c>,
         ///     but with the difference that excess directory separators are removed between the two
         ///     paths.
-        ///     For people familiar with JavaScript, the method behaves similar to NodeJS's
-        ///     <c>path.join([...paths])</c> method: https://nodejs.org/api/path.html#path_path_join_paths
         ///     
         ///     In comparison to the alternatives (<see cref="Combine(string)"/> and <see cref="Join(string)"/>),
         ///     <see cref="Link(string)"/> removes excess leading/trailing directory separator chars of
