@@ -133,5 +133,14 @@
                 $"path within the file system. " +
                 $"This can happen if the file is not stored in the actual file system.";
         }
+
+        internal static class InMemoryFileSystem
+        {
+            internal static string MemberIncompatibleWithInstance() =>
+                "The specified member has been created by another InMemoryFileSystem instance. " +
+                "An InMemoryFileSystem instance is only compatible with members created by itself. " +
+                "Ensure that you are not creating and mixing multiple InMemoryFileSystem instances " +
+                "at the same time.";
+        }
     }
 }
