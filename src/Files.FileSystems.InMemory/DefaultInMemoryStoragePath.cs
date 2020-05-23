@@ -2,10 +2,9 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
     using System.Linq;
-    using Files;
     using System.Text;
+    using Files;
     using Files.Shared;
 
     internal sealed class DefaultInMemoryStoragePath : StoragePath
@@ -33,6 +32,12 @@
             : base(fileSystem, path)
         {
             _pathInformation = fileSystem.PathInformation;
+
+            if (path.Contains(_pathInformation.InvalidPathChars.ToArray()) ||
+                path.Contains(_pathInformation.InvalidFileNameChars.ToArray()))
+            {
+                throw new ArgumentException(ExceptionStrings.StoragePath.InvalidFormat(), nameof(path));
+            }
 
             Kind = GetKind();
             Name = GetName();
@@ -107,15 +112,12 @@
 
                 foreach (var segment in segments)
                 {
-                    if (segment.Equals(_pathInformation.CurrentDirectorySegment, _pathInformation.DefaultStringComparison))
+                    if (IsCurrentDirectorySegment(segment))
                     {
                         // The same directory (e.g. ".") is just skipped.
                         continue;
                     }
-                    else if (
-                        segment.Equals(_pathInformation.ParentDirectorySegment, _pathInformation.DefaultStringComparison) &&
-                        resolvedSegments.Count > 0
-                    )
+                    else if (IsParentDirectorySegment(segment) && resolvedSegments.Count > 0)
                     {
                         // A parent directory (e.g. "..") leads to the removal of the last element.
                         resolvedSegments.RemoveAt(resolvedSegments.Count - 1);
@@ -203,10 +205,18 @@
         private string GetNameWithoutExtension()
         {
             var name = GetName();
+
+            // Specification requires special handling for Current/Parent segments.
+            if (IsCurrentDirectorySegment(name) || IsParentDirectorySegment(name))
+            {
+                return name;
+            }
+
+            // Otherwise, just split at the last extension separator.
             var lastExtensionSeparatorIndex = name.LastIndexOf(_pathInformation.ExtensionSeparatorChar);
             return lastExtensionSeparatorIndex < 0
                 ? name
-                : name.Substring(0, name.Length - lastExtensionSeparatorIndex);
+                : name.Substring(0, lastExtensionSeparatorIndex);
         }
 
         private string? GetExtension()
@@ -224,25 +234,23 @@
             return null;
         }
 
-        private bool IsRooted()
-        {
-            return IsDirectorySeparator(UnderlyingString[0]);
-        }
+        private bool IsRooted() =>
+            IsDirectorySeparator(UnderlyingString[0]);
 
         /// <summary>Returns whether the path consists of a single directory separator, i.e. if it's rooted.</summary>
-        private bool IsRootPathOnly()
-        {
-            return IsRooted() && Length == 1;
-        }
+        private bool IsRootPathOnly() =>
+            IsRooted() && Length == 1;
 
-        private int GetRootLength()
-        {
-            return IsRooted() ? 1 : 0;
-        }
+        private int GetRootLength() =>
+            IsRooted() ? 1 : 0;
 
-        private bool IsDirectorySeparator(char c)
-        {
-            return _pathInformation.DirectorySeparatorChars.Contains(c);
-        }
+        private bool IsDirectorySeparator(char c) =>
+            _pathInformation.DirectorySeparatorChars.Contains(c);
+
+        private bool IsCurrentDirectorySegment(string s) =>
+            s.Equals(_pathInformation.CurrentDirectorySegment, _pathInformation.DefaultStringComparison);
+
+        private bool IsParentDirectorySegment(string s) =>
+            s.Equals(_pathInformation.ParentDirectorySegment, _pathInformation.DefaultStringComparison);
     }
 }

@@ -6,7 +6,7 @@
 
     public sealed class DefaultInMemoryPathProvider : IInMemoryPathProvider
     {
-        private static readonly PathInformation DefaultPathInformation = new PathInformation(
+        private static readonly PathInformation OrdinalPathInformation = new PathInformation(
             invalidPathChars: Array.Empty<char>(),
             invalidFileNameChars: Array.Empty<char>(),
             directorySeparatorChar: '/',
@@ -18,10 +18,28 @@
             defaultStringComparison: StringComparison.Ordinal
         );
 
+        private static readonly PathInformation OrdinalIgnoreCasePathInformation = new PathInformation(
+            invalidPathChars: Array.Empty<char>(),
+            invalidFileNameChars: Array.Empty<char>(),
+            directorySeparatorChar: '/',
+            altDirectorySeparatorChar: '\\',
+            extensionSeparatorChar: '.',
+            volumeSeparatorChar: '/',
+            currentDirectorySegment: ".",
+            parentDirectorySegment: "..",
+            defaultStringComparison: StringComparison.OrdinalIgnoreCase
+        );
+
+        public static DefaultInMemoryPathProvider DefaultOrdinal { get; } = 
+            new DefaultInMemoryPathProvider(OrdinalPathInformation);
+
+        public static DefaultInMemoryPathProvider DefaultOrdinalIgnoreCase { get; } =
+            new DefaultInMemoryPathProvider(OrdinalIgnoreCasePathInformation);
+
         public PathInformation PathInformation { get; }
 
         public DefaultInMemoryPathProvider()
-            : this(DefaultPathInformation) { }
+            : this(OrdinalPathInformation) { }
 
         public DefaultInMemoryPathProvider(PathInformation pathInformation)
         {
