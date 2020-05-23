@@ -6,7 +6,6 @@
     using Files;
     using Files.Shared;
     using Files.Shared.PhysicalStoragePath.Utilities;
-    using static System.Diagnostics.DebuggerBrowsableState;
 
     internal sealed class PhysicalStoragePath : StoragePath
     {
@@ -14,13 +13,8 @@
         // expand/walk a path tree whenever a path is initialized.
         // Consider for example the path foo/bar/baz.
         // Without Lazy<T>, three path instances would be created immediately through the Parent property.
-        [DebuggerBrowsable(Collapsed)]
         private readonly Lazy<StoragePath?> _rootLazy;
-        
-        [DebuggerBrowsable(Collapsed)]
         private readonly Lazy<StoragePath?> _parentLazy;
-        
-        [DebuggerBrowsable(Collapsed)]
         private readonly Lazy<StoragePath> _fullPathLazy;
 
         public override PathKind Kind { get; }

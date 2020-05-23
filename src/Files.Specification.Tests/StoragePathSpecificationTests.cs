@@ -119,6 +119,20 @@
                 (ParentDirectoryPath / Default.PathName).ToString(),
                 PathInformation.ParentDirectorySegment,
             },
+            // For paths like "foo///bar", the trailing separators are discarded after removal of the last segment.
+            new[]
+            {
+                (
+                    (
+                        ParentDirectoryPath +
+                        PathInformation.DirectorySeparatorChar.ToString() +
+                        PathInformation.DirectorySeparatorChar.ToString() +
+                        PathInformation.DirectorySeparatorChar.ToString()
+                    )
+                    / Default.PathName
+                ).ToString(),
+                PathInformation.ParentDirectorySegment,
+            },
         };
 
         public virtual IEnumerable<object[]> ParentPathsWithoutParentData => new[]

@@ -6,7 +6,6 @@
     using System.Linq;
     using System.Runtime.CompilerServices;
     using Files.Shared;
-    using static System.Diagnostics.DebuggerBrowsableState;
 
 #pragma warning disable CA1036
     // Override methods on comparable types, i.e. implement <, >, <=, >= operators due to IComparable.
@@ -49,21 +48,25 @@
         IComparable<string?>,
         IComparable<StoragePath?>
     {
-        private readonly string _underlyingString;
-        
-        [DebuggerBrowsable(Collapsed)]
         private readonly Lazy<StoragePath> _pathWithoutTrailingDirectorySeparatorLazy;
 
         /// <summary>
-        ///     The file system with which this <see cref="StoragePath"/> is associated.
+        ///     The file system with which this path has been initialized.
         /// </summary>
+        /// <seealso cref="ToString"/>
         public FileSystem FileSystem { get; }
+
+        /// <summary>
+        ///     Gets the underlying string with which this <see cref="StoragePath"/> instance has
+        ///     been initialized.
+        /// </summary>
+        protected string UnderlyingString { get; }
 
         /// <summary>
         ///     Gets the number of characters in the underlying string with which this path has
         ///     been initialized.
         /// </summary>
-        public int Length => _underlyingString.Length;
+        public int Length => UnderlyingString.Length;
 
         /// <summary>
         ///     Gets a value indicating whether this path is an absolute or relative path.
@@ -84,6 +87,9 @@
         ///     
         ///     If the path ends with a single trailing directory separator, this separator is ignored
         ///     and the parent is determined based on the segment before that separator.
+        ///     
+        ///     Once the parent directory has been determined, all trailing directory separator
+        ///     characters are removed (as an example, the parent of <c>"foo///bar"</c> is <c>"foo"</c>).
         /// </summary>
         public abstract StoragePath? Parent { get; }
 
@@ -122,13 +128,13 @@
         ///     Gets a value indicating whether the path starts with a directory separator character.
         /// </summary>
         public bool StartsWithDirectorySeparator =>
-            IsDirectorySeparator(_underlyingString[0]);
+            IsDirectorySeparator(UnderlyingString[0]);
 
         /// <summary>
         ///     Gets a value indicating whether the path ends with a directory separator character.
         /// </summary>
         public bool EndsWithDirectorySeparator =>
-            IsDirectorySeparator(_underlyingString[_underlyingString.Length - 1]);
+            IsDirectorySeparator(UnderlyingString[UnderlyingString.Length - 1]);
 
         /// <summary>
         ///     Initializes a new <see cref="StoragePath"/> instance from the specified <paramref name="path"/> string.
@@ -156,8 +162,8 @@
             }
 
             FileSystem = fileSystem;
-            _underlyingString = path;
-            _pathWithoutTrailingDirectorySeparatorLazy = new Lazy<StoragePath>(TrimEndingDirectorySeparatorImpl);
+            UnderlyingString = path;
+            _pathWithoutTrailingDirectorySeparatorLazy = new Lazy<StoragePath>(() => TrimEndingDirectorySeparatorImpl());
         }
 
         /// <summary>
@@ -238,7 +244,7 @@
                 throw new InvalidOperationException(ExceptionStrings.StoragePath.TrimmingResultsInEmptyPath());
             }
 
-            var trimmedPath = _underlyingString.Substring(0, _underlyingString.Length - 1);
+            var trimmedPath = UnderlyingString.Substring(0, UnderlyingString.Length - 1);
 
             try
             {
@@ -246,10 +252,7 @@
             }
             catch (Exception ex)
             {
-                throw new InvalidOperationException(
-                    ExceptionStrings.StoragePath.TrimmingResultsInInvalidPath(),
-                    ex
-                );
+                throw new InvalidOperationException(ExceptionStrings.StoragePath.TrimmingResultsInInvalidPath(), ex);
             }
         }
 
@@ -312,12 +315,12 @@
                 return this;
             }
 
-            return FileSystem.GetPath(_underlyingString + part);
+            return FileSystem.GetPath(UnderlyingString + part);
         }
 
         /// <inheritdoc cref="TryCombine(string?, out StoragePath?)"/>
         public bool TryCombine(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
-            TryCombine(other?._underlyingString, out result);
+            TryCombine(other?.UnderlyingString, out result);
 
         /// <summary>
         ///     Attempts to concatenate the two paths while also ensuring that <i>at least one</i> directory separator
@@ -360,7 +363,7 @@
 
         /// <inheritdoc cref="Combine(string)"/>
         public StoragePath Combine(StoragePath other) =>
-            Combine(other?._underlyingString!);
+            Combine(other?.UnderlyingString!);
 
         /// <summary>
         ///     Concatenates the two paths while also ensuring that <i>at least one</i> directory separator
@@ -449,7 +452,7 @@
 
         /// <inheritdoc cref="TryJoin(string?, out StoragePath?)"/>
         public bool TryJoin(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
-            TryJoin(other?._underlyingString, out result);
+            TryJoin(other?.UnderlyingString, out result);
 
         /// <summary>
         ///     Attempts to concatenate the two paths while also ensuring that <i>at least one</i> directory separator
@@ -492,7 +495,7 @@
 
         /// <inheritdoc cref="Join(string)"/>
         public StoragePath Join(StoragePath other) =>
-            Join(other?._underlyingString!);
+            Join(other?.UnderlyingString!);
 
         /// <summary>
         ///     Concatenates the two paths while also ensuring that <i>at least one</i> directory separator
@@ -572,19 +575,19 @@
             }
 
             var hasSeparator =
-                IsDirectorySeparator(_underlyingString[_underlyingString.Length - 1]) ||
+                IsDirectorySeparator(UnderlyingString[UnderlyingString.Length - 1]) ||
                 IsDirectorySeparator(other[0]);
             
             var joinedPath = hasSeparator
-                ? $"{_underlyingString}{other}"
-                : $"{_underlyingString}{FileSystem.PathInformation.DirectorySeparatorChar}{other}";
+                ? $"{UnderlyingString}{other}"
+                : $"{UnderlyingString}{FileSystem.PathInformation.DirectorySeparatorChar}{other}";
 
             return FileSystem.GetPath(joinedPath);
         }
 
         /// <inheritdoc cref="TryLink(string?, out StoragePath?)"/>
         public bool TryLink(StoragePath? other, [NotNullWhen(true)] out StoragePath? result) =>
-            TryLink(other?._underlyingString, out result);
+            TryLink(other?.UnderlyingString, out result);
 
         /// <summary>
         ///     Attempts to concatenate the two paths while also ensuring that <i>exactly one</i> directory separator
@@ -627,7 +630,7 @@
 
         /// <inheritdoc cref="Link(string)"/>
         public StoragePath Link(StoragePath other) =>
-            Link(other?._underlyingString!);
+            Link(other?.UnderlyingString!);
 
         /// <summary>
         ///     Concatenates the two paths while also ensuring that <i>exactly one</i> directory separator
@@ -718,7 +721,7 @@
                 return this;
             }
 
-            var part1 = _underlyingString.TrimEnd(FileSystem.PathInformation.DirectorySeparatorChars.ToArray());
+            var part1 = UnderlyingString.TrimEnd(FileSystem.PathInformation.DirectorySeparatorChars.ToArray());
             var part2 = other.TrimStart(FileSystem.PathInformation.DirectorySeparatorChars.ToArray());
             return FileSystem.GetPath($"{part1}{FileSystem.PathInformation.DirectorySeparatorChar}{part2}");
         }
@@ -752,7 +755,7 @@
 
         /// <inheritdoc cref="CompareTo(string?, StringComparison)"/>
         public int CompareTo(StoragePath? path, StringComparison stringComparison) =>
-            CompareTo(path?._underlyingString, stringComparison);
+            CompareTo(path?.UnderlyingString, stringComparison);
 
         /// <summary>
         ///     Compares this path with another path based on the path strings.
@@ -782,7 +785,7 @@
         ///     A positive value if this path follows the other <paramref name="path"/>.
         /// </returns>
         public int CompareTo(string? path, StringComparison stringComparison) =>
-            string.Compare(_underlyingString, path, stringComparison);
+            string.Compare(UnderlyingString, path, stringComparison);
 
         /// <summary>
         ///     Compares this path with another path for string equality.
@@ -807,11 +810,11 @@
 
         /// <inheritdoc cref="Equals(string?)"/>
         public bool Equals(StoragePath? path) =>
-            Equals(path?._underlyingString, FileSystem.PathInformation.DefaultStringComparison);
+            Equals(path?.UnderlyingString, FileSystem.PathInformation.DefaultStringComparison);
 
         /// <inheritdoc cref="Equals(string?, StringComparison)"/>
         public bool Equals(StoragePath? path, StringComparison stringComparison) =>
-            Equals(path?._underlyingString, stringComparison);
+            Equals(path?.UnderlyingString, stringComparison);
 
         /// <summary>
         ///     Compares this path with another path for string equality.
@@ -850,7 +853,7 @@
         /// </returns>
         [DebuggerStepThrough]
         public sealed override int GetHashCode() =>
-            _underlyingString.GetHashCode();
+            UnderlyingString.GetHashCode();
 
         /// <summary>
         ///     Returns the underlying path string with which this path has been initialized.
@@ -859,9 +862,10 @@
         ///     The underlying path string with which this path has been initialized.
         ///     This value is never <see langword="null"/> or empty.
         /// </returns>
+        /// <seealso cref="UnderlyingString"/>
         [DebuggerStepThrough]
         public sealed override string ToString() =>
-            _underlyingString;
+            UnderlyingString;
 
         [MethodImpl(MethodImplOptions.AggressiveInlining)]
         private bool IsDirectorySeparator(char c)
@@ -874,7 +878,7 @@
         public static StoragePath operator /(StoragePath path1, StoragePath path2)
         {
             // The called overload validates for null.
-            return path1 / path2?._underlyingString!;
+            return path1 / path2?.UnderlyingString!;
         }
 
         /// <summary>

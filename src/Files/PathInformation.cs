@@ -4,6 +4,7 @@
     using System.Collections.Generic;
     using System.Collections.ObjectModel;
     using System.Linq;
+    using Files.Shared;
 
     /// <summary>
     ///     Provides information about special path characteristics in a file system implementation.
@@ -158,6 +159,16 @@
             _ = invalidFileNameChars ?? throw new ArgumentNullException(nameof(invalidFileNameChars));
             _ = parentDirectorySegment ?? throw new ArgumentNullException(nameof(parentDirectorySegment));
             _ = currentDirectorySegment ?? throw new ArgumentNullException(nameof(currentDirectorySegment));
+
+            if (currentDirectorySegment.Length == 0)
+            {
+                throw new ArgumentException(ExceptionStrings.String.CannotBeEmpty(), nameof(currentDirectorySegment));
+            }
+
+            if (parentDirectorySegment.Length == 0)
+            {
+                throw new ArgumentException(ExceptionStrings.String.CannotBeEmpty(), nameof(parentDirectorySegment));
+            }
 
             InvalidPathChars = new ReadOnlyCollection<char>(invalidPathChars.ToArray());
             InvalidFileNameChars = new ReadOnlyCollection<char>(invalidFileNameChars.ToArray());

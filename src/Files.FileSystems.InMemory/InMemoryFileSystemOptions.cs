@@ -1,18 +1,15 @@
 ﻿namespace Files.FileSystems.InMemory
 {
-    using System;
     using System.Collections.Generic;
-    using System.Threading.Tasks;
-    using System.Linq;
     using System.Diagnostics.CodeAnalysis;
     using System.Text;
 
     public sealed class InMemoryFileSystemOptions
     {
         private static readonly IEqualityComparer<StoragePath> DefaultStoragePathComparer =
-            StoragePathEqualityComparer.Default;
+            DefaultStoragePathEqualityComparer.Default;
         private static readonly IInMemoryPathProvider DefaultPathProvider =
-            null; // TODO!
+            new DefaultInMemoryPathProvider(); // TODO!
         private static readonly Encoding DefaultDefaultEncoding = Encoding.UTF8;
 
         private IEqualityComparer<StoragePath>? _storagePathComparer;

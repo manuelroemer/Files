@@ -1,9 +1,9 @@
 ﻿namespace Files.Tests
 {
     using System;
+    using System.Collections.ObjectModel;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
     using Shouldly;
-    using System.Collections.ObjectModel;
 
     [TestClass]
     public class PathInformationTests
@@ -68,6 +68,34 @@
                 VolumeSeparator,
                 CurrentDirectorySegment,
                 null!,
+                DefaultStringComparison
+            ));
+        }
+
+        [TestMethod]
+        public void Constructor_EmptyStrings_ThrowsArgumentException()
+        {
+            Should.Throw<ArgumentException>(() => new PathInformation(
+                InvalidPathChars,
+                InvalidFileNameChars,
+                DirectorySeparator,
+                AltDirectorySeparator,
+                ExtensionSeparator,
+                VolumeSeparator,
+                "",
+                ParentDirectorySegment,
+                DefaultStringComparison
+            ));
+
+            Should.Throw<ArgumentException>(() => new PathInformation(
+                InvalidPathChars,
+                InvalidFileNameChars,
+                DirectorySeparator,
+                AltDirectorySeparator,
+                ExtensionSeparator,
+                VolumeSeparator,
+                CurrentDirectorySegment,
+                "",
                 DefaultStringComparison
             ));
         }

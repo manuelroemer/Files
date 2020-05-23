@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Files.FileSystems.Physical\Files.FileSystems.Physical.csproj" />
+    <ProjectReference Include="..\Files.FileSystems.InMemory\Files.FileSystems.InMemory.csproj" />
     <ProjectReference Include="..\Files.Specification.Tests\Files.Specification.Tests.csproj" />
     <ProjectReference Include="..\Files\Files.csproj" />
   </ItemGroup>
