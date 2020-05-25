@@ -51,6 +51,7 @@
 
         public FileContentStream(byte[] initialBuffer, FileAccess fileAccess)
         {
+            _fileAccess = fileAccess;
             _ms = new MemoryStream();
             _ms.Write(initialBuffer, 0, initialBuffer.Length);
             _ms.Position = 0;

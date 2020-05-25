@@ -2,7 +2,6 @@
 {
     using System;
     using Files;
-    using Files.Shared;
 
     public sealed class DefaultInMemoryPathProvider : IInMemoryPathProvider
     {
@@ -51,17 +50,6 @@
             _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
             _ = path ?? throw new ArgumentNullException(nameof(path));
             return new DefaultInMemoryStoragePath(fileSystem, path);
-        }
-
-        public StoragePath GetPath(InMemoryFileSystem fileSystem, KnownFolder knownFolder)
-        {
-            _ = fileSystem ?? throw new ArgumentNullException(nameof(fileSystem));
-            if (!EnumInfo.IsDefined(knownFolder))
-            {
-                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(knownFolder), nameof(knownFolder));
-            }
-
-            return fileSystem.GetPath(knownFolder.ToString()).FullPath;
         }
     }
 }

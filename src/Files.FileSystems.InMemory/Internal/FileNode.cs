@@ -1,6 +1,5 @@
 ﻿namespace Files.FileSystems.InMemory.Internal
 {
-    using System.Diagnostics;
     using System.IO;
 
     internal sealed class FileNode : ElementNode
@@ -14,7 +13,7 @@
 
         public static FileNode Create(FsDataStorage storage, StoragePath path)
         {
-            var parentNode = storage.GetRequiredParentNode(path);
+            var parentNode = storage.GetParentNodeAndRequirePathToHaveParent(path);
             var node = new FileNode(storage, path, parentNode);
             storage.RegisterNode(node);
             parentNode.RegisterChildNode(node);

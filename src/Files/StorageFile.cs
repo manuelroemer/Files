@@ -38,6 +38,14 @@
         public StorageFile(FileSystem fileSystem, StoragePath path)
             : base(fileSystem, path)
         {
+            if (path.FullPath.Parent is null)
+            {
+                throw new ArgumentException(
+                    ExceptionStrings.StorageFile.CannotInitializeWithRootFolderPath(),
+                    nameof(path)
+                );
+            }
+
             _parentLazy = new Lazy<StorageFolder>(() =>
             {
                 var parentPath = Path.FullPath.Parent;

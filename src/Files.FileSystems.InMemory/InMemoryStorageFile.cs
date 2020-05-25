@@ -50,6 +50,11 @@
 
         public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
         {
+            if (!EnumInfo.IsDefined(attributes))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(attributes), nameof(attributes));
+            }
+
             _storage.GetFileNode(Path).Attributes = attributes;
             return Task.CompletedTask;
         }
@@ -146,9 +151,16 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
+            var replaceExisting = options switch
+            {
+                NameCollisionOption.Fail => false,
+                NameCollisionOption.ReplaceExisting => true,
+                _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
+            };
+
             var fileNode = _storage.GetFileNode(Path);
-            fileNode.Move(destinationPath);
-            return Task.FromResult(FileSystem.GetFile(fileNode.Path));
+            fileNode.Move(destinationPath, replaceExisting);
+            return Task.FromResult(FileSystem.GetFile(fileNode.Path.FullPath));
         }
 
         public override Task<StorageFile> RenameAsync(
@@ -187,19 +199,35 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            _storage.GetFileNode(Path).Delete();
+            switch (options)
+            {
+                case DeletionOption.Fail:
+                    _storage.GetFileNode(Path).Delete();
+                    break;
+                case DeletionOption.IgnoreMissing:
+                    _storage.TryGetFileNodeAndThrowOnConflictingFolder(Path)?.Delete();
+                    break;
+                default:
+                    throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+            }
+
             return Task.CompletedTask;
         }
 
         public override Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default)
         {
+            if (!EnumInfo.IsDefined(fileAccess))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileAccess), nameof(fileAccess));
+            }
+
             return Task.FromResult<Stream>(OpenFileContentStream(fileAccess));
         }
 
-        private FileContentStream OpenFileContentStream(FileAccess fileAccess)
+        private FileContentStream OpenFileContentStream(FileAccess fileAccess, bool replaceExistingContent = false)
         {
             var fileNode = _storage.GetFileNode(Path);
-            return fileNode.Content.Open(fileAccess);
+            return fileNode.Content.Open(fileAccess, replaceExistingContent);
         }
 
         public override Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
@@ -210,7 +238,8 @@
 
         public override Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
         {
-            using var stream = OpenFileContentStream(FileAccess.Write);
+            _ = bytes ?? throw new ArgumentNullException(nameof(bytes));
+            using var stream = OpenFileContentStream(FileAccess.Write, replaceExistingContent: true);
             stream.Write(bytes, 0, bytes.Length);
             return Task.CompletedTask;
         }
@@ -225,8 +254,9 @@
 
         public override Task WriteTextAsync(string text, Encoding? encoding, CancellationToken cancellationToken = default)
         {
+            _ = text ?? throw new ArgumentNullException(nameof(text));
             encoding ??= _inMemoryFileSystem.Options.DefaultEncoding;
-            using var stream = OpenFileContentStream(FileAccess.Write);
+            using var stream = OpenFileContentStream(FileAccess.Write, replaceExistingContent: true);
             using var writer = new StreamWriter(stream, encoding);
             writer.Write(text);
             return Task.CompletedTask;

@@ -21,16 +21,8 @@
         internal PhysicalStorageFile(PhysicalFileSystem fileSystem, PhysicalStoragePath path)
             : base(fileSystem, path)
         {
-            if (path.FullPath.Parent is null)
-            {
-                throw new ArgumentException(
-                    ExceptionStrings.StorageFile.CannotInitializeWithRootFolderPath(),
-                    nameof(path)
-                );
-            }
-
             _fullPath = path.FullPath;
-            _fullParentPath = path.FullPath.Parent;
+            _fullParentPath = path.FullPath.Parent!;
             _fileInfo = new FileInfo(_fullPath.ToString());
         }
 

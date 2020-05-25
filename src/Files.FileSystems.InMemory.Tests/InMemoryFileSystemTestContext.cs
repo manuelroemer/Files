@@ -10,35 +10,31 @@
     {
         public static InMemoryFileSystemTestContext Instance { get; } = new InMemoryFileSystemTestContext();
 
-        public override FileSystem FileSystem
-        {
-            get
-            {
-                // Since we want to test certain behaviors, e.g. that the DefaultInMemoryStoragePath validates
-                // invalid characters, we require custom PathInformation.
-                var testPathInformation = new PathInformation(
-                    invalidPathChars: new[] { '\0' },
-                    invalidFileNameChars: new[] { '\0' },
-                    '/',
-                    '\\',
-                    '.',
-                    '/',
-                    ".",
-                    "..",
-                    StringComparison.OrdinalIgnoreCase
-                );
-
-                var options = new InMemoryFileSystemOptions()
-                {
-                    PathProvider = new DefaultInMemoryPathProvider(testPathInformation),
-                };
-
-                return new InMemoryFileSystem(options);
-            }
-        }
+        public override FileSystem FileSystem { get; }
 
         private InMemoryFileSystemTestContext()
         {
+            // Since we want to test certain behaviors, e.g. that the DefaultInMemoryStoragePath validates
+            // invalid characters, we require custom PathInformation.
+            var testPathInformation = new PathInformation(
+                invalidPathChars: new[] { '\0' },
+                invalidFileNameChars: new[] { '\0' },
+                '/',
+                '\\',
+                '.',
+                '/',
+                ".",
+                "..",
+                StringComparison.OrdinalIgnoreCase
+            );
+
+            var options = new InMemoryFileSystemOptions()
+            {
+                PathProvider = new DefaultInMemoryPathProvider(testPathInformation),
+            };
+
+            FileSystem = new InMemoryFileSystem(options);
+
             Default.Setup(FileSystem);
         }
 

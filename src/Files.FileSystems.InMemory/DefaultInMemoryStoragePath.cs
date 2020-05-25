@@ -86,6 +86,12 @@
                 endIndex--;
             }
 
+            // If there has been no directory separator there is no parent (can happen with relative paths).
+            if (endIndex <= 0)
+            {
+                return null;
+            }
+
             return FileSystem.GetPath(UnderlyingString.Substring(0, endIndex));
         }
 

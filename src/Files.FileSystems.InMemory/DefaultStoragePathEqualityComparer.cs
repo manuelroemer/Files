@@ -34,7 +34,9 @@
 
         protected virtual int GetHashCodeCore(StoragePath fullPath)
         {
+#pragma warning disable CA1062 // Validate arguments of public methods.
             return fullPath.GetHashCode();
+#pragma warning restore CA1062
         }
 
         private static StoragePath GetFinalPath(StoragePath path)

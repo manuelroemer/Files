@@ -29,6 +29,10 @@
                 .SetupGet(x => x.FullPath)
                 .Returns(() => pathMock.Object);
 
+            pathMock
+                .SetupGet(x => x.Parent)
+                .Returns(() => pathMock.Object);
+
             return pathMock;
         }
     }

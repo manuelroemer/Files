@@ -1,40 +1,38 @@
 ﻿namespace Files.FileSystems.InMemory
 {
+    using System;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Text;
 
     public sealed class InMemoryFileSystemOptions
     {
-        private static readonly IEqualityComparer<StoragePath> DefaultStoragePathComparer =
-            DefaultStoragePathEqualityComparer.Default;
-        private static readonly IInMemoryPathProvider DefaultPathProvider =
-            new DefaultInMemoryPathProvider(); // TODO!
-        private static readonly Encoding DefaultDefaultEncoding = Encoding.UTF8;
+        private IEqualityComparer<StoragePath> _storagePathComparer = DefaultStoragePathEqualityComparer.Default;
+        private IInMemoryPathProvider _pathProvider = DefaultInMemoryPathProvider.DefaultOrdinal;
+        private IKnownFolderProvider _knownFolderProvider = DefaultKnownFolderProvider.Default;
+        private Encoding _defaultEncoding = Encoding.UTF8;
 
-        private IEqualityComparer<StoragePath>? _storagePathComparer;
-        private IInMemoryPathProvider? _pathProvider;
-        private Encoding? _defaultEncoding;
-
-        [AllowNull]
         public IEqualityComparer<StoragePath> StoragePathComparer
         {
-            get => _storagePathComparer ?? DefaultStoragePathComparer;
-            set => _storagePathComparer = value;
+            get => _storagePathComparer;
+            set => _storagePathComparer = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        [AllowNull]
         public IInMemoryPathProvider PathProvider
         {
-            get => _pathProvider ?? DefaultPathProvider;
-            set => _pathProvider = value;
+            get => _pathProvider;
+            set => _pathProvider = value ?? throw new ArgumentNullException(nameof(value));
         }
 
-        [AllowNull]
+        public IKnownFolderProvider KnownFolderProvider
+        {
+            get => _knownFolderProvider;
+            set => _knownFolderProvider = value ?? throw new ArgumentNullException(nameof(value));
+        }
+
         public Encoding DefaultEncoding
         {
-            get => _defaultEncoding ?? DefaultDefaultEncoding;
-            set => _defaultEncoding = value;
+            get => _defaultEncoding;
+            set => _defaultEncoding = value ?? throw new ArgumentNullException(nameof(value));
         }
     }
 }

@@ -9,9 +9,10 @@
 
         public ulong Size => (ulong)_content.LongLength;
 
-        public FileContentStream Open(FileAccess fileAccess)
+        public FileContentStream Open(FileAccess fileAccess, bool replaceExistingContent)
         {
-            var stream = new FileContentStream(_content, fileAccess);
+            var content = replaceExistingContent ? Array.Empty<byte>() : _content;
+            var stream = new FileContentStream(content, fileAccess);
             stream.Disposed += Stream_Disposed;
             return stream;
 

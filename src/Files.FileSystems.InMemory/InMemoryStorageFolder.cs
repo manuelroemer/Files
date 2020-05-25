@@ -49,6 +49,11 @@
 
         public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
         {
+            if (!EnumInfo.IsDefined(attributes))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(attributes), nameof(attributes));
+            }
+
             _storage.GetFolderNode(Path).Attributes = attributes;
             return Task.CompletedTask;
         }
@@ -148,9 +153,16 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
+            var replaceExisting = options switch
+            {
+                NameCollisionOption.Fail => false,
+                NameCollisionOption.ReplaceExisting => true,
+                _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
+            };
+
             var folderNode = _storage.GetFolderNode(Path);
-            folderNode.Move(destinationPath);
-            return Task.FromResult(FileSystem.GetFolder(folderNode.Path));
+            folderNode.Move(destinationPath, replaceExisting);
+            return Task.FromResult(FileSystem.GetFolder(folderNode.Path.FullPath));
         }
 
         public override Task<StorageFolder> RenameAsync(
@@ -189,7 +201,18 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            _storage.GetFolderNode(Path).Delete();
+            switch (options)
+            {
+                case DeletionOption.Fail:
+                    _storage.GetFolderNode(Path).Delete();
+                    break;
+                case DeletionOption.IgnoreMissing:
+                    _storage.TryGetFolderNodeAndThrowOnConflictingFile(Path)?.Delete();
+                    break;
+                default:
+                    throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+            }
+
             return Task.CompletedTask;
         }
 

@@ -102,7 +102,7 @@
 
         #region Parent Tests
 
-        public virtual IEnumerable<object[]> ParentPathsWithParentData => new[]
+        public virtual IEnumerable<object?[]> ParentPathsWithParentData => new[]
         {
             new[]
             {
@@ -137,6 +137,7 @@
 
         public virtual IEnumerable<object[]> ParentPathsWithoutParentData => new[]
         {
+            new[] { Default.PathName },
             new[] { AbsolutePath.Root!.ToString() },
             new[] { Sep },
             new[] { AltSep },

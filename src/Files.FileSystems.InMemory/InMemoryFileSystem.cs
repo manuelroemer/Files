@@ -1,6 +1,7 @@
 ﻿namespace Files.FileSystems.InMemory
 {
     using System;
+    using System.Diagnostics;
     using System.Linq;
     using Files;
     using Files.FileSystems.InMemory.Internal;
@@ -18,10 +19,7 @@
             : this(new InMemoryFileSystemOptions()) { }
 
         public InMemoryFileSystem(InMemoryFileSystemOptions options)
-            : base(
-                  (options ?? throw new ArgumentNullException(nameof(options)))
-                      .PathProvider.PathInformation
-              )
+            : base((options ?? throw new ArgumentNullException(nameof(options))).PathProvider.PathInformation)
         {
             Options = options;
             Storage = new FsDataStorage(options.StoragePathComparer);
@@ -76,7 +74,7 @@
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(knownFolder), nameof(knownFolder));
             }
-            return Options.PathProvider.GetPath(this, knownFolder);
+            return Options.KnownFolderProvider.GetPath(this, knownFolder);
         }
     }
 }

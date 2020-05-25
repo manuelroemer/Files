@@ -106,15 +106,13 @@
         [TestMethod]
         public void GetFile_StoragePath_RootFolderPath_ThrowsArgumentException()
         {
-            var rootPath = TestFolder.Path.Root!;
-            Should.Throw<ArgumentException>(() => FileSystem.GetFile(rootPath));
+            Should.Throw<ArgumentException>(() => FileSystem.GetFile(RootFolder.Path));
         }
         
         [TestMethod]
         public void GetFile_String_RootFolderPath_ThrowsArgumentException()
         {
-            var rootPath = TestFolder.Path.Root!.ToString();
-            Should.Throw<ArgumentException>(() => FileSystem.GetFile(rootPath));
+            Should.Throw<ArgumentException>(() => FileSystem.GetFile(RootFolder.Path));
         }
 
         #endregion
@@ -169,7 +167,7 @@
         [TestMethod]
         public void TryGetFile_StoragePath_RootFolderPath_ReturnsFalseAndNull()
         {
-            var rootPath = TestFolder.Path.Root!;
+            var rootPath = RootFolder.Path;
             var result = FileSystem.TryGetFile(rootPath, out var file);
             result.ShouldBeFalse();
             file.ShouldBeNull();
@@ -178,7 +176,7 @@
         [TestMethod]
         public void TryGetFile_String_RootFolderPath_ReturnsFalseAndNull()
         {
-            var rootPath = TestFolder.Path.Root!.ToString();
+            var rootPath = RootFolder.Path.ToString();
             var result = FileSystem.TryGetFile(rootPath, out var file);
             result.ShouldBeFalse();
             file.ShouldBeNull();

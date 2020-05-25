@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 
 namespace Files.FileSystems.InMemory.Internal
 {
+    [DebuggerDisplay("{Path}")]
     internal abstract class ElementNode
     {
         public FsDataStorage Storage { get; }
@@ -25,9 +27,9 @@ namespace Files.FileSystems.InMemory.Internal
             ModifiedOn = CreatedOn = DateTimeOffset.Now;
         }
 
-        public void Move(StoragePath destinationPath)
+        public virtual void Move(StoragePath destinationPath, bool replaceExisting)
         {
-            if (ReferenceEquals(Storage.TryGetFolderNode(destinationPath), this))
+            if (Storage.IsSameElement(Path, destinationPath))
             {
                 throw new IOException("The element cannot be moved to the same location.");
             }
@@ -37,13 +39,20 @@ namespace Files.FileSystems.InMemory.Internal
                 throw new IOException("A rooted element cannot be moved to another location.");
             }
 
-            var destinationParentPath = destinationPath.FullPath.Parent;
-            if (destinationParentPath is null)
+            var newParentNode = Storage.GetParentNode(destinationPath);
+            if (newParentNode is null)
             {
                 throw new IOException("A non rooted element cannot be moved into a root location.");
             }
 
-            var newParentNode = Storage.GetFolderNode(destinationParentPath);
+            FolderNode? currentParent = newParentNode;
+            do
+            {
+                if (ReferenceEquals(currentParent, this))
+                {
+                    throw new IOException("A parent folder cannot be moved into one of its child folders.");
+                }
+            } while ((currentParent = currentParent.Parent) is object);
 
             // Moving can be done by re-registering the node associations. There is no need
             // to create/clone new nodes.
@@ -52,6 +61,19 @@ namespace Files.FileSystems.InMemory.Internal
             // when the associations have already been mutated.
             // Care must also be taken with the properties to be updated. Anything that depends
             // on the path must be updated.
+            if (replaceExisting)
+            {
+                // TODO: Consider replacing the following type-based if with proper inheritance.
+                if (this is FileNode)
+                {
+                    Storage.TryGetFileNodeAndThrowOnConflictingFolder(destinationPath)?.Delete();
+                }
+                else if (this is FolderNode)
+                {
+                    Storage.TryGetFolderNodeAndThrowOnConflictingFile(destinationPath)?.Delete();
+                }
+            }
+
             Storage.EnsureNoConflictingNodeExists(destinationPath);
 
             Parent.UnregisterChildNode(this);
@@ -66,7 +88,7 @@ namespace Files.FileSystems.InMemory.Internal
             OnModified();
         }
 
-        public void Delete()
+        public virtual void Delete()
         {
             Parent?.UnregisterChildNode(this);
             Storage.UnregisterNode(this);
