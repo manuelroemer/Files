@@ -35,11 +35,7 @@
         public override void Move(StoragePath destinationPath, bool replaceExisting)
         {
             base.Move(destinationPath, replaceExisting);
-            MoveChildrenToNewLocation();
-        }
 
-        private void MoveChildrenToNewLocation()
-        {
             // Cannot use foreach because Move(..) mutates the list and thus invalidates the enumerator.
             // Because of this, we must also iterate from behind, because the order in the list changes here.
             for (var i = _mutableChildren.Count - 1; i >= 0; i--)
