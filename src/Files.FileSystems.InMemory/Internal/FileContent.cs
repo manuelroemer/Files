@@ -26,5 +26,13 @@
                 }
             }
         }
+
+        public FileContent Copy()
+        {
+            return new FileContent()
+            {
+                _content = (byte[])_content.Clone(),
+            };
+        }
     }
 }

@@ -15,9 +15,9 @@ namespace Files.FileSystems.InMemory.Internal
 
         public FileAttributes Attributes { get; set; }
 
-        public DateTimeOffset CreatedOn { get; }
+        public DateTimeOffset CreatedOn { get; protected set; }
 
-        public DateTimeOffset? ModifiedOn { get; private set; }
+        public DateTimeOffset? ModifiedOn { get; protected set; }
 
         protected ElementNode(FsDataStorage storage, StoragePath path, FolderNode? parent)
         {
@@ -26,6 +26,33 @@ namespace Files.FileSystems.InMemory.Internal
             Path = path.FullPath;
             ModifiedOn = CreatedOn = DateTimeOffset.Now;
         }
+
+        public void Copy(StoragePath destinationPath, bool replaceExisting)
+        {
+            if (Storage.IsSameElement(Path, destinationPath))
+            {
+                throw new IOException("The element cannot be moved to the same location.");
+            }
+
+            if (replaceExisting)
+            {
+                // TODO: Consider replacing the following type-based if with proper inheritance.
+                if (this is FileNode)
+                {
+                    Storage.TryGetFileNodeAndThrowOnConflictingFolder(destinationPath)?.Delete();
+                }
+                else if (this is FolderNode)
+                {
+                    Storage.TryGetFolderNodeAndThrowOnConflictingFile(destinationPath)?.Delete();
+                }
+            }
+
+            Storage.EnsureNoConflictingNodeExists(destinationPath);
+
+            CopyImpl(destinationPath);
+        }
+
+        protected abstract void CopyImpl(StoragePath destinationPath);
 
         public virtual void Move(StoragePath destinationPath, bool replaceExisting)
         {

@@ -129,7 +129,31 @@
             CancellationToken cancellationToken = default
         )
         {
-            throw new NotImplementedException();
+            _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
+
+            if (!ReferenceEquals(destinationPath.FileSystem, FileSystem))
+            {
+                throw new ArgumentException(
+                    ExceptionStrings.InMemoryFileSystem.MemberIncompatibleWithInstance(),
+                    nameof(destinationPath)
+                );
+            }
+
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
+            var replaceExisting = options switch
+            {
+                NameCollisionOption.Fail => false,
+                NameCollisionOption.ReplaceExisting => true,
+                _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
+            };
+
+            var folderNode = _storage.GetFolderNode(Path);
+            folderNode.Copy(destinationPath, replaceExisting);
+            return Task.FromResult(FileSystem.GetFolder(destinationPath.FullPath));
         }
 
         public override Task<StorageFolder> MoveAsync(

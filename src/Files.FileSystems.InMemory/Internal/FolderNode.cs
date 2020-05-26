@@ -50,6 +50,20 @@
             }
         }
 
+        protected override void CopyImpl(StoragePath destinationPath)
+        {
+            var newNode = Create(Storage, destinationPath);
+            newNode.Attributes = Attributes;
+            newNode.CreatedOn = CreatedOn;
+            newNode.ModifiedOn = ModifiedOn;
+
+            foreach (var child in _mutableChildren)
+            {
+                var childDestinationPath = destinationPath.FullPath.Join(child.Path.FullPath.Name);
+                child.Copy(childDestinationPath, replaceExisting: false);
+            }
+        }
+
         public override void Delete()
         {
             // Because deleting a child can fail, it is essential that the children are deleted before
