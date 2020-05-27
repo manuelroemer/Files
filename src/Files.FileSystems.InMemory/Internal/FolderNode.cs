@@ -74,5 +74,13 @@
 
             base.Delete();
         }
+
+        public override void EnsureNotLocked()
+        {
+            foreach (var child in _mutableChildren)
+            {
+                child.EnsureNotLocked();
+            }
+        }
     }
 }

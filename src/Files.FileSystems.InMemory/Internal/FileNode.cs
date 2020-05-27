@@ -29,5 +29,10 @@
             newNode.ModifiedOn = ModifiedOn;
             newNode.Content = Content.Copy();
         }
+
+        public override void EnsureNotLocked()
+        {
+            Content.ReadWriteTracker.EnsureCanReadWrite();
+        }
     }
 }

@@ -29,6 +29,8 @@ namespace Files.FileSystems.InMemory.Internal
 
         public void Copy(StoragePath destinationPath, bool replaceExisting)
         {
+            EnsureNotLocked();
+
             if (Storage.IsSameElement(Path, destinationPath))
             {
                 throw new IOException("The element cannot be moved to the same location.");
@@ -56,6 +58,8 @@ namespace Files.FileSystems.InMemory.Internal
 
         public virtual void Move(StoragePath destinationPath, bool replaceExisting)
         {
+            EnsureNotLocked();
+
             if (Storage.IsSameElement(Path, destinationPath))
             {
                 throw new IOException("The element cannot be moved to the same location.");
@@ -112,16 +116,19 @@ namespace Files.FileSystems.InMemory.Internal
             Storage.RegisterNode(this);
             newParentNode.RegisterChildNode(this);
 
-            OnModified();
+            SetModifiedToNow();
         }
 
         public virtual void Delete()
         {
+            EnsureNotLocked();
             Parent?.UnregisterChildNode(this);
             Storage.UnregisterNode(this);
         }
 
-        protected void OnModified()
+        public abstract void EnsureNotLocked();
+
+        protected void SetModifiedToNow()
         {
             ModifiedOn = DateTimeOffset.Now;
         }
