@@ -1,4 +1,9 @@
-﻿namespace Files.FileSystems.InMemory
+﻿#pragma warning disable CS1998
+// Async method lacks 'await' operators and will run synchronously.
+// The entire InMemoryFileSystem implementation is synchronous. Nontheless, exceptions should be
+// propagated via Task instances.
+
+namespace Files.FileSystems.InMemory
 {
     using System;
     using System.Diagnostics;
@@ -28,41 +33,51 @@
             _storage = fileSystem.Storage;
         }
 
-        public override Task<StorageFileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
+        public override async Task<StorageFileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
-            var node = _storage.GetFileNode(Path);
-            var properties = new StorageFileProperties(
-                name: node.Path.Name,
-                nameWithoutExtension: node.Path.NameWithoutExtension,
-                extension: node.Path.Extension,
-                createdOn: node.CreatedOn,
-                modifiedOn: node.ModifiedOn,
-                size: node.Content.Size
-            );
+            lock (_inMemoryFileSystem.Storage)
+            {
+                var node = _storage.GetFileNode(Path);
+                var properties = new StorageFileProperties(
+                    name: node.Path.Name,
+                    nameWithoutExtension: node.Path.NameWithoutExtension,
+                    extension: node.Path.Extension,
+                    createdOn: node.CreatedOn,
+                    modifiedOn: node.ModifiedOn,
+                    size: node.Content.Size
+                );
 
-            return Task.FromResult(properties);
+                return properties;
+            }
         }
 
-        public override Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
+        public override async Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(_storage.GetFileNode(Path).Attributes);
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return _storage.GetFileNode(Path).Attributes;
+            }
         }
 
-        public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
+        public override async Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
         {
             if (!EnumInfo.IsDefined(attributes))
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(attributes), nameof(attributes));
             }
 
-            _storage.GetFileNode(Path).Attributes = attributes;
-            return Task.CompletedTask;
+            lock (_inMemoryFileSystem.Storage)
+            {
+                _storage.GetFileNode(Path).Attributes = attributes;
+            }
         }
 
-        public override Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
+        public override async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
         {
-            var exists = _storage.HasFileNode(Path);
-            return Task.FromResult(exists);
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return _storage.HasFileNode(Path);
+            }
         }
 
         public override async Task CreateAsync(
@@ -76,26 +91,32 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            if (recursive)
+            lock (_inMemoryFileSystem.Storage)
             {
-                await Parent
-                    .CreateAsync(recursive: true, CreationCollisionOption.UseExisting, cancellationToken)
-                    .ConfigureAwait(false);
-            }
+                if (recursive)
+                {
+                    var inMemoryParent = (InMemoryStorageFolder)Parent;
+                    inMemoryParent.CreateInternalNotLocking(
+                        recursive: true,
+                        CreationCollisionOption.UseExisting,
+                        cancellationToken
+                    );
+                }
 
-            switch (options)
-            {
-                case CreationCollisionOption.Fail:
-                    FailImpl();
-                    break;
-                case CreationCollisionOption.ReplaceExisting:
-                    ReplaceExistingImpl();
-                    break;
-                case CreationCollisionOption.UseExisting:
-                    UseExistingImpl();
-                    break;
-                default:
-                    throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+                switch (options)
+                {
+                    case CreationCollisionOption.Fail:
+                        FailImpl();
+                        break;
+                    case CreationCollisionOption.ReplaceExisting:
+                        ReplaceExistingImpl();
+                        break;
+                    case CreationCollisionOption.UseExisting:
+                        UseExistingImpl();
+                        break;
+                    default:
+                        throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+                }
             }
 
             void FailImpl()
@@ -121,7 +142,7 @@
             }
         }
 
-        public override Task<StorageFile> CopyAsync(
+        public override async Task<StorageFile> CopyAsync(
             StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
@@ -149,15 +170,30 @@
                 _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
             };
 
-            var fileNode = _storage.GetFileNode(Path);
-            fileNode.Copy(destinationPath, replaceExisting);
-            return Task.FromResult(FileSystem.GetFile(destinationPath.FullPath));
+            lock (_inMemoryFileSystem.Storage)
+            {
+                var fileNode = _storage.GetFileNode(Path);
+                fileNode.Copy(destinationPath, replaceExisting);
+                return FileSystem.GetFile(destinationPath.FullPath);
+            }
         }
 
-        public override Task<StorageFile> MoveAsync(
+        public override async Task<StorageFile> MoveAsync(
             StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
+        )
+        {
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return MoveInternalNotLocking(destinationPath, options, cancellationToken);
+            }
+        }
+
+        private StorageFile MoveInternalNotLocking(
+            StoragePath destinationPath,
+            NameCollisionOption options,
+            CancellationToken cancellationToken
         )
         {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
@@ -182,12 +218,15 @@
                 _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
             };
 
-            var fileNode = _storage.GetFileNode(Path);
-            fileNode.Move(destinationPath, replaceExisting);
-            return Task.FromResult(FileSystem.GetFile(fileNode.Path.FullPath));
+            lock (_inMemoryFileSystem.Storage)
+            {
+                var fileNode = _storage.GetFileNode(Path);
+                fileNode.Move(destinationPath, replaceExisting);
+                return FileSystem.GetFile(fileNode.Path.FullPath);
+            }
         }
 
-        public override Task<StorageFile> RenameAsync(
+        public override async Task<StorageFile> RenameAsync(
             string newName,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
@@ -212,78 +251,94 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            var destinationPath = Parent.Path.FullPath.Join(newName);
-            return MoveAsync(destinationPath, options, cancellationToken);
+            lock (_inMemoryFileSystem.Storage)
+            {
+                var destinationPath = Parent.Path.FullPath.Join(newName);
+                return MoveInternalNotLocking(destinationPath, options, cancellationToken);
+            }
         }
 
-        public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
+        public override async Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
         {
             if (!EnumInfo.IsDefined(options))
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            switch (options)
+            lock (_inMemoryFileSystem.Storage)
             {
-                case DeletionOption.Fail:
-                    _storage.GetFileNode(Path).Delete();
-                    break;
-                case DeletionOption.IgnoreMissing:
-                    _storage.TryGetFileNodeAndThrowOnConflictingFolder(Path)?.Delete();
-                    break;
-                default:
-                    throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+                switch (options)
+                {
+                    case DeletionOption.Fail:
+                        _storage.GetFileNode(Path).Delete();
+                        break;
+                    case DeletionOption.IgnoreMissing:
+                        _storage.TryGetFileNodeAndThrowOnConflictingFolder(Path)?.Delete();
+                        break;
+                    default:
+                        throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+                }
             }
-
-            return Task.CompletedTask;
         }
 
-        public override Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default)
+
+        //
+        // The Open.../Read.../Write... methods below do not require explicit locking.
+        // Locking only happens when acquiring the FileContentStream from the node (via OpenFileContentStream(...)).
+        // Once the stream exists, the underlying FileNode automatically protects itself against
+        // modification since the file is "in use".
+        // See FileContentStream/FileNode for details.
+        //
+
+        public override async Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default)
         {
             if (!EnumInfo.IsDefined(fileAccess))
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileAccess), nameof(fileAccess));
             }
 
-            return Task.FromResult<Stream>(OpenFileContentStream(fileAccess));
+            return OpenFileContentStream(fileAccess);
         }
 
-        private FileContentStream OpenFileContentStream(FileAccess fileAccess, bool replaceExistingContent = false)
-        {
-            var fileNode = _storage.GetFileNode(Path);
-            return fileNode.Content.Open(fileAccess, replaceExistingContent);
-        }
-
-        public override Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
+        public override async Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
         {
             using var stream = OpenFileContentStream(FileAccess.Read);
-            return Task.FromResult(stream.ToArray());
+            return stream.ToArray();
         }
 
-        public override Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
+        public override async Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
         {
             _ = bytes ?? throw new ArgumentNullException(nameof(bytes));
             using var stream = OpenFileContentStream(FileAccess.Write, replaceExistingContent: true);
             stream.Write(bytes, 0, bytes.Length);
-            return Task.CompletedTask;
         }
 
-        public override Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
+        public override async Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
         {
             encoding ??= _inMemoryFileSystem.Options.DefaultEncoding;
             using var stream = OpenFileContentStream(FileAccess.Read);
             using var reader = new StreamReader(stream, encoding);
-            return Task.FromResult(reader.ReadToEnd());
+            return reader.ReadToEnd();
         }
 
-        public override Task WriteTextAsync(string text, Encoding? encoding, CancellationToken cancellationToken = default)
+        public override async Task WriteTextAsync(string text, Encoding? encoding, CancellationToken cancellationToken = default)
         {
             _ = text ?? throw new ArgumentNullException(nameof(text));
             encoding ??= _inMemoryFileSystem.Options.DefaultEncoding;
             using var stream = OpenFileContentStream(FileAccess.Write, replaceExistingContent: true);
             using var writer = new StreamWriter(stream, encoding);
             writer.Write(text);
-            return Task.CompletedTask;
+        }
+
+        private FileContentStream OpenFileContentStream(FileAccess fileAccess, bool replaceExistingContent = false)
+        {
+            lock (_inMemoryFileSystem.Storage)
+            {
+                var fileNode = _storage.GetFileNode(Path);
+                return fileNode.Content.Open(fileAccess, replaceExistingContent);
+            }
         }
     }
 }
+
+#pragma warning restore CS1998

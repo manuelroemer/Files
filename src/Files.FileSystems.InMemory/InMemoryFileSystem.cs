@@ -1,7 +1,6 @@
 ﻿namespace Files.FileSystems.InMemory
 {
     using System;
-    using System.Diagnostics;
     using System.Linq;
     using Files;
     using Files.FileSystems.InMemory.Internal;

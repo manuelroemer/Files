@@ -1,4 +1,9 @@
-﻿namespace Files.FileSystems.InMemory
+﻿#pragma warning disable CS1998
+// Async method lacks 'await' operators and will run synchronously.
+// The entire InMemoryFileSystem implementation is synchronous. Nontheless, exceptions should be
+// propagated via Task instances.
+
+namespace Files.FileSystems.InMemory
 {
     using System;
     using System.Collections.Generic;
@@ -28,40 +33,50 @@
             _storage = fileSystem.Storage;
         }
 
-        public override Task<StorageFolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
+        public override async Task<StorageFolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
-            var node = _storage.GetFolderNode(Path);
-            var properties = new StorageFolderProperties(
-                name: node.Path.Name,
-                nameWithoutExtension: node.Path.NameWithoutExtension,
-                extension: node.Path.Extension,
-                createdOn: node.CreatedOn,
-                modifiedOn: node.ModifiedOn
-            );
+            lock (_inMemoryFileSystem.Storage)
+            {
+                var node = _storage.GetFolderNode(Path);
+                var properties = new StorageFolderProperties(
+                    name: node.Path.Name,
+                    nameWithoutExtension: node.Path.NameWithoutExtension,
+                    extension: node.Path.Extension,
+                    createdOn: node.CreatedOn,
+                    modifiedOn: node.ModifiedOn
+                );
 
-            return Task.FromResult(properties);
+                return properties;
+            }
         }
 
-        public override Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
+        public override async Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(_storage.GetFolderNode(Path).Attributes);
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return _storage.GetFolderNode(Path).Attributes;
+            }
         }
 
-        public override Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
+        public override async Task SetAttributesAsync(FileAttributes attributes, CancellationToken cancellationToken = default)
         {
             if (!EnumInfo.IsDefined(attributes))
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(attributes), nameof(attributes));
             }
 
-            _storage.GetFolderNode(Path).Attributes = attributes;
-            return Task.CompletedTask;
+            lock (_inMemoryFileSystem.Storage)
+            {
+                _storage.GetFolderNode(Path).Attributes = attributes;
+            }
         }
 
-        public override Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
+        public override async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
         {
-            var exists = _storage.HasFolderNode(Path);
-            return Task.FromResult(exists);
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return _storage.HasFolderNode(Path);
+            }
         }
 
         public override async Task CreateAsync(
@@ -70,34 +85,52 @@
             CancellationToken cancellationToken = default
         )
         {
+            lock (_inMemoryFileSystem.Storage)
+            {
+                CreateInternalNotLocking(recursive, options, cancellationToken);
+            }
+        }
+
+        /// <summary>
+        ///     The actual Create implementation.
+        ///     Extracted since this method must be callable recursively by itself and InMemoryStorageFile.
+        ///     Therefore, no lock must be aquired.
+        /// </summary>
+        internal void CreateInternalNotLocking(
+            bool recursive,
+            CreationCollisionOption options,
+            CancellationToken cancellationToken
+        )
+        {
             if (!EnumInfo.IsDefined(options))
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            // Recursively call this method until all parent folders exist (if required).
-            // It's enough to check whether an ElementNode exists because the storage will throw on
-            // conflicting Node types later.
-            if (recursive && Parent is object && !_storage.HasElementNode(Parent.Path))
+            lock (_inMemoryFileSystem.Storage)
             {
-                await Parent
-                    .CreateAsync(recursive: true, CreationCollisionOption.UseExisting, cancellationToken)
-                    .ConfigureAwait(false);
-            }
+                // Recursively call this method until all parent folders exist (if required).
+                // It's enough to check whether an ElementNode exists because the storage will throw on
+                // conflicting Node types later.
+                if (recursive && Parent is object && !_storage.HasElementNode(Parent.Path))
+                {
+                    CreateInternalNotLocking(recursive: true, CreationCollisionOption.UseExisting, cancellationToken);
+                }
 
-            switch (options)
-            {
-                case CreationCollisionOption.Fail:
-                    FailImpl();
-                    break;
-                case CreationCollisionOption.ReplaceExisting:
-                    ReplaceExistingImpl();
-                    break;
-                case CreationCollisionOption.UseExisting:
-                    UseExistingImpl();
-                    break;
-                default:
-                    throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+                switch (options)
+                {
+                    case CreationCollisionOption.Fail:
+                        FailImpl();
+                        break;
+                    case CreationCollisionOption.ReplaceExisting:
+                        ReplaceExistingImpl();
+                        break;
+                    case CreationCollisionOption.UseExisting:
+                        UseExistingImpl();
+                        break;
+                    default:
+                        throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+                }
             }
 
             void FailImpl()
@@ -123,7 +156,7 @@
             }
         }
 
-        public override Task<StorageFolder> CopyAsync(
+        public override async Task<StorageFolder> CopyAsync(
             StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
@@ -151,19 +184,34 @@
                 _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
             };
 
-            var folderNode = _storage.GetFolderNode(Path);
-            folderNode.Copy(destinationPath, replaceExisting);
-            return Task.FromResult(FileSystem.GetFolder(destinationPath.FullPath));
+            lock (_inMemoryFileSystem.Storage)
+            {
+                var folderNode = _storage.GetFolderNode(Path);
+                folderNode.Copy(destinationPath, replaceExisting);
+                return FileSystem.GetFolder(destinationPath.FullPath);
+            }
         }
 
-        public override Task<StorageFolder> MoveAsync(
+        public override async Task<StorageFolder> MoveAsync(
             StoragePath destinationPath,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         )
         {
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return MoveInternalNotLocking(destinationPath, options, cancellationToken);
+            }
+        }
+
+        private StorageFolder MoveInternalNotLocking(
+            StoragePath destinationPath,
+            NameCollisionOption options,
+            CancellationToken cancellationToken
+        )
+        {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
-            
+
             if (!ReferenceEquals(destinationPath.FileSystem, FileSystem))
             {
                 throw new ArgumentException(
@@ -183,13 +231,13 @@
                 NameCollisionOption.ReplaceExisting => true,
                 _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
             };
-
+            
             var folderNode = _storage.GetFolderNode(Path);
             folderNode.Move(destinationPath, replaceExisting);
-            return Task.FromResult(FileSystem.GetFolder(folderNode.Path.FullPath));
+            return FileSystem.GetFolder(folderNode.Path.FullPath);
         }
 
-        public override Task<StorageFolder> RenameAsync(
+        public override async Task<StorageFolder> RenameAsync(
             string newName,
             NameCollisionOption options,
             CancellationToken cancellationToken = default
@@ -215,49 +263,60 @@
             }
 
             var destinationPath = Path.FullPath.Parent?.Join(newName) ?? FileSystem.GetPath(newName);
-            return MoveAsync(destinationPath, options, cancellationToken);
+
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return MoveInternalNotLocking(destinationPath, options, cancellationToken);
+            }
         }
 
-        public override Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
+        public override async Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
         {
             if (!EnumInfo.IsDefined(options))
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            switch (options)
+            lock (_inMemoryFileSystem.Storage)
             {
-                case DeletionOption.Fail:
-                    _storage.GetFolderNode(Path).Delete();
-                    break;
-                case DeletionOption.IgnoreMissing:
-                    _storage.TryGetFolderNodeAndThrowOnConflictingFile(Path)?.Delete();
-                    break;
-                default:
-                    throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+                switch (options)
+                {
+                    case DeletionOption.Fail:
+                        _storage.GetFolderNode(Path).Delete();
+                        break;
+                    case DeletionOption.IgnoreMissing:
+                        _storage.TryGetFolderNodeAndThrowOnConflictingFile(Path)?.Delete();
+                        break;
+                    default:
+                        throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+                }
             }
-
-            return Task.CompletedTask;
         }
 
-        public override Task<IEnumerable<StorageFile>> GetAllFilesAsync(CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<StorageFile>> GetAllFilesAsync(CancellationToken cancellationToken = default)
         {
-            var files = _storage
-                .GetFolderNode(Path)
-                .Children
-                .OfType<FileNode>()
-                .Select(node => FileSystem.GetFile(node.Path));
-            return Task.FromResult(files);
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return _storage
+                    .GetFolderNode(Path)
+                    .Children
+                    .OfType<FileNode>()
+                    .Select(node => FileSystem.GetFile(node.Path));
+            }
         }
 
-        public override Task<IEnumerable<StorageFolder>> GetAllFoldersAsync(CancellationToken cancellationToken = default)
+        public override async Task<IEnumerable<StorageFolder>> GetAllFoldersAsync(CancellationToken cancellationToken = default)
         {
-            var folders = _storage
-                .GetFolderNode(Path)
-                .Children
-                .OfType<FolderNode>()
-                .Select(node => FileSystem.GetFolder(node.Path));
-            return Task.FromResult(folders);
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return _storage
+                    .GetFolderNode(Path)
+                    .Children
+                    .OfType<FolderNode>()
+                    .Select(node => FileSystem.GetFolder(node.Path));
+            }
         }
     }
 }
+
+#pragma warning restore CS1998
