@@ -3,12 +3,28 @@
     using System.Collections.Generic;
     using System.IO;
 
+    /// <summary>
+    ///     The InMemoryFileSystem is, like a real file system, based on a file/folder tree structure.
+    ///     This class is the entry point to these trees, i.e. it stores and manages the root nodes.
+    ///     In addition, it provides methods for quickly finding and interacting with specific nodes.
+    /// </summary>
     internal sealed class FsDataStorage
     {
         private readonly Dictionary<StoragePath, ElementNode> _allNodes;
         private readonly List<FolderNode> _rootFolderNodes;
 
+        /// <summary>
+        ///     Gets a dictionary which tracks all available file/folder nodes.
+        ///     These nodes are uniquely identified via their path. For efficient access, that path
+        ///     is used as the dictionary's key. This enables not having to search the entire
+        ///     tree when looking for a node at a specific path.
+        /// </summary>
         public IReadOnlyDictionary<StoragePath, ElementNode> AllNodes => _allNodes;
+        
+        /// <summary>
+        ///     Gets a list of all tracked root folder nodes, i.e. those folder nodes which don't
+        ///     have a parent node.
+        /// </summary>
         public IReadOnlyList<FolderNode> RootFolderNodes => _rootFolderNodes;
 
         public FsDataStorage(IEqualityComparer<StoragePath> pathComparer)
