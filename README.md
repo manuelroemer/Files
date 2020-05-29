@@ -43,7 +43,7 @@ In addition, the entire library uses **Nullable Reference Types**.
 
 ## The Files Core API
 
-The following class diagram shows the five most important members of the Files Core API and should
+The following class diagram shows the **five most important members** of the Files Core API and should
 give a great overview about the library's design.
 Supporting members like enums and utility extension methods are not shown in the image.
 
