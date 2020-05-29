@@ -107,30 +107,32 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            lock (_inMemoryFileSystem.Storage)
+            // Recursively call this method until all parent folders exist (if required).
+            // It's enough to check whether an ElementNode exists because the storage will throw on
+            // conflicting Node types later.
+            if (recursive && Parent is object && !_storage.HasElementNode(Parent.Path))
             {
-                // Recursively call this method until all parent folders exist (if required).
-                // It's enough to check whether an ElementNode exists because the storage will throw on
-                // conflicting Node types later.
-                if (recursive && Parent is object && !_storage.HasElementNode(Parent.Path))
-                {
-                    CreateInternalNotLocking(recursive: true, CreationCollisionOption.UseExisting, cancellationToken);
-                }
+                var inMemoryParent = (InMemoryStorageFolder)Parent;
+                inMemoryParent.CreateInternalNotLocking(
+                    recursive: true,
+                    CreationCollisionOption.UseExisting,
+                    cancellationToken
+                );
+            }
 
-                switch (options)
-                {
-                    case CreationCollisionOption.Fail:
-                        FailImpl();
-                        break;
-                    case CreationCollisionOption.ReplaceExisting:
-                        ReplaceExistingImpl();
-                        break;
-                    case CreationCollisionOption.UseExisting:
-                        UseExistingImpl();
-                        break;
-                    default:
-                        throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
-                }
+            switch (options)
+            {
+                case CreationCollisionOption.Fail:
+                    FailImpl();
+                    break;
+                case CreationCollisionOption.ReplaceExisting:
+                    ReplaceExistingImpl();
+                    break;
+                case CreationCollisionOption.UseExisting:
+                    UseExistingImpl();
+                    break;
+                default:
+                    throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
             }
 
             void FailImpl()

@@ -30,7 +30,7 @@
 
             var options = new InMemoryFileSystemOptions()
             {
-                PathProvider = new DefaultInMemoryPathProvider(testPathInformation),
+                PathProvider = new DefaultInMemoryStoragePathProvider(testPathInformation),
             };
 
             FileSystem = new InMemoryFileSystem(options);

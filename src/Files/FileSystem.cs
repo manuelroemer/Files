@@ -75,7 +75,7 @@
     public abstract class FileSystem
     {
         /// <summary>
-        ///     Gets a <see cref="PathInformation"/> instance which provides information about
+        ///     Gets a <see cref="Files.PathInformation"/> instance which provides information about
         ///     special path characteristics in this file system implementation.
         /// </summary>
         public PathInformation PathInformation { get; }

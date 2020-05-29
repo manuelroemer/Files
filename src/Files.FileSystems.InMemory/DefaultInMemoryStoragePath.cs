@@ -7,6 +7,14 @@
     using Files;
     using Files.Shared;
 
+    /// <summary>
+    ///     See <see cref="DefaultInMemoryStoragePathProvider"/> for a detailed description about
+    ///     the path's behavior.
+    ///     
+    ///     In summary, this is a path implementation inspired by Unix, but slimmed down.
+    ///     The class is entirely based on a <see cref="PathInformation"/> value, i.e. every single
+    ///     character (e.g. '/' for separators or '.' for extension separators) can be swapped out.
+    /// </summary>
     internal sealed class DefaultInMemoryStoragePath : StoragePath
     {
         private readonly PathInformation _pathInformation;
