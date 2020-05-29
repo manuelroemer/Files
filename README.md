@@ -1,4 +1,4 @@
-# Files &nbsp; [![Nuget](https://img.shields.io/nuget/v/Files)](https://www.nuget.org/packages/Files) [![GitHub License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) ![Nullable Reference Types](https://img.shields.io/badge/%E2%9C%93-Nullable%20Reference%20Types-229922) [![Build Status](https://dev.azure.com/ManuelRoemer/Files/_apis/build/status/Files%20CI?branchName=master)](https://dev.azure.com/ManuelRoemer/Files/_build/latest?definitionId=20&branchName=master)
+# Files &nbsp; [![Nuget](https://img.shields.io/nuget/v/Files)](https://www.nuget.org/packages/Files) [![GitHub License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) ![Nullable Reference Types](https://img.shields.io/badge/%E2%9C%93-Nullable%20Reference%20Types-success) [![Build Status](https://dev.azure.com/ManuelRoemer/Files/_apis/build/status/Files%20CI?branchName=master)](https://dev.azure.com/ManuelRoemer/Files/_build/latest?definitionId=20&branchName=master)
 
 Files is a **modern file system abstraction** for .NET. As such, Files has the following key features:
 
