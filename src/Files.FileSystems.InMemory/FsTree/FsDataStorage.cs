@@ -7,6 +7,9 @@
     ///     The InMemoryFileSystem is, like a real file system, based on a file/folder tree structure.
     ///     This class is the entry point to these trees, i.e. it stores and manages the root nodes.
     ///     In addition, it provides methods for quickly finding and interacting with specific nodes.
+    ///     
+    ///     This class (aswell as the associated node classes) is not doing any thread synchronization.
+    ///     Instead, the user must ensure that the FS tree is only accessed synchronously.
     /// </summary>
     internal sealed class FsDataStorage
     {
@@ -112,13 +115,13 @@
 
         public FileNode? TryGetFileNodeAndThrowOnConflictingFolder(StoragePath path)
         {
-            EnsureNoConflictingFolderNodeExists(path);
+            EnsureNoConflictingFolderNodeExistsAt(path);
             return TryGetFileNode(path);
         }
 
         public FolderNode? TryGetFolderNodeAndThrowOnConflictingFile(StoragePath path)
         {
-            EnsureNoConflictingFileNodeExists(path);
+            EnsureNoConflictingFileNodeExistsAt(path);
             return TryGetFolderNode(path);
         }
 
@@ -133,11 +136,11 @@
 
         public void EnsureNoConflictingNodeExists(StoragePath path)
         {
-            EnsureNoConflictingFileNodeExists(path);
-            EnsureNoConflictingFolderNodeExists(path);
+            EnsureNoConflictingFileNodeExistsAt(path);
+            EnsureNoConflictingFolderNodeExistsAt(path);
         }
 
-        private void EnsureNoConflictingFileNodeExists(StoragePath path)
+        private void EnsureNoConflictingFileNodeExistsAt(StoragePath path)
         {
             if (HasFileNode(path))
             {
@@ -145,7 +148,7 @@
             }
         }
 
-        private void EnsureNoConflictingFolderNodeExists(StoragePath path)
+        private void EnsureNoConflictingFolderNodeExistsAt(StoragePath path)
         {
             if (HasFolderNode(path))
             {

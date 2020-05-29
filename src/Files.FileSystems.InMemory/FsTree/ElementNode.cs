@@ -16,6 +16,9 @@ namespace Files.FileSystems.InMemory.FsTree
     ///     on the provided methods in these node classes.
     ///     Of course, the nodes are designed with the specifications in mind, i.e. they throw
     ///     the expected exceptions when applicable.
+    ///     
+    ///     The node classes are not doing any thread synchronization.
+    ///     Instead, the user must ensure that the FS tree is only accessed synchronously.
     /// </summary>
     [DebuggerDisplay("{Path}")]
     internal abstract class ElementNode
