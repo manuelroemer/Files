@@ -94,7 +94,7 @@ Console.WriteLine(movedFolder.Path);  // e.g. "C:/Users/Example/Documents/Destin
 ```
 
 > ℹ **Note:**<br/>
-> Please do not confuse the members with UWP's `StorageFile` and `StorageFolder`.
+> Please do not confuse the members above with UWP's `StorageFile` and `StorageFolder`.
 > These two classes are completely independent of UWP and have simply been named like this (and not,
 > for example, simply `File` and `Folder`) to prevent naming conflicts with .NETs `System.IO` namespace.
 
