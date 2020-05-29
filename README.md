@@ -2,7 +2,7 @@
 
 Files is a **modern file system abstraction** for .NET. As such, Files has the following key features:
 
-✨ **Immutability by Default**:<br/>
+✨ **Immutable by Default**:<br/>
 In comparison to .NET's `FileInfo`/`DirectoryInfo` and UWP's `IStorageFile`/`IStorageFolder`,
 the core members of Files are immutable by default, meaning that **no unexpected mutations** can
 happen when you, for example, move a file.
@@ -36,7 +36,8 @@ In addition, it backports several APIs which have been added to newer .NET SDKs 
 ✨ **Extensively Documented**:<br/>
 Incredible effort has been put into documenting the library's members.
 You **will not find** a single public class/property/method/etc. which is **not documented via XML comments**.
-This includes parameters, return types, and, most importantly, possible exceptions.
+This includes parameters, return types, and, most importantly, possible exceptions.<br/>
+In addition, the entire library uses **Nullable Reference Types**.
 
 
 
@@ -92,6 +93,11 @@ Console.WriteLine(folderToMove.Path); // e.g. "C:/Users/Example/Documents/Source
 Console.WriteLine(movedFolder.Path);  // e.g. "C:/Users/Example/Documents/Destination"
 ```
 
+> ℹ **Note:**<br/>
+> Please do not confuse the members with UWP's `StorageFile` and `StorageFolder`.
+> These two classes are completely independent of UWP and have simply been named like this (and not,
+> for example, simply `File` and `Folder`) to prevent naming conflicts with .NETs `System.IO` namespace.
+
 
 
 ## Installation
@@ -129,10 +135,6 @@ In addition, the number of breaking changes is supposed to be kept minimal. Most
 influence library developers (i.e. `FileSystem` implementers) and not the end user of the API.
 
 
-
-## FAQ
-
-Why `StorageFile` and not `File`?
 
 ## License
 
