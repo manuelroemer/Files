@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using Files.Shared;
 
 namespace Files.FileSystems.InMemory.FsTree
 {
@@ -43,13 +44,19 @@ namespace Files.FileSystems.InMemory.FsTree
             ModifiedOn = CreatedOn = DateTimeOffset.Now;
         }
 
-        public void Copy(StoragePath destinationPath, bool replaceExisting)
+        public virtual void Copy(StoragePath destinationPath, bool replaceExisting)
         {
             EnsureNotLocked();
 
             if (Storage.IsSameElement(Path, destinationPath))
             {
-                throw new IOException("The element cannot be moved to the same location.");
+                throw new IOException(ExceptionStrings.StorageElement.CannotCopyToSameLocation());
+            }
+
+            var newParentNode = Storage.GetParentNode(destinationPath);
+            if (newParentNode is null)
+            {
+                throw new IOException(ExceptionStrings.StorageElement.CannotCopyToRootLocation());
             }
 
             if (replaceExisting)
@@ -70,18 +77,18 @@ namespace Files.FileSystems.InMemory.FsTree
 
             if (Storage.IsSameElement(Path, destinationPath))
             {
-                throw new IOException("The element cannot be moved to the same location.");
+                throw new IOException(ExceptionStrings.StorageElement.CannotMoveToSameLocation());
             }
 
             if (Parent is null)
             {
-                throw new IOException("A rooted element cannot be moved to another location.");
+                throw new IOException(ExceptionStrings.StorageElement.CannotMoveFromRootLocation());
             }
 
             var newParentNode = Storage.GetParentNode(destinationPath);
             if (newParentNode is null)
             {
-                throw new IOException("A non rooted element cannot be moved into a root location.");
+                throw new IOException(ExceptionStrings.StorageElement.CannotMoveToRootLocation());
             }
 
             FolderNode? currentParent = newParentNode;
@@ -89,7 +96,7 @@ namespace Files.FileSystems.InMemory.FsTree
             {
                 if (ReferenceEquals(currentParent, this))
                 {
-                    throw new IOException("A parent folder cannot be moved into one of its child folders.");
+                    throw new IOException(ExceptionStrings.StorageFolder.CannotMoveParentFolderIntoChildFolder());
                 }
             } while ((currentParent = currentParent.Parent) is object);
 

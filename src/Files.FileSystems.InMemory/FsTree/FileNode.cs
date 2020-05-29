@@ -1,12 +1,11 @@
 ﻿namespace Files.FileSystems.InMemory.FsTree
 {
-    using System.IO;
     using Files;
 
     /// <see cref="ElementNode"/>
     internal sealed class FileNode : ElementNode
     {
-        public new FolderNode Parent  => base.Parent ?? throw new IOException("Parent is null for a file.");
+        public new FolderNode Parent  => base.Parent!;
 
         public FileContent Content { get; private set; }
 

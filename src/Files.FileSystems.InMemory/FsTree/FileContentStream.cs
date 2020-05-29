@@ -5,6 +5,7 @@
     using System.Security.Cryptography;
     using System.Threading;
     using System.Threading.Tasks;
+    using Files.Shared;
 
     /// <summary>
     ///     A wrapper around a <see cref="MemoryStream"/> which is tailored towards reading/writing
@@ -197,7 +198,7 @@
         {
             if (!CanRead)
             {
-                throw new NotSupportedException("The stream does not support reading.");
+                throw new NotSupportedException(ExceptionStrings.Stream.NotReadable());
             }
         }
 
@@ -205,7 +206,7 @@
         {
             if (!CanWrite)
             {
-                throw new NotSupportedException("The stream does not support writing.");
+                throw new NotSupportedException(ExceptionStrings.Stream.NotWriteable());
             }
         }
     }

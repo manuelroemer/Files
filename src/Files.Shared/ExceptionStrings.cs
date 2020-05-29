@@ -25,6 +25,15 @@
                 $"The object cannot be compared to objects of type {type.FullName}.";
         }
 
+        internal static class Stream
+        {
+            internal static string NotReadable() =>
+                "The stream does not support reading.";
+
+            internal static string NotWriteable() =>
+                "The stream does not support writing.";
+        }
+
         internal static class FsCompatibility
         {
             internal static string StoragePathTypeNotSupported() =>
@@ -52,6 +61,28 @@
 
             internal static string TrimmingResultsInInvalidPath() =>
                 "Trimming the trailing directory separator results in an invalid path.";
+
+            internal static string PathHasNoParent() =>
+                $"The path is required to have a parent, but the {nameof(StoragePath.PathHasNoParent)} " +
+                $"property is null.";
+        }
+
+        internal static class StorageElement
+        {
+            internal static string CannotCopyToSameLocation() =>
+                "Copying the element to the same location is not possible.";
+
+            internal static string CannotCopyToRootLocation() =>
+                "Copying the element to a root location is not possible.";
+
+            internal static string CannotMoveToSameLocation() =>
+                "Moving the element to the same location is not possible.";
+
+            internal static string CannotMoveToRootLocation() =>
+                "Moving the element to a root location is not possible.";
+
+            internal static string CannotMoveFromRootLocation() =>
+                "A rooted element cannot be moved to another location.";
         }
 
         internal static class StorageFile
@@ -90,6 +121,15 @@
 
             internal static string CannotMoveToRootLocation() =>
                 "Moving the file to a root location is not possible.";
+
+            internal static string NotFound(Files.StoragePath path) =>
+                $"The file at \"{path}\" does not exist.";
+
+            internal static string ParentNotFound(Files.StoragePath path) =>
+                $"One or more parent folder(s) of the file at \"{path}\" do(es) not exist.";
+
+            internal static string FileIsLocked() =>
+                "The file is currently locked and thus cannot be modified.";
         }
 
         internal static class StorageFolder
@@ -123,6 +163,15 @@
 
             internal static string CannotMoveToRootLocation() =>
                 "Moving the folder to a root location is not possible.";
+
+            internal static string CannotMoveParentFolderIntoChildFolder() =>
+                "Moving a parent folder into a child folder is not possible.";
+
+            internal static string NotFound(Files.StoragePath path) =>
+                $"The folder at \"{path}\" does not exist.";
+
+            internal static string ParentNotFound(Files.StoragePath path) =>
+                $"One or more parent folder(s) of the folder at \"{path}\" do(es) not exist.";
         }
 
         internal static class WindowsStorageCompatibility

@@ -2,6 +2,7 @@
 {
     using System.Collections.Generic;
     using System.IO;
+    using Files.Shared;
 
     /// <summary>
     ///     The InMemoryFileSystem is, like a real file system, based on a file/folder tree structure.
@@ -70,7 +71,7 @@
             TryGetElementNode(path) is object;
 
         public FolderNode GetParentNodeAndRequirePathToHaveParent(StoragePath path) =>
-            GetParentNode(path) ?? throw new IOException($"The path {path} is required to have a parent, but has none.");
+            GetParentNode(path) ?? throw new IOException(ExceptionStrings.StoragePath.PathHasNoParent());
 
         public FolderNode? GetParentNode(StoragePath path) =>
             path.FullPath.Parent is null ? null : GetFolderNode(path.FullPath.Parent);
@@ -83,11 +84,11 @@
             {
                 if (path.FullPath.Parent is object && HasFolderNode(path.FullPath.Parent))
                 {
-                    throw new FileNotFoundException($"The file at {path} does not exist.");
+                    throw new FileNotFoundException(ExceptionStrings.StorageFile.NotFound(path));
                 }
                 else
                 {
-                    throw new DirectoryNotFoundException($"One or more parent folders of the file at {path} don't exist.");
+                    throw new DirectoryNotFoundException(ExceptionStrings.StorageFile.ParentNotFound(path));
                 }
             }
 
@@ -102,11 +103,11 @@
             {
                 if (path.FullPath.Parent is object && HasFolderNode(path.FullPath.Parent))
                 {
-                    throw new DirectoryNotFoundException($"The folder at {path} does not exist.");
+                    throw new DirectoryNotFoundException(ExceptionStrings.StorageFolder.NotFound(path));
                 }
                 else
                 {
-                    throw new DirectoryNotFoundException($"One or more parent folders of the folder at {path} don't exist.");
+                    throw new DirectoryNotFoundException(ExceptionStrings.StorageFolder.ParentNotFound(path));
                 }
             }
 
@@ -144,7 +145,7 @@
         {
             if (HasFileNode(path))
             {
-                throw new IOException($"A conflicting file exists at {path}.");
+                throw new IOException(ExceptionStrings.StorageFolder.ConflictingFileExistsAtFolderLocation());
             }
         }
 
@@ -152,7 +153,7 @@
         {
             if (HasFolderNode(path))
             {
-                throw new IOException($"A conflicting folder exists at {path}.");
+                throw new IOException(ExceptionStrings.StorageFile.ConflictingFolderExistsAtFileLocation());
             }
         }
     }

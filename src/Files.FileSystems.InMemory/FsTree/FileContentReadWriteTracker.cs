@@ -1,6 +1,7 @@
 ﻿namespace Files.FileSystems.InMemory.FsTree
 {
     using System.IO;
+    using Files.Shared;
 
     /// <summary>
     ///     A very simple implementation of a reader/writer tracker for the <see cref="FileContent"/>
@@ -103,7 +104,7 @@
         {
             if (_isLocked)
             {
-                throw new IOException("The file is locked by another stream.");
+                throw new IOException(ExceptionStrings.StorageFile.FileIsLocked());
             }
         }
 
@@ -111,7 +112,7 @@
         {
             if (_isLocked)
             {
-                throw new IOException("The file is locked by another stream.");
+                throw new IOException(ExceptionStrings.StorageFile.FileIsLocked());
             }
         }
 
