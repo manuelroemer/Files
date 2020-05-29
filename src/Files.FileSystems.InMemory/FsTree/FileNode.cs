@@ -1,16 +1,20 @@
-﻿namespace Files.FileSystems.InMemory.Internal
+﻿namespace Files.FileSystems.InMemory.FsTree
 {
     using System.IO;
     using Files;
 
+    /// <see cref="ElementNode"/>
     internal sealed class FileNode : ElementNode
     {
         public new FolderNode Parent  => base.Parent ?? throw new IOException("Parent is null for a file.");
 
-        public FileContent Content { get; private set; } = new FileContent();
+        public FileContent Content { get; private set; }
 
         private FileNode(FsDataStorage storage, StoragePath path, FolderNode parent)
-            : base(storage, path, parent) { }
+            : base(storage, path, parent)
+        {
+            Content = new FileContent(ownerFileNode: this);
+        }
 
         public static FileNode Create(FsDataStorage storage, StoragePath path)
         {
@@ -27,12 +31,17 @@
             newNode.Attributes = Attributes;
             newNode.CreatedOn = CreatedOn;
             newNode.ModifiedOn = ModifiedOn;
-            newNode.Content = Content.Copy();
+            newNode.Content = Content.Copy(newOwnerFileNode: newNode);
         }
 
         public override void EnsureNotLocked()
         {
             Content.ReadWriteTracker.EnsureCanReadWrite();
+        }
+
+        protected override void DeleteSameNodeTypeAtPathIfExisting(StoragePath destinationPath)
+        {
+            Storage.TryGetFileNodeAndThrowOnConflictingFolder(destinationPath)?.Delete();
         }
     }
 }

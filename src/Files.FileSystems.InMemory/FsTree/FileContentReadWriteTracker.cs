@@ -1,4 +1,4 @@
-﻿namespace Files.FileSystems.InMemory.Internal
+﻿namespace Files.FileSystems.InMemory.FsTree
 {
     using System.IO;
 

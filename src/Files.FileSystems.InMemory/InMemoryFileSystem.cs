@@ -3,7 +3,7 @@
     using System;
     using System.Linq;
     using Files;
-    using Files.FileSystems.InMemory.Internal;
+    using Files.FileSystems.InMemory.FsTree;
     using Files.Shared;
 
     public sealed class InMemoryFileSystem : FileSystem

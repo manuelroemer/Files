@@ -13,7 +13,7 @@ namespace Files.FileSystems.InMemory
     using System.Threading;
     using System.Threading.Tasks;
     using Files;
-    using Files.FileSystems.InMemory.Internal;
+    using Files.FileSystems.InMemory.FsTree;
     using Files.Shared;
 
     internal sealed class InMemoryStorageFile : StorageFile

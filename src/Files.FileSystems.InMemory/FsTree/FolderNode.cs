@@ -1,8 +1,9 @@
-﻿namespace Files.FileSystems.InMemory.Internal
+﻿namespace Files.FileSystems.InMemory.FsTree
 {
     using System.Collections.Generic;
     using Files;
 
+    /// <see cref="ElementNode"/>
     internal sealed class FolderNode : ElementNode
     {
         // Keeps track of the children of this folder. This list is unordered.
@@ -81,6 +82,11 @@
             {
                 child.EnsureNotLocked();
             }
+        }
+
+        protected override void DeleteSameNodeTypeAtPathIfExisting(StoragePath destinationPath)
+        {
+            Storage.TryGetFolderNodeAndThrowOnConflictingFile(destinationPath)?.Delete();
         }
     }
 }

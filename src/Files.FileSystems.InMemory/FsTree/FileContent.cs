@@ -1,4 +1,4 @@
-﻿namespace Files.FileSystems.InMemory.Internal
+﻿namespace Files.FileSystems.InMemory.FsTree
 {
     using System;
     using System.IO;
@@ -6,11 +6,17 @@
 
     internal sealed class FileContent
     {
+        private readonly FileNode _ownerFileNode;
         private byte[] _content = Array.Empty<byte>();
 
         public ulong Size => (ulong)_content.LongLength;
 
         public FileContentReadWriteTracker ReadWriteTracker { get; } = new FileContentReadWriteTracker();
+
+        public FileContent(FileNode ownerFileNode)
+        {
+            _ownerFileNode = ownerFileNode;
+        }
 
         public FileContentStream Open(FileAccess fileAccess, bool replaceExistingContent)
         {
@@ -46,20 +52,22 @@
                     case FileAccess.Write:
                         ReadWriteTracker.CloseWriter();
                         _content = stream.ToArray();
+                        _ownerFileNode.SetModifiedToNow();
                         break;
                     case FileAccess.ReadWrite:
                         ReadWriteTracker.CloseReaderWriter();
                         _content = stream.ToArray();
+                        _ownerFileNode.SetModifiedToNow();
                         break;
                 }
             }
         }
 
-        public FileContent Copy()
+        public FileContent Copy(FileNode newOwnerFileNode)
         {
             ReadWriteTracker.EnsureCanRead();
 
-            return new FileContent()
+            return new FileContent(newOwnerFileNode)
             {
                 _content = (byte[])_content.Clone(),
             };

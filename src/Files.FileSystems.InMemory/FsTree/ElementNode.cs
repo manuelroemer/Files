@@ -2,8 +2,21 @@
 using System.Diagnostics;
 using System.IO;
 
-namespace Files.FileSystems.InMemory.Internal
+namespace Files.FileSystems.InMemory.FsTree
 {
+    /// <summary>
+    ///     This class is the base class for the <see cref="FileNode"/> and <see cref="FolderNode"/>
+    ///     and as such encapsulates the shared properties/logic which is used for maintaining
+    ///     the in-memory file system tree.
+    ///     
+    ///     These node classes only provide operations which modify either the node's content or
+    ///     the FS tree itself. They do not implement special behavior which is defined by the 
+    ///     Files specification. This is the role of the <see cref="InMemoryStorageFile"/> and
+    ///     <see cref="InMemoryStorageFolder"/>. These classes implement the specification based
+    ///     on the provided methods in these node classes.
+    ///     Of course, the nodes are designed with the specifications in mind, i.e. they throw
+    ///     the expected exceptions when applicable.
+    /// </summary>
     [DebuggerDisplay("{Path}")]
     internal abstract class ElementNode
     {
@@ -38,15 +51,7 @@ namespace Files.FileSystems.InMemory.Internal
 
             if (replaceExisting)
             {
-                // TODO: Consider replacing the following type-based if with proper inheritance.
-                if (this is FileNode)
-                {
-                    Storage.TryGetFileNodeAndThrowOnConflictingFolder(destinationPath)?.Delete();
-                }
-                else if (this is FolderNode)
-                {
-                    Storage.TryGetFolderNodeAndThrowOnConflictingFile(destinationPath)?.Delete();
-                }
+                DeleteSameNodeTypeAtPathIfExisting(destinationPath);
             }
 
             Storage.EnsureNoConflictingNodeExists(destinationPath);
@@ -94,15 +99,7 @@ namespace Files.FileSystems.InMemory.Internal
             // on the path must be updated.
             if (replaceExisting)
             {
-                // TODO: Consider replacing the following type-based if with proper inheritance.
-                if (this is FileNode)
-                {
-                    Storage.TryGetFileNodeAndThrowOnConflictingFolder(destinationPath)?.Delete();
-                }
-                else if (this is FolderNode)
-                {
-                    Storage.TryGetFolderNodeAndThrowOnConflictingFile(destinationPath)?.Delete();
-                }
+                DeleteSameNodeTypeAtPathIfExisting(destinationPath);
             }
 
             Storage.EnsureNoConflictingNodeExists(destinationPath);
@@ -119,6 +116,8 @@ namespace Files.FileSystems.InMemory.Internal
             SetModifiedToNow();
         }
 
+        protected abstract void DeleteSameNodeTypeAtPathIfExisting(StoragePath destinationPath);
+
         public virtual void Delete()
         {
             EnsureNotLocked();
@@ -128,7 +127,7 @@ namespace Files.FileSystems.InMemory.Internal
 
         public abstract void EnsureNotLocked();
 
-        protected void SetModifiedToNow()
+        public void SetModifiedToNow()
         {
             ModifiedOn = DateTimeOffset.Now;
         }
