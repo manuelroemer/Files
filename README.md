@@ -2,4 +2,4 @@
 
 ## License
 
-See the [LICENSE](./license) file for details.
+See the [LICENSE](./LICENSE) file for details.
