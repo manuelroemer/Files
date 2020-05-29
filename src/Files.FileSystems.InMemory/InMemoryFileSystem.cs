@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using System.Threading;
     using Files;
     using Files.FileSystems.InMemory.FsTree;
     using Files.Shared;
@@ -22,7 +23,7 @@
     ///     you are, for example, able to define exactly which paths are mapped to which file system
     ///     element or which characters are used as the directory separator(s).
     ///     
-    ///     One important difference between the <see cref="InMemoryFileSystem"/> and a real-world
+    ///     An important difference between the <see cref="InMemoryFileSystem"/> and a real-world
     ///     file system implementation is that each <see cref="InMemoryFileSystem"/> instance is
     ///     isolated. Two different instances of the <c>PhysicalFileSystem</c>, for example, still
     ///     operate on the same file system of the local machine. This is not true for two different
@@ -35,6 +36,12 @@
     ///     will throw an exception here.
     ///     Therefore it is essential that you correctly implement your code and, ideally, don't
     ///     interchange different <see cref="FileSystem"/> instances.
+    ///     
+    ///     You must also be aware that the <see cref="InMemoryFileSystem"/> is entirely empty
+    ///     in the beginning, i.e. there are no files or folders present. You can easily create
+    ///     these during a setup phase though, for example by utilizing the
+    ///     <see cref="StorageElement.CreateAsync(bool, CancellationToken)"/>
+    ///     method with the <c>recursive: true</c> parameter.
     /// </remarks>
     public sealed class InMemoryFileSystem : FileSystem
     {
