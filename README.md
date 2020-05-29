@@ -1,4 +1,4 @@
-# Files
+# Files &nbsp; [![Nuget](https://img.shields.io/nuget/v/Files)](https://www.nuget.org/packages/Files) [![GitHub License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) ![Nullable Reference Types](https://img.shields.io/badge/%E2%9C%93-Nullable%20Reference%20Types-229922) [![Build Status](https://dev.azure.com/ManuelRoemer/Files/_apis/build/status/Files%20CI?branchName=master)](https://dev.azure.com/ManuelRoemer/Files/_build/latest?definitionId=20&branchName=master)
 
 Files is a **modern file system abstraction** for .NET. As such, Files has the following key features:
 
@@ -103,13 +103,13 @@ dotnet add <Package-Name>
 
 The following table displays the available packages. All packages target **.NET Standard 2.0** at minimum:
 
-| Package | Description |
-| ------- | ----------- |
-| 📦 `Files`  | The base package providing the API contract and abstractions. This is always required. |
-| 📦 `Files.FileSystems.Physical` | Provides a `FileSystem` implementation for the physical file system based on .NET's `System.IO` namespace. |
-| 📦 `Files.FileSystems.WindowsStorage` | Provides a `FileSystem` implementation for the physical file system based on UWP's `Windows.Storage` API.<br/>**Targets `uap10.0.16299`.** |
-| 📦 `Files.FileSystems.InMemory` | Provides a configurable in-memory `FileSystem` implementation which is designed for testing members using the Files API. Despite being designed for testing, the implementation is fully functional, i.e. not stubbed. |
-| 📦 `Files.Specification.Tests` | A set of MS Test test cases which form the specification for all `FileSystem` implementations. These tests are used to verify that the above `FileSystem` packages have been implemented correctly and are, due to their potential relevance to others, made publicly available as a package.<br/>**Please note that this specific package does not abide to any versioning conventions. While minimized, breaking changes can always happen here!** |
+| 📦 Package | 📃 Description |
+| --- | --- |
+| `Files`  | The base package providing the API contract and abstractions. This is always required. |
+| `Files.FileSystems.Physical` | Provides a `FileSystem` implementation for the physical file system based on .NET's `System.IO` namespace. |
+| `Files.FileSystems.WindowsStorage` | Provides a `FileSystem` implementation for the physical file system based on UWP's `Windows.Storage` API.<br/>**Targets `uap10.0.16299`.** |
+| `Files.FileSystems.InMemory` | Provides a configurable in-memory `FileSystem` implementation which is designed for testing members using the Files API. Despite being designed for testing, the implementation is fully functional, i.e. not stubbed. |
+| `Files.Specification.Tests` | A set of MS Test test cases which form the specification for all `FileSystem` implementations. These tests are used to verify that the above `FileSystem` packages have been implemented correctly and are, due to their potential relevance to others, made publicly available as a package.<br/>**Please note that this specific package does not abide to any versioning conventions. While minimized, breaking changes can always happen here!** |
 
 
 
