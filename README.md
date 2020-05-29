@@ -62,7 +62,30 @@ Represents a folder at a specific path and provides methods for interacting with
 
 ### Code Example
 
+In the following, you can find two simple examples of how the Files API can be used.
 
+```csharp
+// Example 1: Creating a file in a folder and writing "Hello world!" to it.
+FileSystem fs = new InMemoryFileSystem();
+StoragePath tempFolderPath = fs.GetPath(KnownFolder.TemporaryData);
+StoragePath helloWorldPath = tempFolderPath / "Greetings" / "HelloWorld.txt";
+
+StorageFile file = fs.GetFile(helloWorldPath);
+await file.CreateRecursivelyAsync();
+await file.WriteTextAsync("Hello world!");
+```
+
+```csharp
+// Example 1: Moving a folder from one location to another.
+//            This displays what is meant by immutability.
+FileSystem fs = new PhysicalFileSystem();
+StorageFolder folderToMove = fs.GetFolder(KnownFolder.DocumentsLibrary / "Source");
+StoragePath destinationPath = folderToMove.Path.FullPath.Parent! / "Destination";
+
+StorageFolder movedFolder = await folderToMove.MoveAsync(destinationPath);
+Console.WriteLine(folderToMove.Path); // e.g. "C:/Users/Example/Documents/Source"
+Console.WriteLine(movedFolder.Path);  // e.g. "C:/Users/Example/Documents/Destination"
+```
 
 ## Installation
 
