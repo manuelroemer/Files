@@ -39,6 +39,7 @@ In addition, it backports several APIs which have been added to newer .NET SDKs 
 
 The following class diagram shows the five most important members of the Files Core API and should
 give a great overview about the library's design.
+Supporting members like enums and utility extension methods are not shown in the image.
 
 ![The Files Core API](./doc/assets/core-api-overview-class-diagram.png)
 > The Files Core API as of version 0.1.0.
@@ -76,8 +77,8 @@ await file.WriteTextAsync("Hello world!");
 ```
 
 ```csharp
-// Example 1: Moving a folder from one location to another.
-//            This displays what is meant by immutability.
+// Example 2: Moving a folder from one location to another.
+//            This displays the immutability of the members, specifically the "folderToMove".
 FileSystem fs = new PhysicalFileSystem();
 StorageFolder folderToMove = fs.GetFolder(KnownFolder.DocumentsLibrary / "Source");
 StoragePath destinationPath = folderToMove.Path.FullPath.Parent! / "Destination";
@@ -87,9 +88,29 @@ Console.WriteLine(folderToMove.Path); // e.g. "C:/Users/Example/Documents/Source
 Console.WriteLine(movedFolder.Path);  // e.g. "C:/Users/Example/Documents/Destination"
 ```
 
+
+
 ## Installation
 
+Files is available on NuGet. Install it via:
 
+```sh
+Install-Package <Package-Name>
+
+--or--
+
+dotnet add <Package-Name>
+```
+
+The following table displays the available packages. All packages target **.NET Standard 2.0** at minimum:
+
+| Package | Description |
+| ------- | ----------- |
+| `Files` | The base package providing the API contract and abstractions. This is always required. |
+| `Files.FileSystems.Physical` | Provides a `FileSystem` implementation for the physical file system based on .NET's `System.IO` namespace. |
+| `Files.FileSystems.WindowsStorage` | Provides a `FileSystem` implementation for the physical file system based on UWP's `Windows.Storage` API.<br/>**Targets `uap10.0.16299`.** |
+| `Files.FileSystems.InMemory` | Provides a configurable in-memory `FileSystem` implementation which is designed for testing members using the Files API. Despite being designed for testing, the implementation is fully functional, i.e. not stubbed. |
+| `Files.Specification.Tests` | A set of MS Test test cases which form the specification for a custom `FileSystem` implementation. These tests are used to verify that the above `FileSystem` packages have been implemented correctly and are, due to their potential relevance to others, made publicly available as a package.<br/>**Please note that this specific package does not abide to any versioning conventions. While minimized, breaking changes can always happen here!** |
 
 ## FAQ
 
