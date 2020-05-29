@@ -35,7 +35,7 @@ In addition, it backports several APIs which have been added to newer .NET SDKs 
 
 ✨ **Extensively Documented**:<br/>
 Incredible effort has been put into documenting the library's members.
-You **will not find** a single public class/property/method/etc. which is **not documented via XML comments**.
+You **will not find** a single public class/property/method/etc. which is not **documented via XML comments**.
 This includes parameters, return types, and, most importantly, possible exceptions.<br/>
 In addition, the entire library uses **Nullable Reference Types**.
 
@@ -83,7 +83,7 @@ await file.WriteTextAsync("Hello world!");
 ```
 
 ```csharp
-// Example 2: Moving a folder from one location to another. Highlights whats meant by immutability.
+// Example 2: Moving a folder from one location to another. Highlights what's meant by immutability.
 FileSystem fs = new PhysicalFileSystem();
 StorageFolder folderToMove = fs.GetFolder(KnownFolder.DocumentsLibrary / "Source");
 StoragePath destinationPath = folderToMove.Path.FullPath.Parent! / "Destination";
