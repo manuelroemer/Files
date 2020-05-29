@@ -35,6 +35,8 @@ namespace Files.FileSystems.InMemory
 
         public override async Task<StorageFolderProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 var node = _storage.GetFolderNode(Path);
@@ -52,6 +54,8 @@ namespace Files.FileSystems.InMemory
 
         public override async Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 return _storage.GetFolderNode(Path).Attributes;
@@ -65,6 +69,8 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(attributes), nameof(attributes));
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 _storage.GetFolderNode(Path).Attributes = attributes;
@@ -73,6 +79,8 @@ namespace Files.FileSystems.InMemory
 
         public override async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 return _storage.HasFolderNode(Path);
@@ -85,6 +93,13 @@ namespace Files.FileSystems.InMemory
             CancellationToken cancellationToken = default
         )
         {
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 CreateInternalNotLocking(recursive, options, cancellationToken);
@@ -102,10 +117,7 @@ namespace Files.FileSystems.InMemory
             CancellationToken cancellationToken
         )
         {
-            if (!EnumInfo.IsDefined(options))
-            {
-                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
-            }
+            cancellationToken.ThrowIfCancellationRequested();
 
             // Recursively call this method until all parent folders exist (if required).
             // It's enough to check whether an ElementNode exists because the storage will throw on
@@ -179,6 +191,8 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             var replaceExisting = options switch
             {
                 NameCollisionOption.Fail => false,
@@ -200,18 +214,6 @@ namespace Files.FileSystems.InMemory
             CancellationToken cancellationToken = default
         )
         {
-            lock (_inMemoryFileSystem.Storage)
-            {
-                return MoveInternalNotLocking(destinationPath, options, cancellationToken);
-            }
-        }
-
-        private StorageFolder MoveInternalNotLocking(
-            StoragePath destinationPath,
-            NameCollisionOption options,
-            CancellationToken cancellationToken
-        )
-        {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
 
             if (!ReferenceEquals(destinationPath.FileSystem, FileSystem))
@@ -226,6 +228,22 @@ namespace Files.FileSystems.InMemory
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return MoveInternalNotLocking(destinationPath, options, cancellationToken);
+            }
+        }
+
+        private StorageFolder MoveInternalNotLocking(
+            StoragePath destinationPath,
+            NameCollisionOption options,
+            CancellationToken cancellationToken
+        )
+        {
+            cancellationToken.ThrowIfCancellationRequested();
 
             var replaceExisting = options switch
             {
@@ -264,6 +282,8 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             var destinationPath = Path.FullPath.Parent?.Join(newName) ?? FileSystem.GetPath(newName);
 
             lock (_inMemoryFileSystem.Storage)
@@ -278,6 +298,8 @@ namespace Files.FileSystems.InMemory
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             lock (_inMemoryFileSystem.Storage)
             {
@@ -297,6 +319,8 @@ namespace Files.FileSystems.InMemory
 
         public override async Task<IEnumerable<StorageFile>> GetAllFilesAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 return _storage
@@ -309,6 +333,8 @@ namespace Files.FileSystems.InMemory
 
         public override async Task<IEnumerable<StorageFolder>> GetAllFoldersAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 return _storage

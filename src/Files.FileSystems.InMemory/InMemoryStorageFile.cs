@@ -35,6 +35,8 @@ namespace Files.FileSystems.InMemory
 
         public override async Task<StorageFileProperties> GetPropertiesAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 var node = _storage.GetFileNode(Path);
@@ -53,6 +55,8 @@ namespace Files.FileSystems.InMemory
 
         public override async Task<FileAttributes> GetAttributesAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 return _storage.GetFileNode(Path).Attributes;
@@ -66,6 +70,8 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(attributes), nameof(attributes));
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 _storage.GetFileNode(Path).Attributes = attributes;
@@ -74,6 +80,8 @@ namespace Files.FileSystems.InMemory
 
         public override async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 return _storage.HasFileNode(Path);
@@ -90,6 +98,8 @@ namespace Files.FileSystems.InMemory
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             lock (_inMemoryFileSystem.Storage)
             {
@@ -163,6 +173,8 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             var replaceExisting = options switch
             {
                 NameCollisionOption.Fail => false,
@@ -184,18 +196,6 @@ namespace Files.FileSystems.InMemory
             CancellationToken cancellationToken = default
         )
         {
-            lock (_inMemoryFileSystem.Storage)
-            {
-                return MoveInternalNotLocking(destinationPath, options, cancellationToken);
-            }
-        }
-
-        private StorageFile MoveInternalNotLocking(
-            StoragePath destinationPath,
-            NameCollisionOption options,
-            CancellationToken cancellationToken
-        )
-        {
             _ = destinationPath ?? throw new ArgumentNullException(nameof(destinationPath));
 
             if (!ReferenceEquals(destinationPath.FileSystem, FileSystem))
@@ -210,6 +210,22 @@ namespace Files.FileSystems.InMemory
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
+
+            lock (_inMemoryFileSystem.Storage)
+            {
+                return MoveInternalNotLocking(destinationPath, options, cancellationToken);
+            }
+        }
+
+        private StorageFile MoveInternalNotLocking(
+            StoragePath destinationPath,
+            NameCollisionOption options,
+            CancellationToken cancellationToken
+        )
+        {
+            cancellationToken.ThrowIfCancellationRequested();
 
             var replaceExisting = options switch
             {
@@ -251,6 +267,8 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
             lock (_inMemoryFileSystem.Storage)
             {
                 var destinationPath = Parent.Path.FullPath.Join(newName);
@@ -264,6 +282,8 @@ namespace Files.FileSystems.InMemory
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
+
+            cancellationToken.ThrowIfCancellationRequested();
 
             lock (_inMemoryFileSystem.Storage)
             {
@@ -297,11 +317,13 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileAccess), nameof(fileAccess));
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
             return OpenFileContentStream(fileAccess);
         }
 
         public override async Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
         {
+            cancellationToken.ThrowIfCancellationRequested();
             using var stream = OpenFileContentStream(FileAccess.Read);
             return stream.ToArray();
         }
@@ -309,6 +331,7 @@ namespace Files.FileSystems.InMemory
         public override async Task WriteBytesAsync(byte[] bytes, CancellationToken cancellationToken = default)
         {
             _ = bytes ?? throw new ArgumentNullException(nameof(bytes));
+            cancellationToken.ThrowIfCancellationRequested();
             using var stream = OpenFileContentStream(FileAccess.Write, replaceExistingContent: true);
             stream.Write(bytes, 0, bytes.Length);
         }
@@ -316,6 +339,7 @@ namespace Files.FileSystems.InMemory
         public override async Task<string> ReadTextAsync(Encoding? encoding, CancellationToken cancellationToken = default)
         {
             encoding ??= _inMemoryFileSystem.Options.DefaultEncoding;
+            cancellationToken.ThrowIfCancellationRequested();
             using var stream = OpenFileContentStream(FileAccess.Read);
             using var reader = new StreamReader(stream, encoding);
             return reader.ReadToEnd();
@@ -325,6 +349,7 @@ namespace Files.FileSystems.InMemory
         {
             _ = text ?? throw new ArgumentNullException(nameof(text));
             encoding ??= _inMemoryFileSystem.Options.DefaultEncoding;
+            cancellationToken.ThrowIfCancellationRequested();
             using var stream = OpenFileContentStream(FileAccess.Write, replaceExistingContent: true);
             using var writer = new StreamWriter(stream, encoding);
             writer.Write(text);
