@@ -48,7 +48,7 @@ give a great overview about the library's design.
 Supporting members like enums and utility extension methods are not shown in the image.
 
 ![The Files Core API](./doc/assets/core-api-overview-class-diagram.png)
-> The Files Core API as of version 0.1.0.
+> The Files Core API (`v0.1.0`).
 
 Explanation of the members:
 
