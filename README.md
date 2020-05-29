@@ -15,7 +15,7 @@ or network drives.
 
 ✨ **Consistent API Design**:<br/>
 Files fixes many inconsistencies of .NET's APIs.
-Have you ever wondered why `System.IO.File` members throw `UnauthorizedAccessException`s when a conflicting folder exists?
+Have you ever wondered why `System.IO.File` throws `UnauthorizedAccessException`s when a conflicting folder exists?
 Why `System.IO.Directory` throws an `IOException` in the same scenario?
 Why you can move directories to the same location, but get an exception when you try the same with files?
 *No?* Well, nontheless, Files **fixes all of these inconsistencies** and **a lot more** (escpecially
