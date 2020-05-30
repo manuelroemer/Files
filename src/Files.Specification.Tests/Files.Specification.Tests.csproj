@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
     <IsTestProject>false</IsTestProject>
+    <IsPackable>true</IsPackable>
     <Description>
 A modern, immutable, async-first abstraction of hierarchical file systems with a consistent and developer friendly API that allows seamless switching between multiple underlying file system manifestations, while also fixing and hiding the flaws and inconsistencies of the wrapped APIs.
 
