@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Files.FileSystems.InMemory\Files.FileSystems.InMemory.csproj" />
+    <ProjectReference Include="..\Files.Specification.Tests\Files.Specification.Tests.csproj" />
+    <ProjectReference Include="..\Files\Files.csproj" />
+  </ItemGroup>
+
+</Project>

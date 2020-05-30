@@ -1,0 +1,22 @@
+<Project Sdk="MSBuild.Sdk.Extras">
+
+  <PropertyGroup>
+    <TargetFramework>uap10.0.16299</TargetFramework>
+    <DefineConstants>$(DefineConstants);UAP</DefineConstants>
+    <Description>
+A modern, immutable, async-first abstraction of hierarchical file systems with a consistent and developer friendly API that allows seamless switching between multiple underlying file system manifestations, while also fixing and hiding the flaws and inconsistencies of the wrapped APIs.
+
+This package provides a FileSystem implementation which interacts with the local machine's file system via UWP's Windows.Storage APIs. This implementation is designed for applications targeting the UWP which, due to sandbox restrictions, cannot use .NET's System.IO APIs.
+
+Learn more about Files at https://github.com/manuelroemer/Files.
+    </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Files\Files.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\Files.Shared\Files.Shared.projitems" />
+  <Import Project="..\Files.Shared.PhysicalStoragePath\Files.Shared.PhysicalStoragePath.projitems" />
+
+</Project>

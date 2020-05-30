@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1</TargetFrameworks>
+    <Description>
+A modern, immutable, async-first abstraction of hierarchical file systems with a consistent and developer friendly API that allows seamless switching between multiple underlying file system manifestations, while also fixing and hiding the flaws and inconsistencies of the wrapped APIs.
+
+This package provides an in-memory FileSystem implementation which is specifically designed for testing. The InMemoryFileSystem is completely independent of any real-world file system and can thus run in any testing configuration. In addition, each InMemoryFileSystem is isolated, leading to predictable testing states.
+
+Learn more about Files at https://github.com/manuelroemer/Files.
+    </Description>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Files\Files.csproj" />
+  </ItemGroup>
+
+  <Import Project="..\Files.Shared\Files.Shared.projitems" Label="Shared" />
+
+</Project>
