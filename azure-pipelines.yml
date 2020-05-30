@@ -98,4 +98,4 @@ jobs:
       command: 'push'
       packagesToPush: '$(System.ArtifactsDirectory)/**/*.nupkg'
       nuGetFeedType: 'external'
-      # publishFeedCredentials: NuGet.org
+      publishFeedCredentials: 'NuGet'
