@@ -296,18 +296,27 @@
             }
         }
 
-        public override Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default)
+        public override Task<Stream> OpenAsync(
+            FileAccess fileAccess,
+            FileShare fileShare,
+            CancellationToken cancellationToken = default
+        )
         {
             if (!EnumInfo.IsDefined(fileAccess))
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileAccess), nameof(fileAccess));
             }
 
+            if (!EnumInfo.IsDefined(fileShare))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileShare), nameof(fileShare));
+            }
+
             return Task.Run<Stream>(() =>
             {
                 try
                 {
-                    return File.Open(_fullPath.ToString(), FileMode.Open, fileAccess);
+                    return File.Open(_fullPath.ToString(), FileMode.Open, fileAccess, fileShare);
                 }
                 catch (UnauthorizedAccessException ex)
                 {

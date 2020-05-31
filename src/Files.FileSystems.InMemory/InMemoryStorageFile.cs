@@ -310,11 +310,20 @@ namespace Files.FileSystems.InMemory
         // See FileContentStream/FileNode for details.
         //
 
-        public override async Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default)
+        public override async Task<Stream> OpenAsync(
+            FileAccess fileAccess,
+            FileShare fileShare,
+            CancellationToken cancellationToken = default
+        )
         {
             if (!EnumInfo.IsDefined(fileAccess))
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileAccess), nameof(fileAccess));
+            }
+
+            if (!EnumInfo.IsDefined(fileShare))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileShare), nameof(fileShare));
             }
 
             cancellationToken.ThrowIfCancellationRequested();

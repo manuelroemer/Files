@@ -211,6 +211,7 @@
 
         /// <summary>
         ///     Opens and returns a stream which can be used for reading bytes from the file.
+        ///     While opened, the file cannot be accessed by other process or streams.
         /// </summary>
         /// <param name="storageFile">The <see cref="StorageFile"/>.</param>
         /// <param name="cancellationToken">
@@ -221,8 +222,8 @@
         /// </returns>
         /// <remarks>
         ///     Calling this method is equivalent to calling
-        ///     <see cref="StorageFile.OpenAsync(FileAccess, CancellationToken)"/> with the
-        ///     <see cref="FileAccess.Read"/> parameter.
+        ///     <see cref="StorageFile.OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
+        ///     <see cref="FileAccess.Read"/> and <see cref="FileShare.None"/> parameters.
         /// </remarks>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -247,12 +248,63 @@
             CancellationToken cancellationToken = default
         )
         {
+            return OpenReadAsync(storageFile, FileShare.None, cancellationToken);
+        }
+
+        /// <summary>
+        ///     Opens and returns a stream which can be used for reading bytes from the file.
+        ///     Depending on the specified <see cref="FileShare"/> value, the file may or may not be
+        ///     accessed by other process or streams while opened.
+        /// </summary>
+        /// <param name="storageFile">The <see cref="StorageFile"/>.</param>
+        /// <param name="fileShare">
+        ///     Defines if and how other processes and streams can concurrently access the opened file.
+        ///     This value is only a suggestion to the underlying file system implementation.
+        ///     It is not guaranteed that the value is supported.
+        ///     If the specified value is unsupported, <see cref="FileShare.None"/> is used instead.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="Stream"/> which can be used to read bytes from the file.
+        /// </returns>
+        /// <remarks>
+        ///     Calling this method is equivalent to calling
+        ///     <see cref="StorageFile.OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
+        ///     <see cref="FileAccess.Read"/> and <paramref name="fileShare"/> parameters.
+        /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
+        /// <exception cref="IOException">
+        ///     An I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     One of the file's parent folders does not exist.
+        /// </exception>
+        /// <exception cref="FileNotFoundException">
+        ///     The file does not exist.
+        /// </exception>
+        public static Task<Stream> OpenReadAsync(
+            this StorageFile storageFile,
+            FileShare fileShare,
+            CancellationToken cancellationToken = default
+        )
+        {
             _ = storageFile ?? throw new ArgumentNullException(nameof(storageFile));
-            return storageFile.OpenAsync(FileAccess.Read, cancellationToken);
+            return storageFile.OpenAsync(FileAccess.Read, fileShare, cancellationToken);
         }
 
         /// <summary>
         ///     Opens and returns a stream which can be used for writing bytes to the file.
+        ///     While opened, the file cannot be accessed by other process or streams.
         /// </summary>
         /// <param name="storageFile">The <see cref="StorageFile"/>.</param>
         /// <param name="cancellationToken">
@@ -263,8 +315,8 @@
         /// </returns>
         /// <remarks>
         ///     Calling this method is equivalent to calling
-        ///     <see cref="StorageFile.OpenAsync(FileAccess, CancellationToken)"/> with the
-        ///     <see cref="FileAccess.Write"/> parameter.
+        ///     <see cref="StorageFile.OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
+        ///     <see cref="FileAccess.Write"/> and <see cref="FileShare.None"/> parameters.
         /// </remarks>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -289,8 +341,58 @@
             CancellationToken cancellationToken = default
         )
         {
+            return OpenWriteAsync(storageFile, FileShare.None, cancellationToken);
+        }
+
+        /// <summary>
+        ///     Opens and returns a stream which can be used for writing bytes to the file.
+        ///     Depending on the specified <see cref="FileShare"/> value, the file may or may not be
+        ///     accessed by other process or streams while opened.
+        /// </summary>
+        /// <param name="storageFile">The <see cref="StorageFile"/>.</param>
+        /// <param name="fileShare">
+        ///     Defines if and how other processes and streams can concurrently access the opened file.
+        ///     This value is only a suggestion to the underlying file system implementation.
+        ///     It is not guaranteed that the value is supported.
+        ///     If the specified value is unsupported, <see cref="FileShare.None"/> is used instead.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="Stream"/> which can be used to write bytes to the file.
+        /// </returns>
+        /// <remarks>
+        ///     Calling this method is equivalent to calling
+        ///     <see cref="StorageFile.OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
+        ///     <see cref="FileAccess.Read"/> and <paramref name="fileShare"/> parameters.
+        /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
+        /// <exception cref="IOException">
+        ///     An I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     One of the file's parent folders does not exist.
+        /// </exception>
+        /// <exception cref="FileNotFoundException">
+        ///     The file does not exist.
+        /// </exception>
+        public static Task<Stream> OpenWriteAsync(
+            this StorageFile storageFile,
+            FileShare fileShare,
+            CancellationToken cancellationToken = default
+        )
+        {
             _ = storageFile ?? throw new ArgumentNullException(nameof(storageFile));
-            return storageFile.OpenAsync(FileAccess.Write, cancellationToken);
+            return storageFile.OpenAsync(FileAccess.Write, fileShare, cancellationToken);
         }
     }
 }

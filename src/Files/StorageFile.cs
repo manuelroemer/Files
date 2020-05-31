@@ -499,6 +499,7 @@
         /// <summary>
         ///     Opens and returns a stream which can be used for reading and writing bytes from and
         ///     to the file.
+        ///     While opened, the file cannot be accessed by other process or streams.
         /// </summary>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
@@ -508,8 +509,8 @@
         /// </returns>
         /// <remarks>
         ///     Calling this method is equivalent to calling
-        ///     <see cref="OpenAsync(FileAccess, CancellationToken)"/> with the
-        ///     <see cref="FileAccess.ReadWrite"/> parameter.
+        ///     <see cref="OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
+        ///     <see cref="FileAccess.ReadWrite"/> and <see cref="FileShare.None"/> parameters.
         /// </remarks>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -530,17 +531,113 @@
         ///     The file does not exist.
         /// </exception>
         public Task<Stream> OpenAsync(CancellationToken cancellationToken = default) =>
-            OpenAsync(FileAccess.ReadWrite, cancellationToken);
+            OpenAsync(FileAccess.ReadWrite, FileShare.None, cancellationToken);
 
         /// <summary>
         ///     Opens and returns a stream which, depending on the specified <see cref="FileAccess"/> value,
         ///     can be used for reading and/or writing bytes from and to the file.
+        ///     While opened, the file cannot be accessed by other process or streams.
         /// </summary>
         /// <param name="fileAccess">
         ///     Defines whether the stream should be readable, writeable or both.
         ///     This value defines the minimum required capabilities.
         ///     This means that the returned stream may, for example, be both readable and
         ///     writeable, even if the value was only <see cref="FileAccess.Read"/>.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="Stream"/> which, depending on the specified <see cref="FileAccess"/> value,
+        ///     can be used to read and write bytes from and to the file.
+        /// </returns>
+        /// <remarks>
+        ///     Calling this method is equivalent to calling
+        ///     <see cref="OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
+        ///     <paramref name="fileAccess"/> and <see cref="FileShare.None"/> parameters.
+        /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
+        /// <exception cref="IOException">
+        ///     An I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     One of the file's parent folders does not exist.
+        /// </exception>
+        /// <exception cref="FileNotFoundException">
+        ///     The file does not exist.
+        /// </exception>
+        public Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default) =>
+            OpenAsync(fileAccess, FileShare.None, cancellationToken);
+
+        /// <summary>
+        ///     Opens and returns a stream which can be used for reading and writing bytes from and
+        ///     to the file.
+        ///     Depending on the specified <see cref="FileShare"/> value, the file may or may not be
+        ///     accessed by other process or streams while opened.
+        /// </summary>
+        /// <param name="fileShare">
+        ///     Defines if and how other processes and streams can concurrently access the opened file.
+        ///     This value is only a suggestion to the underlying file system implementation.
+        ///     It is not guaranteed that the value is supported.
+        ///     If the specified value is unsupported, <see cref="FileShare.None"/> is used instead.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="Stream"/> which can be used to read and write bytes from and to the file.
+        /// </returns>
+        /// <remarks>
+        ///     Calling this method is equivalent to calling
+        ///     <see cref="OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
+        ///     <see cref="FileAccess.ReadWrite"/> and <paramref name="fileShare"/> parameters.
+        /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
+        /// <exception cref="IOException">
+        ///     An I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     One of the file's parent folders does not exist.
+        /// </exception>
+        /// <exception cref="FileNotFoundException">
+        ///     The file does not exist.
+        /// </exception>
+        public Task<Stream> OpenAsync(FileShare fileShare, CancellationToken cancellationToken = default) =>
+            OpenAsync(FileAccess.ReadWrite, fileShare, cancellationToken);
+
+        /// <summary>
+        ///     Opens and returns a stream which, depending on the specified <see cref="FileAccess"/> value,
+        ///     can be used for reading and/or writing bytes from and to the file.
+        ///     Depending on the specified <see cref="FileShare"/> value, the file may or may not be
+        ///     accessed by other process or streams while opened.
+        /// </summary>
+        /// <param name="fileAccess">
+        ///     Defines whether the stream should be readable, writeable or both.
+        ///     This value defines the minimum required capabilities.
+        ///     This means that the returned stream may, for example, be both readable and
+        ///     writeable, even if the value was only <see cref="FileAccess.Read"/>.
+        /// </param>
+        /// <param name="fileShare">
+        ///     Defines if and how other processes and streams can concurrently access the opened file.
+        ///     This value is only a suggestion to the underlying file system implementation.
+        ///     It is not guaranteed that the value is supported.
+        ///     If the specified value is unsupported, <see cref="FileShare.None"/> is used instead.
         /// </param>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
@@ -567,7 +664,11 @@
         /// <exception cref="FileNotFoundException">
         ///     The file does not exist.
         /// </exception>
-        public abstract Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default);
+        public abstract Task<Stream> OpenAsync(
+            FileAccess fileAccess,
+            FileShare fileShare,
+            CancellationToken cancellationToken = default
+        );
 
         /// <summary>
         ///     Reads and returns the file's content as a byte array.

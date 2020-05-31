@@ -288,11 +288,20 @@
             }
         }
 
-        public override async Task<Stream> OpenAsync(FileAccess fileAccess, CancellationToken cancellationToken = default)
+        public override async Task<Stream> OpenAsync(
+            FileAccess fileAccess,
+            FileShare fileShare,
+            CancellationToken cancellationToken = default
+        )
         {
             if (!EnumInfo.IsDefined(fileAccess))
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileAccess), nameof(fileAccess));
+            }
+            
+            if (!EnumInfo.IsDefined(fileShare))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileShare), nameof(fileShare));
             }
 
             var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
@@ -304,7 +313,16 @@
                 _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(fileAccess)),
             };
 
-            var randomAccessStream = await file.OpenAsync(fileAccessMode).AsAwaitable(cancellationToken);
+            var storageOpenOptions = fileShare switch
+            {
+                FileShare.Read => StorageOpenOptions.AllowOnlyReaders,
+                FileShare.ReadWrite => StorageOpenOptions.AllowReadersAndWriters,
+                _ => StorageOpenOptions.None,
+            };
+
+            var randomAccessStream = await file
+                .OpenAsync(fileAccessMode, storageOpenOptions)
+                .AsAwaitable(cancellationToken);
             return randomAccessStream.AsStream();
         }
 
