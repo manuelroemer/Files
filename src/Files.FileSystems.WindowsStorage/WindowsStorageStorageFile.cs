@@ -12,6 +12,7 @@
     using Files.Shared;
     using Files.Shared.PhysicalStoragePath;
     using Files.Shared.PhysicalStoragePath.Utilities;
+    using Microsoft.Win32.SafeHandles;
     using Windows.Storage;
     using CreationCollisionOption = CreationCollisionOption;
     using IOFileAttributes = System.IO.FileAttributes;
@@ -23,6 +24,7 @@
 
     internal sealed class WindowsStorageStorageFile : StorageFile
     {
+        private const int DefaultBufferSize = 81920;
         private readonly StoragePath _fullPath;
         private readonly StoragePath _fullParentPath;
 
@@ -298,39 +300,99 @@
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileAccess), nameof(fileAccess));
             }
-            
+
             if (!EnumInfo.IsDefined(fileShare))
             {
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(fileShare), nameof(fileShare));
             }
 
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // By default, UWP has a "relaxed" FileShare model which always allows multiple readers.
+            // In addition, the default OpenAsync(FileAccessMode, StorageOpenOptions) method doesn't
+            // allow to specify values analogous to FileShare.None/FileShare.Write.
+            // However, there is a semi-new API called StorageFile.CreateSafeFileHandle which allows
+            // us to circumvent the Storage Broker API and manually create a FileStream via a
+            // SafeFileHandle. This handle can be created with the appropriate FileShare.
+            // Nontheless, CreateSafeFileHandle can fail (and might not even be supported all the time).
+            // Therefore, we *try* to create a FileStream via the handle, but fall back to the
+            // Storage Broker API when necessary. This ensures that the library always works
+            // (even though limited, in such a scenario).
             var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-            var fileAccessMode = fileAccess switch
-            {
-                FileAccess.Read => FileAccessMode.Read,
-                FileAccess.Write => FileAccessMode.ReadWrite,
-                FileAccess.ReadWrite => FileAccessMode.ReadWrite,
-                _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(fileAccess)),
-            };
+            return TryOpenViaHandle() ?? await OpenViaStorageBroker().ConfigureAwait(false);
 
-            var storageOpenOptions = fileShare switch
+            Stream? TryOpenViaHandle()
             {
-                FileShare.Read => StorageOpenOptions.AllowOnlyReaders,
-                FileShare.ReadWrite => StorageOpenOptions.AllowReadersAndWriters,
-                _ => StorageOpenOptions.None,
-            };
+                // CreateSafeFileHandle has two handleable points of failure:
+                // https://docs.microsoft.com/en-us/dotnet/api/system.io.windowsruntimestorageextensions.createsafefilehandle
+                // 1) It can return null (i.e. no handle can be created).
+                // 2) It can throw exceptions (mainly ArgumentNullException/NotSupportedException, but
+                //    who really knows what else could be thrown here).
+                //
+                // We want to be very defensive with this code path. Creating the FileStream via the
+                // handle should be the prefered way, but if it fails, no matter how, we'll want
+                // to fall back to the "default" Storage Broker APIs.
+                SafeFileHandle? handle = null;
 
-            var randomAccessStream = await file
-                .OpenAsync(fileAccessMode, storageOpenOptions)
-                .AsAwaitable(cancellationToken);
-            return randomAccessStream.AsStream();
+                try
+                {
+#pragma warning disable CA2000 
+                    // Dispose objects before losing scope.
+                    // Handle is disposed by the FileStream or below in the 'catch'.
+                    handle = file.CreateSafeFileHandle(fileAccess, fileShare);
+#pragma warning restore CA2000 
+
+                    if (handle is null)
+                    {
+                        return null;
+                    }
+
+                    return new FileStream(handle, fileAccess);
+                }
+                catch
+                {
+                    handle?.Dispose();
+                    return null;
+                }
+            }
+
+            async Task<Stream> OpenViaStorageBroker()
+            {
+                // With the Storage Broker API fallback, we simply cannot fulfill the FileShare requirement.
+                // We'll do our best to be as close to the requirements as possible, but values like FileShare.None
+                // simply cannot be fulfilled.
+                // This is bad, but the default execution flow should use the handle anyway. This code here
+                // ideally never runs.
+                var fileAccessMode = fileAccess switch
+                {
+                    FileAccess.Read => FileAccessMode.Read,
+                    FileAccess.Write => FileAccessMode.ReadWrite,
+                    FileAccess.ReadWrite => FileAccessMode.ReadWrite,
+                    _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(fileAccess)),
+                };
+
+                var storageOpenOptions = StorageOpenOptions.None;
+                if (fileShare.HasFlag(FileShare.Read))
+                {
+                    storageOpenOptions = StorageOpenOptions.AllowOnlyReaders;
+                }
+                else if (fileShare.HasFlag(FileShare.Write) || fileShare.HasFlag(FileShare.ReadWrite))
+                {
+                    storageOpenOptions = StorageOpenOptions.AllowReadersAndWriters;
+                }
+
+                var randomAccessStream = await file
+                    .OpenAsync(fileAccessMode, storageOpenOptions)
+                    .AsAwaitable(cancellationToken);
+                return randomAccessStream.AsStream();
+            }
         }
 
         public override async Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
         {
-            using var stream = await OpenAsync(FileAccess.Read).ConfigureAwait(false);
+            using var stream = await OpenAsync(FileAccess.Read, cancellationToken).ConfigureAwait(false);
             using var ms = new MemoryStream();
-            await stream.CopyToAsync(ms).ConfigureAwait(false);
+            await stream.CopyToAsync(ms, DefaultBufferSize, cancellationToken).ConfigureAwait(false);
             return ms.ToArray();
         }
 
