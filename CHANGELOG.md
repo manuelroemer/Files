@@ -11,6 +11,7 @@ TODO.
 * Added new `StorageFile.OpenAsync` overloads.
 * Added two new overloads to the `StorageFileExtensions.OpenRead` and `StorageFileExtensions.OpenWrite` extensions
   which accept a `FileShare` parameter.
+* Updated the XML documentation.
 
 ### Files.FileSystems.Physical
 
