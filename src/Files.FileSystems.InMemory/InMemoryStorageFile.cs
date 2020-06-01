@@ -327,7 +327,7 @@ namespace Files.FileSystems.InMemory
             }
 
             cancellationToken.ThrowIfCancellationRequested();
-            return OpenFileContentStream(fileAccess);
+            return OpenFileContentStream(fileAccess, fileShare);
         }
 
         public override async Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
@@ -364,12 +364,16 @@ namespace Files.FileSystems.InMemory
             writer.Write(text);
         }
 
-        private FileContentStream OpenFileContentStream(FileAccess fileAccess, bool replaceExistingContent = false)
+        private FileContentStream OpenFileContentStream(
+            FileAccess fileAccess,
+            FileShare fileShare = FileShare.None,
+            bool replaceExistingContent = false
+        )
         {
             lock (_inMemoryFileSystem.Storage)
             {
                 var fileNode = _storage.GetFileNode(Path);
-                return fileNode.Content.Open(fileAccess, replaceExistingContent);
+                return fileNode.Content.Open(fileAccess, fileShare, replaceExistingContent);
             }
         }
     }

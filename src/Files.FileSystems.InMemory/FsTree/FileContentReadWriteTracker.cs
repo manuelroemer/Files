@@ -23,14 +23,33 @@
         // Future extensions might change the behavior based on a FileShare value.
 
         private readonly object _lock = new object();
-        private bool _isLocked;
+        private FileShare _currentFileShare;
+        private int _readers;
+        private int _writers;
+        private int _readerWriters;
+
+        private bool HasAnyReadersOrWriters => _readers > 0 || _writers > 0 || _readerWriters > 0;
+
+        public bool TrySetFileShare(FileShare fileShare)
+        {
+            lock (_lock)
+            {
+                // The current FileShare can only change if the file is not being accessed by anyone.
+                if (!HasAnyReadersOrWriters)
+                {
+                    _currentFileShare = fileShare;
+                    return true;
+                }
+                return false;
+            }
+        }
 
         public void AddReader()
         {
             lock (_lock)
             {
                 EnsureCanReadInternal();
-                _isLocked = true;
+                _readers++;
             }
         }
 
@@ -39,7 +58,7 @@
             lock (_lock)
             {
                 EnsureCanWriteInternal();
-                _isLocked = true;
+                _writers++;
             }
         }
 
@@ -48,7 +67,7 @@
             lock (_lock)
             {
                 EnsureCanReadWriteInternal();
-                _isLocked = true;
+                _readerWriters++;
             }
         }
 
@@ -56,7 +75,7 @@
         {
             lock (_lock)
             {
-                _isLocked = false;
+                _readers--;
             }
         }
 
@@ -64,7 +83,7 @@
         {
             lock (_lock)
             {
-                _isLocked = false;
+                _writers--;
             }
         }
 
@@ -72,7 +91,7 @@
         {
             lock (_lock)
             {
-                _isLocked = false;
+                _readerWriters--;
             }
         }
 
@@ -102,18 +121,26 @@
 
         private void EnsureCanReadInternal()
         {
-            if (_isLocked)
+            if (!HasAnyReadersOrWriters ||
+                _currentFileShare.HasFlag(FileShare.Read) ||
+                _currentFileShare.HasFlag(FileShare.ReadWrite))
             {
-                throw new IOException(ExceptionStrings.StorageFile.FileIsLocked());
+                return;
             }
+
+            throw new IOException(ExceptionStrings.StorageFile.FileIsLocked());
         }
 
         private void EnsureCanWriteInternal()
         {
-            if (_isLocked)
+            if (!HasAnyReadersOrWriters ||
+                _currentFileShare.HasFlag(FileShare.Write) ||
+                _currentFileShare.HasFlag(FileShare.ReadWrite))
             {
-                throw new IOException(ExceptionStrings.StorageFile.FileIsLocked());
+                return;
             }
+
+            throw new IOException(ExceptionStrings.StorageFile.FileIsLocked());
         }
 
         private void EnsureCanReadWriteInternal()

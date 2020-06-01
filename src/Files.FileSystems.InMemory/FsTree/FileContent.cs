@@ -2,6 +2,7 @@
 {
     using System;
     using System.IO;
+    using System.Threading;
     using Files.Shared;
 
     internal sealed class FileContent
@@ -18,8 +19,11 @@
             _ownerFileNode = ownerFileNode;
         }
 
-        public FileContentStream Open(FileAccess fileAccess, bool replaceExistingContent)
+        public FileContentStream Open(FileAccess fileAccess, FileShare fileShare, bool replaceExistingContent)
         {
+            // Set the FileShare before incrementing reader/writer count, because otherwise, it'll fail.
+            ReadWriteTracker.TrySetFileShare(fileShare);
+
             switch (fileAccess)
             {
                 case FileAccess.Read:
