@@ -58,6 +58,7 @@
 
         public static FileAttributes InvalidFileAttributes => (FileAttributes)(-1);
         public static FileAccess InvalidFileAccess => (FileAccess)(-1);
+        public static FileShare InvalidFileShare => (FileShare)(-1);
         public static CreationCollisionOption InvalidCreationCollisionOption => (CreationCollisionOption)(-1);
         public static NameCollisionOption InvalidNameCollisionOption => (NameCollisionOption)(-1);
         public static DeletionOption InvalidDeletionOption => (DeletionOption)(-1);

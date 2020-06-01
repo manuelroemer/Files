@@ -810,6 +810,13 @@
         }
 
         [TestMethod]
+        public async Task OpenAsync_InvalidFileShare_ThrowsArgumentException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await Should.ThrowAsync<ArgumentException>(async () => await file.OpenAsync(FileAccess.ReadWrite, Default.InvalidFileShare));
+        }
+        
+        [TestMethod]
         [DataRow(FileAccess.Read)]
         [DataRow(FileAccess.Write)]
         [DataRow(FileAccess.ReadWrite)]
@@ -878,6 +885,48 @@
             using var stream = await file.OpenAsync(FileAccess.ReadWrite);
             stream.CanRead.ShouldBeTrue();
             stream.CanWrite.ShouldBeTrue();
+        }
+
+        [TestMethod]
+        [DataRow(FileAccess.Read, FileShare.Read, FileAccess.Read, FileShare.Read)]
+        [DataRow(FileAccess.Write, FileShare.Write, FileAccess.Write, FileShare.Write)]
+        [DataRow(FileAccess.ReadWrite, FileShare.ReadWrite, FileAccess.Read, FileShare.ReadWrite)]
+        [DataRow(FileAccess.ReadWrite, FileShare.ReadWrite, FileAccess.Write, FileShare.ReadWrite)]
+        [DataRow(FileAccess.ReadWrite, FileShare.ReadWrite, FileAccess.ReadWrite, FileShare.ReadWrite)]
+        public async Task OpenAsync_ExistingFileAndLegalFileShareAttempts_ReturnsStream(
+            FileAccess firstFileAccess,
+            FileShare firstFileShare,
+            FileAccess secondFileAccess,
+            FileShare secondFileShare
+        )
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            using var firstStream = await file.OpenAsync(firstFileAccess, firstFileShare);
+            using var secondStream = await file.OpenAsync(secondFileAccess, secondFileShare);
+            // ^ Should not throw.
+        }
+
+        [TestMethod]
+        [DataRow(FileAccess.ReadWrite, FileShare.None, FileAccess.ReadWrite, FileShare.None)]
+        [DataRow(FileAccess.ReadWrite, FileShare.None, FileAccess.Read, FileShare.Read)]
+        [DataRow(FileAccess.ReadWrite, FileShare.None, FileAccess.Write, FileShare.Write)]
+        [DataRow(FileAccess.ReadWrite, FileShare.None, FileAccess.ReadWrite, FileShare.ReadWrite)]
+        [DataRow(FileAccess.Read, FileShare.Read, FileAccess.ReadWrite, FileShare.None)]
+        [DataRow(FileAccess.Read, FileShare.Read, FileAccess.Write, FileShare.Write)]
+        [DataRow(FileAccess.Read, FileShare.Read, FileAccess.ReadWrite, FileShare.ReadWrite)]
+        [DataRow(FileAccess.Write, FileShare.Write, FileAccess.ReadWrite, FileShare.None)]
+        [DataRow(FileAccess.Write, FileShare.Write, FileAccess.Read, FileShare.Read)]
+        [DataRow(FileAccess.Write, FileShare.Write, FileAccess.ReadWrite, FileShare.ReadWrite)]
+        public async Task OpenAsync_ExistingFileAndConflictingFileShareAttempts_ThrowsIOException(
+            FileAccess firstFileAccess,
+            FileShare firstFileShare,
+            FileAccess secondFileAccess,
+            FileShare secondFileShare
+        )
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            using var lockingStream = await file.OpenAsync(firstFileAccess, firstFileShare);
+            await Should.ThrowAsync<IOException>(async () => await file.OpenAsync(secondFileAccess, secondFileShare));
         }
 
         [TestMethod]
