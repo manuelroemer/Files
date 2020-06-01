@@ -238,6 +238,10 @@
         ///     <see cref="FileSystem"/> implementation.
         ///     This condition <b>may</b>, however, be enhanced by any <see cref="FileSystem"/>
         ///     implementation.
+        ///     
+        ///     --or--
+        ///     
+        ///     <paramref name="options"/> is an invalid <see cref="NameCollisionOption"/> value.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -368,6 +372,10 @@
         ///     <see cref="FileSystem"/> implementation.
         ///     This condition <b>may</b>, however, be enhanced by any <see cref="FileSystem"/>
         ///     implementation.
+        ///     
+        ///     --or--
+        ///     
+        ///     <paramref name="options"/> is an invalid <see cref="NameCollisionOption"/> value.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -504,6 +512,10 @@
         ///     
         ///     You can use the <see cref="FileSystem.PathInformation"/> property of this folder's
         ///     <see cref="StorageElement.FileSystem"/> property to determine which characters are allowed.
+        ///     
+        ///     --or--
+        ///     
+        ///     <paramref name="options"/> is an invalid <see cref="NameCollisionOption"/> value.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.

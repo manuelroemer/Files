@@ -259,9 +259,7 @@
         /// <param name="storageFile">The <see cref="StorageFile"/>.</param>
         /// <param name="fileShare">
         ///     Defines if and how other processes and streams can concurrently access the opened file.
-        ///     This value is only a suggestion to the underlying file system implementation.
-        ///     It is not guaranteed that the value is supported.
-        ///     If the specified value is unsupported, <see cref="FileShare.None"/> is used instead.
+        ///     This value should only be treated as a suggestion to the underlying file system.
         /// </param>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
@@ -274,6 +272,9 @@
         ///     <see cref="StorageFile.OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
         ///     <see cref="FileAccess.Read"/> and <paramref name="fileShare"/> parameters.
         /// </remarks>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="fileShare"/> is an invalid <see cref="FileShare"/> value.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
@@ -352,9 +353,7 @@
         /// <param name="storageFile">The <see cref="StorageFile"/>.</param>
         /// <param name="fileShare">
         ///     Defines if and how other processes and streams can concurrently access the opened file.
-        ///     This value is only a suggestion to the underlying file system implementation.
-        ///     It is not guaranteed that the value is supported.
-        ///     If the specified value is unsupported, <see cref="FileShare.None"/> is used instead.
+        ///     This value should only be treated as a suggestion to the underlying file system.
         /// </param>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
@@ -367,6 +366,9 @@
         ///     <see cref="StorageFile.OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
         ///     <see cref="FileAccess.Read"/> and <paramref name="fileShare"/> parameters.
         /// </remarks>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="fileShare"/> is an invalid <see cref="FileShare"/> value.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>

@@ -200,6 +200,10 @@
         ///     <see cref="FileSystem"/> implementation.
         ///     This condition <b>may</b>, however, be enhanced by any <see cref="FileSystem"/>
         ///     implementation.
+        ///     
+        ///     --or--
+        ///     
+        ///     <paramref name="options"/> is an invalid <see cref="NameCollisionOption"/> value.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -328,6 +332,10 @@
         ///     <see cref="FileSystem"/> implementation.
         ///     This condition <b>may</b>, however, be enhanced by any <see cref="FileSystem"/>
         ///     implementation.
+        ///     
+        ///     --or--
+        ///     
+        ///     <paramref name="options"/> is an invalid <see cref="NameCollisionOption"/> value.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -462,6 +470,10 @@
         ///     
         ///     You can use the <see cref="FileSystem.PathInformation"/> property of this file's
         ///     <see cref="StorageElement.FileSystem"/> property to determine which characters are allowed.
+        ///     
+        ///     --or--
+        ///     
+        ///     <paramref name="options"/> is an invalid <see cref="NameCollisionOption"/> value.
         /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
@@ -556,6 +568,9 @@
         ///     <see cref="OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
         ///     <paramref name="fileAccess"/> and <see cref="FileShare.None"/> parameters.
         /// </remarks>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="fileAccess"/> is an invalid <see cref="FileAccess"/> value.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
@@ -585,9 +600,7 @@
         /// </summary>
         /// <param name="fileShare">
         ///     Defines if and how other processes and streams can concurrently access the opened file.
-        ///     This value is only a suggestion to the underlying file system implementation.
-        ///     It is not guaranteed that the value is supported.
-        ///     If the specified value is unsupported, <see cref="FileShare.None"/> is used instead.
+        ///     This value should only be treated as a suggestion to the underlying file system.
         /// </param>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
@@ -600,6 +613,9 @@
         ///     <see cref="OpenAsync(FileAccess, FileShare, CancellationToken)"/> with the
         ///     <see cref="FileAccess.ReadWrite"/> and <paramref name="fileShare"/> parameters.
         /// </remarks>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="fileShare"/> is an invalid <see cref="FileShare"/> value.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
@@ -635,9 +651,7 @@
         /// </param>
         /// <param name="fileShare">
         ///     Defines if and how other processes and streams can concurrently access the opened file.
-        ///     This value is only a suggestion to the underlying file system implementation.
-        ///     It is not guaranteed that the value is supported.
-        ///     If the specified value is unsupported, <see cref="FileShare.None"/> is used instead.
+        ///     This value should only be treated as a suggestion to the underlying file system.
         /// </param>
         /// <param name="cancellationToken">
         ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
@@ -646,6 +660,13 @@
         ///     A <see cref="Stream"/> which, depending on the specified <see cref="FileAccess"/> value,
         ///     can be used to read and write bytes from and to the file.
         /// </returns>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="fileAccess"/> is an invalid <see cref="FileAccess"/> value.
+        ///     
+        ///     --or--
+        ///     
+        ///     <paramref name="fileShare"/> is an invalid <see cref="FileShare"/> value.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>

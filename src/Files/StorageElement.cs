@@ -299,6 +299,9 @@
         ///     <see cref="CreateAsync(bool, CreationCollisionOption, CancellationToken)"/> with the
         ///     <c>recursive: false</c> parameter.
         /// </remarks>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="options"/> is an invalid <see cref="CreationCollisionOption"/> value.
+        /// </exception>
         /// <exception cref="OperationCanceledException">
         ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
         /// </exception>
