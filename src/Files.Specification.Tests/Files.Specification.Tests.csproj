@@ -15,7 +15,7 @@ Learn more about Files at https://github.com/manuelroemer/Files.
 
   <ItemGroup>
     <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
-    <PackageReference Include="Shouldly" Version="3.0.2" />
+    <PackageReference Include="Shouldly" Version="4.0.0" />
     <ProjectReference Include="..\Files\Files.csproj" />
   </ItemGroup>
 
