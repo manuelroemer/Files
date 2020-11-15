@@ -1,4 +1,4 @@
-﻿namespace Files.Specification.Tests
+namespace Files.Specification.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -281,7 +281,7 @@
             await file.CreateAsync(recursive, options).ConfigureAwait(false);
             await file.ShouldExistAsync();
         }
-        
+
         [DataTestMethod]
         [DataRow(CreationCollisionOption.Fail)]
         [DataRow(CreationCollisionOption.ReplaceExisting)]
@@ -319,7 +319,7 @@
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.WriteTextAsync(Default.TextContent);
-            
+
             await file.CreateAsync(recursive, CreationCollisionOption.ReplaceExisting);
 
             await file.ShouldExistAsync();
@@ -333,7 +333,7 @@
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
             await file.WriteTextAsync(Default.TextContent);
-            
+
             await file.CreateAsync(recursive, CreationCollisionOption.UseExisting);
 
             await file.ShouldExistAsync();
@@ -497,7 +497,7 @@
             var dstFilePath = TestFolder.GetPath(Default.DstFileSegments);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await srcFile.CopyAsync(dstFilePath, options));
         }
-        
+
         [TestMethod]
         [DataRow(NameCollisionOption.Fail)]
         [DataRow(NameCollisionOption.ReplaceExisting)]
@@ -527,7 +527,7 @@
             var srcFile = await TestFolder.SetupFileAsync(Default.SrcFileSegments);
             await Should.ThrowAsync<IOException>(async () => await srcFile.CopyAsync(dstFile.Path, NameCollisionOption.Fail));
         }
-        
+
         [TestMethod]
         public async Task CopyAsync_ReplaceExistingAndExistingFileAtDestination_ReplacesExistingFile()
         {
@@ -800,6 +800,178 @@
 
         #endregion
 
+        #region CreateAndOpenAsync Tests
+
+        [TestMethod]
+        public async Task CreateAndOpenAsync_InvalidOptions_ThrowsArgumentException()
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await Should.ThrowAsync<ArgumentException>(async () =>
+            {
+                using (await file.CreateAndOpenAsync(Default.InvalidCreationCollisionOption))
+                { }
+            });
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail, true)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, true)]
+        [DataRow(CreationCollisionOption.UseExisting, true)]
+        [DataRow(CreationCollisionOption.Fail, false)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, false)]
+        [DataRow(CreationCollisionOption.UseExisting, false)]
+        public async Task CreateAndOpenAsync_NonExistingFile_CreatesFile(CreationCollisionOption options, bool recursive)
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            using (await file.CreateAndOpenAsync(recursive, options).ConfigureAwait(false))
+            { }
+            await file.ShouldExistAsync();
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail)]
+        [DataRow(CreationCollisionOption.ReplaceExisting)]
+        [DataRow(CreationCollisionOption.UseExisting)]
+        public async Task CreateAndOpenAsync_RecursiveAndNonExistingParent_CreatesFileAndParent(CreationCollisionOption options)
+        {
+            var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
+            using (await file.CreateAndOpenAsync(recursive: true, options: options))
+            { }
+            await file.ShouldExistAsync();
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail)]
+        [DataRow(CreationCollisionOption.ReplaceExisting)]
+        [DataRow(CreationCollisionOption.UseExisting)]
+        public async Task CreateAndOpenAsync_NotRecursiveAndNonExistingParent_ThrowsDirectoryNotFoundException(CreationCollisionOption options)
+        {
+            var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
+            await Should.ThrowAsync<DirectoryNotFoundException>(async () =>
+            {
+                using (await file.CreateAndOpenAsync(recursive: false, options))
+                { }
+            });
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task CreateAndOpenAsync_FailAndExistingFile_ThrowsIOException(bool recursive)
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await Should.ThrowAsync<IOException>(async () =>
+            {
+                using (await file.CreateAndOpenAsync(recursive, CreationCollisionOption.Fail))
+                { }
+            });
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task CreateAndOpenAsync_ReplaceExistingAndExistingFile_ReplacesFile(bool recursive)
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.WriteTextAsync(Default.TextContent);
+
+            using (await file.CreateAndOpenAsync(recursive, CreationCollisionOption.ReplaceExisting))
+            { }
+
+            await file.ShouldExistAsync();
+            await file.ShouldHaveEmptyContentAsync();
+        }
+
+        [DataTestMethod]
+        [DataRow(true)]
+        [DataRow(false)]
+        public async Task CreateAndOpenAsync_UseExistingAndExistingFile_DoesNothing(bool recursive)
+        {
+            var file = await TestFolder.SetupFileAsync(Default.FileName);
+            await file.WriteTextAsync(Default.TextContent);
+
+            using (await file.CreateAndOpenAsync(recursive, CreationCollisionOption.UseExisting))
+            { }
+
+            await file.ShouldExistAsync();
+            await file.ShouldHaveContentAsync(Default.TextContent);
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail, true)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, true)]
+        [DataRow(CreationCollisionOption.UseExisting, true)]
+        [DataRow(CreationCollisionOption.Fail, false)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, false)]
+        [DataRow(CreationCollisionOption.UseExisting, false)]
+        public async Task CreateAndOpenAsync_ConflictingFolderExistsAtLocation_ThrowsIOException(CreationCollisionOption options, bool recursive)
+        {
+            var file = await TestFolder.SetupFolderAndGetFileAtSameLocation(Default.SharedFileFolderName);
+            await Should.ThrowAsync<IOException>(async () =>
+            {
+                using (await file.CreateAndOpenAsync(recursive, options))
+                { }
+            });
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail, true)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, true)]
+        [DataRow(CreationCollisionOption.UseExisting, true)]
+        [DataRow(CreationCollisionOption.Fail, false)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, false)]
+        [DataRow(CreationCollisionOption.UseExisting, false)]
+        public async Task CreateAndOpenAsync_OpensStream(CreationCollisionOption options, bool recursive)
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            using var stream = await file.CreateAndOpenAsync(recursive, options);
+            stream.ShouldNotBeNull();
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail, true)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, true)]
+        [DataRow(CreationCollisionOption.UseExisting, true)]
+        [DataRow(CreationCollisionOption.Fail, false)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, false)]
+        [DataRow(CreationCollisionOption.UseExisting, false)]
+        public async Task CreateAndOpenAsync_OpensStreamToCorrectFile(CreationCollisionOption options, bool recursive)
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+            using (var stream = await file.CreateAndOpenAsync(recursive, options))
+            using (var writer = new StreamWriter(stream))
+            {
+                writer.Write(Default.TextContent);
+            }
+
+            await file.ShouldHaveContentAsync(Default.TextContent);
+        }
+
+        [DataTestMethod]
+        [DataRow(CreationCollisionOption.Fail, true)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, true)]
+        [DataRow(CreationCollisionOption.UseExisting, true)]
+        [DataRow(CreationCollisionOption.Fail, false)]
+        [DataRow(CreationCollisionOption.ReplaceExisting, false)]
+        [DataRow(CreationCollisionOption.UseExisting, false)]
+        public async Task CreateAndOpenAsync_StreamCanBeUsedForReadingAndWriting(CreationCollisionOption options, bool recursive)
+        {
+            var file = TestFolder.GetFile(Default.FileName);
+
+            using (var stream = await file.CreateAndOpenAsync(recursive, options))
+            using (var streamReader = new StreamReader(stream))
+            using (var streamWriter = new StreamWriter(stream))
+            {
+                await streamWriter.WriteAsync(Default.TextContent);
+                await streamWriter.FlushAsync();
+                stream.Position = 0;
+                var text = await streamReader.ReadToEndAsync();
+                text.ShouldBe(Default.TextContent);
+            }
+        }
+
+        #endregion
+
         #region OpenAsync Tests
 
         [TestMethod]
@@ -839,7 +1011,7 @@
         public async Task OpenAsync_ExistingFile_StreamCanBeUsedForReadingAndWriting()
         {
             var file = await TestFolder.SetupFileAsync(Default.FileName);
-            
+
             using (var writeStream = await file.OpenAsync())
             using (var streamWriter = new StreamWriter(writeStream))
             {
@@ -862,7 +1034,7 @@
             using var stream = await file.OpenAsync(FileAccess.Read);
             stream.CanRead.ShouldBeTrue();
         }
-        
+
         [TestMethod]
         public async Task OpenAsync_ExistingFileAndWriteFileAccess_ReturnsWriteableStream()
         {
@@ -870,7 +1042,7 @@
             using var stream = await file.OpenAsync(FileAccess.Write);
             stream.CanWrite.ShouldBeTrue();
         }
-        
+
         [TestMethod]
         public async Task OpenAsync_ExistingFileAndReadWriteFileAccess_ReturnsReadableAndWriteableStream()
         {
@@ -897,7 +1069,7 @@
         [DataRow(FileAccess.Read)]
         [DataRow(FileAccess.Write)]
         [DataRow(FileAccess.ReadWrite)]
-        public async Task SetAttributesAsync_NonExistingParent_ThrowsDirectoryNotFoundException(FileAccess fileAccess)
+        public async Task OpenAsync_NonExistingParent_ThrowsDirectoryNotFoundException(FileAccess fileAccess)
         {
             var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () =>
@@ -961,14 +1133,14 @@
             var file = TestFolder.GetFile(Default.FileName);
             await Should.ThrowAsync<FileNotFoundException>(async () => await file.ReadTextAsync());
         }
-        
+
         [TestMethod]
         public async Task ReadTextAsync_NonExistingParent_ThrowsDirectoryNotFoundException()
         {
             var file = TestFolder.GetFile(Default.FileWithNonExistingParentSegments);
             await Should.ThrowAsync<DirectoryNotFoundException>(async () => await file.ReadTextAsync());
         }
-        
+
         [TestMethod]
         public async Task ReadTextAsync_ConflictingFolderExistsAtLocation_ThrowsIOException()
         {
