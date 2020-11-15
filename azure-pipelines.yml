@@ -5,6 +5,7 @@ variables:
   buildConfiguration: 'Release'
   releaseBranch: 'refs/heads/master'
   nuGetArtifactName: 'NuGet Packages'
+  CI: True
 
 jobs:
 - job: Build
@@ -101,6 +102,6 @@ jobs:
     displayName: Push to NuGet
     inputs:
       command: 'push'
-      packagesToPush: '$(System.ArtifactsDirectory)/**/*.nupkg'
+      packagesToPush: '$(System.ArtifactsDirectory)/**/*.*nupkg'
       nuGetFeedType: 'external'
       publishFeedCredentials: 'NuGet'
