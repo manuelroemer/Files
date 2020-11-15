@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
@@ -10,5 +9,4 @@
   <ItemGroup>
     <PackageReference Include="Nuke.Common" Version="5.0.0" />
   </ItemGroup>
-
 </Project>

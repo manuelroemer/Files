@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>
       netstandard2.0;
@@ -25,5 +24,4 @@ Learn more about Files at https://github.com/manuelroemer/Files.
 
   <Import Project="..\Files.Shared\Files.Shared.projitems" />
   <Import Project="..\Files.Shared.PhysicalStoragePath\Files.Shared.PhysicalStoragePath.projitems" />
-
 </Project>

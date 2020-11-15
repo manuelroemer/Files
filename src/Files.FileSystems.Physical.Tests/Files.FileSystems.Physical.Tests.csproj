@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>
       netcoreapp2.0;
@@ -21,5 +20,4 @@
     <ProjectReference Include="..\Files.Specification.Tests\Files.Specification.Tests.csproj" />
     <ProjectReference Include="..\Files\Files.csproj" />
   </ItemGroup>
-
 </Project>

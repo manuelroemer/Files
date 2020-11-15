@@ -1,5 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <TargetFrameworks>netstandard2.0;netstandard2.1;net5.0</TargetFrameworks>
     <Description>
@@ -13,5 +12,4 @@ Learn more about Files at https://github.com/manuelroemer/Files.
   </PropertyGroup>
 
   <Import Project="..\Files.Shared\Files.Shared.projitems" />
-
 </Project>
