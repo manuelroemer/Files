@@ -99,6 +99,33 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
+            CreateInternal(recursive, options, cancellationToken);
+        }
+
+        public override async Task<Stream> CreateAndOpenAsync(
+            bool recursive,
+            CreationCollisionOption options,
+            CancellationToken cancellationToken = default
+        )
+        {
+            if (!EnumInfo.IsDefined(options))
+            {
+                throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
+            }
+
+            lock (_inMemoryFileSystem.Storage)
+            {
+                CreateInternal(recursive, options, cancellationToken);
+                return OpenFileContentStream(FileAccess.ReadWrite, replaceExistingContent: false, cancellationToken);
+            }
+        }
+
+        private void CreateInternal(
+            bool recursive,
+            CreationCollisionOption options,
+            CancellationToken cancellationToken
+        )
+        {
             cancellationToken.ThrowIfCancellationRequested();
 
             lock (_inMemoryFileSystem.Storage)
@@ -106,7 +133,7 @@ namespace Files.FileSystems.InMemory
                 if (recursive)
                 {
                     var inMemoryParent = (InMemoryStorageFolder)Parent;
-                    inMemoryParent.CreateInternalNotLocking(
+                    inMemoryParent.CreateInternal(
                         recursive: true,
                         CreationCollisionOption.UseExisting,
                         cancellationToken
