@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using Files.Shared;
@@ -91,14 +91,14 @@ namespace Files.FileSystems.InMemory.FsTree
                 throw new IOException(ExceptionStrings.StorageElement.CannotMoveToRootLocation());
             }
 
-            FolderNode? currentParent = newParentNode;
+            var currentParent = newParentNode;
             do
             {
                 if (ReferenceEquals(currentParent, this))
                 {
                     throw new IOException(ExceptionStrings.StorageFolder.CannotMoveParentFolderIntoChildFolder());
                 }
-            } while ((currentParent = currentParent.Parent) is not null);
+            } while ((currentParent = currentParent!.Parent) is not null);
 
             // Moving can be done by re-registering the node associations. There is no need
             // to create/clone new nodes.
