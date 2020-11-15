@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -167,9 +167,9 @@ class Build : NukeBuild
                     "Microsoft Visual Studio"
                 );
 
-                var exePath = Glob.Files(vsBasePath, "**/vstest.console.exe", GlobOptions.CaseInsensitive)
+                var exePath = Glob.Files(vsBasePath, "**/TestPlatform/**/vstest.console.exe", GlobOptions.CaseInsensitive)
                     .OrderBy(path => path)
-                    .Last();
+                    .First();
 
                 return Path.Combine(vsBasePath, exePath);
             }
