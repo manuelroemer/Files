@@ -6,7 +6,8 @@
       netcoreapp2.1;
       netcoreapp2.2;
       netcoreapp3.0;
-      netcoreapp3.1
+      netcoreapp3.1;
+      net5.0
     </TargetFrameworks>
     <TargetFrameworks Condition=" '$(OS)' == 'Windows_NT' ">
       $(TargetFrameworks);
@@ -15,6 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Shouldly" Version="4.0.1" />
     <ProjectReference Include="..\Files.FileSystems.Physical\Files.FileSystems.Physical.csproj" />
     <ProjectReference Include="..\Files.Specification.Tests\Files.Specification.Tests.csproj" />
     <ProjectReference Include="..\Files\Files.csproj" />

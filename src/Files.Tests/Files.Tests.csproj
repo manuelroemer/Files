@@ -1,11 +1,16 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netcoreapp3.1</TargetFramework>
+    <TargetFramework>net5.0</TargetFramework>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Files\Files.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Update="Moq" Version="4.15.1" />
+    <PackageReference Update="Shouldly" Version="4.0.1" />
   </ItemGroup>
 
 </Project>

@@ -7,7 +7,8 @@
       netcoreapp2.0;
       netcoreapp2.1;
       netcoreapp2.2;
-      netcoreapp3.0
+      netcoreapp3.0;
+      net5.0
     </TargetFrameworks>
     <Description>
 A modern, immutable, async-first abstraction of hierarchical file systems with a consistent and developer friendly API that allows seamless switching between multiple underlying file system manifestations, while also fixing and hiding the flaws and inconsistencies of the wrapped APIs.
