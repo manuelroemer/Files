@@ -20,10 +20,11 @@
     <PackageReleaseNotes>https://github.com/manuelroemer/Files/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <IsPackable>true</IsPackable>
+    <PackageIcon>Icon256x256.png</PackageIcon>
     
     <IsTestProject>$(MSBuildProjectName.Contains('Test'))</IsTestProject>
   </PropertyGroup>
-  
+
   <PropertyGroup Condition=" $(Configuration) == 'Release' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
@@ -37,5 +38,9 @@
   <ItemGroup>
     <PackageReference Include="Nullable" Version="1.*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="*" PrivateAssets="All" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="..\..\assets\Icon256x256.png" Pack="true" PackagePath="\" Visible="False" />
   </ItemGroup>
 </Project>

@@ -11,20 +11,29 @@ code base.
 * Added `StorageFile.CreateAndOpenAsync` overloads which allow to (pseudo-)atomically create and
   open a file (atomicity depends on the corresponding `FileSystem` implementation).
 * Fixed `cancellationToken`s not being passed everywhere.
+* Added a package icon.
 
 ### Files.FileSystems.Physical
 
 * Added `net5.0` TFM.
 * Fixed `cancellationToken`s not being passed everywhere.
+* Added a package icon.
 
 ### Files.FileSystems.WindowsStorage
 
 * Fixed scenarios where a wrong exception type could be thrown (throw `IOException` by default when the
   Windows API returns a generic exception).
+* Added a package icon.
 
 ### Files.FileSystems.InMemory
 
 * Added `net5.0` TFM.
+* Added a package icon.
+
+### Files.Specification.Tests
+
+* Added `net5.0` TFM.
+* Added a package icon.
 
 
 
