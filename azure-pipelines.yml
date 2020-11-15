@@ -5,7 +5,7 @@ variables:
   buildConfiguration: 'Release'
   releaseBranch: 'refs/heads/master'
   nuGetArtifactName: 'NuGet Packages'
-  CI: True
+  CI: true
 
 jobs:
 - job: Build
