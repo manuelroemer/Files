@@ -1,4 +1,4 @@
-﻿namespace Files.FileSystems.WindowsStorage.Utilities
+namespace Files.FileSystems.WindowsStorage.Utilities
 {
     using System;
     using System.IO;
@@ -55,14 +55,29 @@
 
         internal static Exception Convert(Exception ex) => ex.HResult switch
         {
-            ErrorElementAlreadyExists => new IOException(ex.Message, ex),
             ErrorAccessDenied => new UnauthorizedAccessException(ex.Message, ex),
+            ErrorElementAlreadyExists => new IOException(ex.Message, ex),
             ErrorOutOfMemory => new IOException(ex.Message, ex),
             ErrorDiskFull => new IOException(ex.Message, ex),
             ErrorSharingViolation => new IOException(ex.Message, ex),
             ErrorUnableToRemoveReplaced => new IOException(ex.Message, ex),
             ErrorFail => new IOException(ex.Message, ex),
-            _ => ex
+
+            // The following general fallback to an IOException might cause problems in the future,
+            // e.g. when we run into an exception with an HResult signifying an argument error
+            // or something alike. Such errors potentially shouldn't be converted to IOExceptions.
+            //
+            // With that being said, why do we have this fallback?
+            // While working on the 0.2.0 release, some tests started to fail because Windows
+            // returned weird HResults after an update that don't have anything to do with
+            // file I/O. Whatever is going on under the hood - in most cases, an exception
+            // should be translated into an IOException. Should other cases (e.g. argument exceptions)
+            // ever occur, they can be added as special cases above.
+            // I'm also not removing the (redundant) HResult switches returning
+            // an IOException above - these are HResults where we *definitely* know that we want
+            // an IOException. If the default fallback ever changes for some reason, there's no need to
+            // look these error codes up again.
+            _ => new IOException(ex.Message, ex),
         };
     }
 }

@@ -17,7 +17,8 @@ code base.
 
 ### Files.FileSystems.WindowsStorage
 
-_No changes._
+* Fixed scenarios where a wrong exception type could be thrown (throw `IOException` by default when the
+  Windows API returns a generic exception).
 
 ### Files.FileSystems.InMemory
 
