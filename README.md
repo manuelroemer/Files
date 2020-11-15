@@ -1,10 +1,10 @@
-# Files &nbsp; [![Nuget](https://img.shields.io/nuget/v/Files)](https://www.nuget.org/packages/Files) [![GitHub License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) ![Nullable Reference Types](https://img.shields.io/badge/%E2%9C%93-Nullable%20Reference%20Types-success) [![Build Status](https://dev.azure.com/ManuelRoemer/Files/_apis/build/status/Files%20CI?branchName=master)](https://dev.azure.com/ManuelRoemer/Files/_build/latest?definitionId=20&branchName=master)
+# ![Icon](assets/Icon64x64.png) Files &nbsp; [![Nuget](https://img.shields.io/nuget/v/Files)](https://www.nuget.org/packages/Files) [![GitHub License](https://img.shields.io/badge/license-MIT-blue.svg)](./LICENSE) ![Nullable Reference Types](https://img.shields.io/badge/%E2%9C%93-Nullable%20Reference%20Types-success) [![Build Status](https://dev.azure.com/ManuelRoemer/Files/_apis/build/status/Files%20CI?branchName=master)](https://dev.azure.com/ManuelRoemer/Files/_build/latest?definitionId=20&branchName=master)
 
 Files is a **modern file system abstraction** for .NET. As such, Files has the following key features:
 
 ✨ **No Tight Coupling to a Concrete File System**:<br/>
 Easily switch between **different file system implementations**, including the local machine's
-**physical file system**, an implementation using **UWP**'s `Windows.Storage` API and an 
+**physical file system**, an implementation using **UWP**'s `Windows.Storage` API and an
 **in-memory** solution for **testing**!
 And of course, you can easily create **your own** implementation if necessary.
 
