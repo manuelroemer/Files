@@ -90,7 +90,7 @@
         {
             try
             {
-                if (_testFolder is object)
+                if (_testFolder is not null)
                 {
                     await LogFinalTestFolderStateAsync();
                     await _testFolder.DeleteAsync(DeletionOption.IgnoreMissing);

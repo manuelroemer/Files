@@ -358,7 +358,7 @@
                 try
                 {
                     var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-                    if (folder is object)
+                    if (folder is not null)
                     {
                         await folder.DeleteAsync(StorageDeleteOption.PermanentDelete).AsAwaitable(cancellationToken);
                     }

@@ -98,7 +98,7 @@ namespace Files.FileSystems.InMemory.FsTree
                 {
                     throw new IOException(ExceptionStrings.StorageFolder.CannotMoveParentFolderIntoChildFolder());
                 }
-            } while ((currentParent = currentParent.Parent) is object);
+            } while ((currentParent = currentParent.Parent) is not null);
 
             // Moving can be done by re-registering the node associations. There is no need
             // to create/clone new nodes.

@@ -276,7 +276,7 @@
                 try
                 {
                     var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-                    if (file is object)
+                    if (file is not null)
                     {
                         await file.DeleteAsync(StorageDeleteOption.PermanentDelete).AsAwaitable(cancellationToken);
                     }

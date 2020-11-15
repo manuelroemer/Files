@@ -110,7 +110,7 @@
                 // Directory.CreateDirectory is recursive by default.
                 // If recursive is false, we must manually ensure that the parent directory exists (if this is not
                 // a root directory).
-                if (!recursive && _fullParentPath is object && !Directory.Exists(_fullParentPath.ToString()))
+                if (!recursive && _fullParentPath is not null && !Directory.Exists(_fullParentPath.ToString()))
                 {
                     throw new DirectoryNotFoundException();
                 }

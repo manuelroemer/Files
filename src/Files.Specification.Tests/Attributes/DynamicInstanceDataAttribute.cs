@@ -57,7 +57,7 @@
 
         public string? GetDisplayName(MethodInfo methodInfo, object[] data)
         {
-            if (data is object)
+            if (data is not null)
             {
                 return $"{methodInfo.Name}({string.Join(", ", data)})";
             }

@@ -122,7 +122,7 @@ namespace Files.FileSystems.InMemory
             // Recursively call this method until all parent folders exist (if required).
             // It's enough to check whether an ElementNode exists because the storage will throw on
             // conflicting Node types later.
-            if (recursive && Parent is object && !_storage.HasElementNode(Parent.Path))
+            if (recursive && Parent is not null && !_storage.HasElementNode(Parent.Path))
             {
                 var inMemoryParent = (InMemoryStorageFolder)Parent;
                 inMemoryParent.CreateInternalNotLocking(
