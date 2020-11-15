@@ -4,6 +4,7 @@
 
 This release adds targets for .NET 5.0. Internally, C# 9.0 specific features have been added to the
 code base.
+The `StorageFile` has been extended with `CreateAndOpenAsync` overloads.
 
 ### Files
 
