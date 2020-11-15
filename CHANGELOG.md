@@ -8,6 +8,8 @@ code base.
 ### Files
 
 * Added `net5.0` TFM.
+* Added `StorageFile.CreateAndOpenAsync` overloads which allow to (pseudo-)atomically create and
+  open a file (atomicity depends on the corresponding `FileSystem` implementation).
 * Fixed `cancellationToken`s not being passed everywhere.
 
 ### Files.FileSystems.Physical
