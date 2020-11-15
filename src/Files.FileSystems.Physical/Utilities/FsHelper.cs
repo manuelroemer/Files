@@ -33,6 +33,12 @@
         public static string? GetRealFileName(string fullPath)
         {
             var parentPath = Path.GetDirectoryName(fullPath);
+            if (parentPath is null)
+            {
+                // fullPath is a root. We cannot get a parent directory here from which we retrieve its children.
+                return null;
+            }
+
             var fileName = Path.GetFileName(fullPath);
             var realChildren = Directory.GetFiles(parentPath, searchPattern: fileName);
 
@@ -50,6 +56,12 @@
         public static string? GetRealDirectoryName(string fullPath)
         {
             var parentPath = Path.GetDirectoryName(fullPath);
+            if (parentPath is null)
+            {
+                // fullPath is a root. We cannot get a parent directory here from which we retrieve its children.
+                return null;
+            }
+
             var directoryName = Path.GetFileName(fullPath);
             var realChildren = Directory.GetDirectories(parentPath, searchPattern: directoryName);
 

@@ -72,7 +72,7 @@
 
                 cancellationToken.ThrowIfCancellationRequested();
                 File.SetAttributes(_fullPath.ToString(), attributes);
-            });
+            }, cancellationToken);
         }
 
         public override async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
@@ -310,7 +310,7 @@
 
         public override async Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
         {
-            using var stream = await OpenAsync(FileAccess.Read).ConfigureAwait(false);
+            using var stream = await OpenAsync(FileAccess.Read, cancellationToken).ConfigureAwait(false);
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms).ConfigureAwait(false);
             return ms.ToArray();

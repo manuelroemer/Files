@@ -31,7 +31,7 @@ namespace Files.Shared.PhysicalStoragePath.Utilities
         // For the WindowsStorage project.
         // Windows is always assumed to be case-insensitive.
         // Not doing the full check as below, since writing files is harder to do in a UWP sandbox.
-        internal static bool IsCaseSensitive { get; } = false;
+        internal static bool IsCaseSensitive { get; }
 #else
         internal static bool IsCaseSensitive { get; } = GetIsCaseSensitive();
 

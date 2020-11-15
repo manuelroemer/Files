@@ -2,7 +2,6 @@
 {
     using System;
     using System.IO;
-    using System.Security.Cryptography;
     using System.Threading;
     using System.Threading.Tasks;
     using Files.Shared;
@@ -61,7 +60,7 @@
         public byte[] ToArray() =>
             _ms.ToArray();
 
-        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+        public override IAsyncResult BeginRead(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
         {
             EnsureCanRead();
             return _ms.BeginRead(buffer, offset, count, callback, state);
@@ -88,7 +87,7 @@
             return _ms.ReadByte();
         }
 
-        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback callback, object state)
+        public override IAsyncResult BeginWrite(byte[] buffer, int offset, int count, AsyncCallback? callback, object? state)
         {
             EnsureCanWrite();
             return _ms.BeginWrite(buffer, offset, count, callback, state);

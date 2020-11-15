@@ -40,7 +40,7 @@
             stream.Disposed += Stream_Disposed;
             return stream;
 
-            void Stream_Disposed(object sender, EventArgs e)
+            void Stream_Disposed(object? sender, EventArgs e)
             {
                 stream.Disposed -= Stream_Disposed;
 
