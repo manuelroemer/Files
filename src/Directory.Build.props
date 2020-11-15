@@ -1,5 +1,4 @@
 <Project>
-
   <PropertyGroup>
     <LangVersion>latest</LangVersion>
     <Nullable>enable</Nullable>
@@ -39,16 +38,4 @@
     <PackageReference Include="Nullable" Version="1.*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="*" PrivateAssets="All" />
   </ItemGroup>
-
-  <ItemGroup Condition=" $(IsTestProject) ">
-    <!-- Do not upgrade Microsoft.NET.Test.Sdk without reason. 16.2.0 is currently the last version
-         supporting every single TFM for which this project has tests. -->
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
-    <PackageReference Include="MSTest.TestAdapter" Version="2.*" />
-    <PackageReference Include="MSTest.TestFramework" Version="2.*" />
-    <PackageReference Include="Shouldly" Version="3.*" />
-    <PackageReference Include="Moq" Version="4.*" />
-    <PackageReference Include="coverlet.collector" Version="1.*" PrivateAssets="All" />
-  </ItemGroup>
-
 </Project>
