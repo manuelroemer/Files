@@ -1,4 +1,4 @@
-﻿namespace Files.FileSystems.Physical
+namespace Files.FileSystems.Physical
 {
     using System;
     using System.IO;
@@ -81,7 +81,18 @@
             return Task.Run(() => File.Exists(_fullPath.ToString()), cancellationToken);
         }
 
-        public override Task CreateAsync(
+        public override async Task CreateAsync(
+            bool recursive,
+            CreationCollisionOption options,
+            CancellationToken cancellationToken = default
+        )
+        {
+            using (await CreateAndOpenAsync(recursive, options, cancellationToken).ConfigureAwait(false))
+            {
+            }
+        }
+
+        public override Task<Stream> CreateAndOpenAsync(
             bool recursive,
             CreationCollisionOption options,
             CancellationToken cancellationToken = default
@@ -92,7 +103,7 @@
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            return Task.Run(() =>
+            return Task.Run<Stream>(() =>
             {
                 if (recursive)
                 {
@@ -102,7 +113,7 @@
                 try
                 {
                     cancellationToken.ThrowIfCancellationRequested();
-                    new FileStream(_fullPath.ToString(), options.ToFileMode()).Dispose();
+                    return new FileStream(_fullPath.ToString(), options.ToFileMode());
                 }
                 catch (UnauthorizedAccessException ex)
                 {
