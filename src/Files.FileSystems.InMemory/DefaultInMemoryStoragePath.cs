@@ -1,4 +1,4 @@
-﻿namespace Files.FileSystems.InMemory
+namespace Files.FileSystems.InMemory
 {
     using System;
     using System.Collections.Generic;
@@ -152,7 +152,7 @@
 
                 bool ShouldRemove()
                 {
-                    for (int i = 0; i < path.Length - 1; i++)
+                    for (var i = 0; i < path.Length - 1; i++)
                     {
                         if (IsDirectorySeparator(path[i]) && IsDirectorySeparator(path[i + 1]))
                         {
@@ -166,7 +166,7 @@
                 {
                     var sb = new StringBuilder(path.Length);
 
-                    for (int i = 0; i < path.Length - 1; i++)
+                    for (var i = 0; i < path.Length - 1; i++)
                     {
                         // Skip two consecutive separators.
                         if (IsDirectorySeparator(path[i]) && IsDirectorySeparator(path[i + 1]))
