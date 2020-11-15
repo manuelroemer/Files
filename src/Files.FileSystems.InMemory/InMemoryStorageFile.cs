@@ -211,12 +211,7 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            lock (_inMemoryFileSystem.Storage)
-            {
-                return MoveInternal(destinationPath, options, cancellationToken);
-            }
+            return MoveInternal(destinationPath, options, cancellationToken);
         }
 
         public override async Task<StorageFile> RenameAsync(
@@ -244,13 +239,8 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            lock (_inMemoryFileSystem.Storage)
-            {
-                var destinationPath = Parent.Path.FullPath.Join(newName);
-                return MoveInternal(destinationPath, options, cancellationToken);
-            }
+            var destinationPath = Parent.Path.FullPath.Join(newName);
+            return MoveInternal(destinationPath, options, cancellationToken);
         }
 
         private StorageFile MoveInternal(
@@ -268,9 +258,12 @@ namespace Files.FileSystems.InMemory
                 _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
             };
 
-            var fileNode = _storage.GetFileNode(Path);
-            fileNode.Move(destinationPath, replaceExisting);
-            return FileSystem.GetFile(fileNode.Path.FullPath);
+            lock (_inMemoryFileSystem.Storage)
+            {
+                var fileNode = _storage.GetFileNode(Path);
+                fileNode.Move(destinationPath, replaceExisting);
+                return FileSystem.GetFile(fileNode.Path.FullPath);
+            }
         }
 
         public override async Task DeleteAsync(DeletionOption options, CancellationToken cancellationToken = default)
