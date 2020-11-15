@@ -11,28 +11,28 @@ And of course, you can easily create **your own** implementation if necessary.
 
 ✨ **Immutable by Default**:<br/>
 In comparison to .NET's `FileInfo`/`DirectoryInfo` and UWP's `IStorageFile`/`IStorageFolder`,
-the core members of Files are immutable by default, meaning that **no unexpected mutations** can
-happen when you, for example, move a file.
+the core members of Files are immutable. In comparison to `FileInfo`, moving a file with File's
+API doesn't mutate the `FileInfo.FullPath` equivalent.
 Interacting with a file system suddenly becomes predictable!
 
 ✨ **Async First**:<br/>
-All I/O operations are, whenever possible, **executed asynchronously**.
-This prevents unexpected blocking when, for example, dealing with unexpectedly large files
-or network drives.
+When working with a file system, seemingly harmless code can easily end up blocking, for example
+when the application encounters a large number of files or when data is stored on network drives.
+Files' async-first API entirely removes such problems.
 
 ✨ **Consistent API Design**:<br/>
-Files fixes many inconsistencies of .NET's APIs.
+Files fixes many inconsistencies of .NET's file system APIs.
 Have you ever wondered why `System.IO.File` throws `UnauthorizedAccessException`s when a conflicting folder exists?
-Why `System.IO.Directory` throws an `IOException` in the same scenario?
+Why `System.IO.Directory` throws an `IOException` in the same situation?
 Why you can move directories to the same location, but get an exception when you try the same with files?
-*No?* Well, nontheless, Files **fixes all of these inconsistencies** and **a lot more** (escpecially
+*No?* Well, nontheless, Files **fixes all of these inconsistencies** and **a lot more** (especially
 in the UWP area) and provides a thought-through API surface, starting with class design and ending
 with potential exceptions.
 
 ✨ **Thorougly Tested**:<br/>
 Each `FileSystem` implementation is tested against a self-imposed specification.
-The tests run on **3 different OSs** (Windows (Win32/UWP), Ubuntu, macOS) using up to
-**5 different .NET SDKs** in order to catch and fix platform-specific problems (of which there are
+The tests run on **3 different OSs** (Windows (Win32/UWP), Ubuntu, macOS) using both modern and legacy
+.NET SDKs in order to catch and fix platform-specific problems (of which there are
 many) and provide a **consistent developer experience**.
 
 ✨ **.NET Standard 2.0 and Polyfill Support**:<br/>
@@ -41,10 +41,8 @@ In addition, it backports several APIs which have been added to newer .NET SDKs 
 `System.IO.Path.Join(...)` method.
 
 ✨ **Extensively Documented**:<br/>
-Incredible effort has been put into documenting the library's members.
-You **will not find** a single public class/property/method/etc. which is not **documented via XML comments**.
-This includes parameters, return types, and, most importantly, possible exceptions.<br/>
-In addition, the entire library uses **Nullable Reference Types**.
+A lot of effort has been put into documenting the library with **XML comments** and annotating it with
+**Nullable Reference Types**.
 
 
 
