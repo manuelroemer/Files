@@ -29,7 +29,7 @@ Why you can move directories to the same location, but get an exception when you
 in the UWP area) and provides a thought-through API surface, starting with class design and ending
 with potential exceptions.
 
-✨ **Thorougly Tested**:<br/>
+✨ **Thoroughly Tested**:<br/>
 Each `FileSystem` implementation is tested against a self-imposed specification.
 The tests run on **3 different OSs** (Windows (Win32/UWP), Ubuntu, macOS) using both modern and legacy
 .NET SDKs in order to catch and fix platform-specific problems (of which there are
