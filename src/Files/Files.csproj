@@ -4,7 +4,7 @@
     <Description>
 A modern, immutable, async-first abstraction of hierarchical file systems with a consistent and developer friendly API that allows seamless switching between multiple underlying file system manifestations, while also fixing and hiding the flaws and inconsistencies of the wrapped APIs.
 
-This package provides the Core API of the Files libraries which defines the API contract and abstractions. In addition, it provides several extensions and conveniences which simplify working the Core API.
+This package provides the Core API of the Files libraries which defines the API contract and abstractions. In addition, it provides several extensions and conveniences which simplify working with the Core API.
 You should use the abstractions provided by this package for your implementations. Nontheless, you must also install a package which provides a concrete implementation of these file system abstractions.
 
 Learn more about Files at https://github.com/manuelroemer/Files.
