@@ -1,4 +1,4 @@
-﻿namespace Files
+namespace Files
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
@@ -90,7 +90,7 @@
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="pathInformation"/> is <see langword="null"/>.
         /// </exception>
-        public FileSystem(PathInformation pathInformation)
+        protected FileSystem(PathInformation pathInformation)
         {
             PathInformation = pathInformation ?? throw new ArgumentNullException(nameof(pathInformation));
         }

@@ -1,5 +1,3 @@
-﻿using System;
-
 namespace Files
 {
     /// <summary>
@@ -10,11 +8,11 @@ namespace Files
         /// <summary>
         ///     The path is an absolute path.
         /// </summary>
-        Absolute = UriKind.Absolute,
+        Absolute,
 
         /// <summary>
         ///     The path is a relative path.
         /// </summary>
-        Relative = UriKind.Relative,
+        Relative,
     }
 }

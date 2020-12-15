@@ -1,15 +1,10 @@
 <Project>
   <PropertyGroup>
-    <LangVersion>latest</LangVersion>
+    <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
 
-    <SignAssembly>true</SignAssembly>
-    <AssemblyOriginatorKeyFile>../key.snk</AssemblyOriginatorKeyFile>
-    <CodeAnalysisRuleSet>../Default.ruleset</CodeAnalysisRuleSet>
-
-    <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <NoWarn>$(NoWarn);CS1591</NoWarn>
-    
     <Product>Files</Product>
     <Version>0.1.0</Version>
     <Authors>Manuel Römer</Authors>
@@ -19,11 +14,28 @@
     <PackageProjectUrl>https://github.com/manuelroemer/Files</PackageProjectUrl>
     <PackageReleaseNotes>https://github.com/manuelroemer/Files/blob/master/CHANGELOG.md</PackageReleaseNotes>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <IsPackable>true</IsPackable>
+    <PackageIcon>Icon256x256.png</PackageIcon>
+
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);CS1591</NoWarn>
+
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>../key.snk</AssemblyOriginatorKeyFile>
     
+    <CodeAnalysisRuleSet>../Default.ruleset</CodeAnalysisRuleSet>
+
     <IsTestProject>$(MSBuildProjectName.Contains('Test'))</IsTestProject>
   </PropertyGroup>
-  
+
+  <PropertyGroup Condition=" $(CI) == 'true' ">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+
   <PropertyGroup Condition=" $(Configuration) == 'Release' ">
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
@@ -35,7 +47,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Nullable" Version="1.*" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="*" PrivateAssets="All" />
+    <PackageReference Include="Nullable" Version="*" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="*" PrivateAssets="All"/>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Include="..\..\assets\Icon256x256.png" Pack="true" PackagePath="\" Visible="False" />
   </ItemGroup>
 </Project>

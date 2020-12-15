@@ -1,4 +1,4 @@
-﻿namespace Files
+namespace Files
 {
     using System;
     using System.Collections.Generic;
@@ -35,7 +35,7 @@
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="fileSystem"/> or <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
-        public StorageFolder(FileSystem fileSystem, StoragePath path)
+        protected StorageFolder(FileSystem fileSystem, StoragePath path)
             : base(fileSystem, path)
         {
             _parentLazy = new Lazy<StorageFolder?>(() =>

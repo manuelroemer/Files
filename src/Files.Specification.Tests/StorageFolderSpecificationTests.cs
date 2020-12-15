@@ -1,4 +1,4 @@
-﻿namespace Files.Specification.Tests
+namespace Files.Specification.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -21,7 +21,7 @@
                 .Distinct()
                 .ToArray();
 
-        public StorageFolderSpecificationTests(FileSystemTestContext context)
+        protected StorageFolderSpecificationTests(FileSystemTestContext context)
             : base(context) { }
 
         #region FileSystem Tests

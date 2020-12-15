@@ -1,4 +1,4 @@
-﻿#pragma warning disable CS1998
+#pragma warning disable CS1998
 // Async method lacks 'await' operators and will run synchronously.
 // The entire InMemoryFileSystem implementation is synchronous. Nontheless, exceptions should be
 // propagated via Task instances.
@@ -98,12 +98,7 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            lock (_inMemoryFileSystem.Storage)
-            {
-                CreateInternalNotLocking(recursive, options, cancellationToken);
-            }
+            CreateInternal(recursive, options, cancellationToken);
         }
 
         /// <summary>
@@ -111,7 +106,7 @@ namespace Files.FileSystems.InMemory
         ///     Extracted since this method must be callable recursively by itself and InMemoryStorageFile.
         ///     Therefore, no lock must be aquired.
         /// </summary>
-        internal void CreateInternalNotLocking(
+        internal void CreateInternal(
             bool recursive,
             CreationCollisionOption options,
             CancellationToken cancellationToken
@@ -119,32 +114,35 @@ namespace Files.FileSystems.InMemory
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            // Recursively call this method until all parent folders exist (if required).
-            // It's enough to check whether an ElementNode exists because the storage will throw on
-            // conflicting Node types later.
-            if (recursive && Parent is not null && !_storage.HasElementNode(Parent.Path))
+            lock (_inMemoryFileSystem.Storage)
             {
-                var inMemoryParent = (InMemoryStorageFolder)Parent;
-                inMemoryParent.CreateInternalNotLocking(
-                    recursive: true,
-                    CreationCollisionOption.UseExisting,
-                    cancellationToken
-                );
-            }
+                // Recursively call this method until all parent folders exist (if required).
+                // It's enough to check whether an ElementNode exists because the storage will throw on
+                // conflicting Node types later.
+                if (recursive && Parent is not null && !_storage.HasElementNode(Parent.Path))
+                {
+                    var inMemoryParent = (InMemoryStorageFolder)Parent;
+                    inMemoryParent.CreateInternal(
+                        recursive: true,
+                        CreationCollisionOption.UseExisting,
+                        cancellationToken
+                    );
+                }
 
-            switch (options)
-            {
-                case CreationCollisionOption.Fail:
-                    FailImpl();
-                    break;
-                case CreationCollisionOption.ReplaceExisting:
-                    ReplaceExistingImpl();
-                    break;
-                case CreationCollisionOption.UseExisting:
-                    UseExistingImpl();
-                    break;
-                default:
-                    throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+                switch (options)
+                {
+                    case CreationCollisionOption.Fail:
+                        FailImpl();
+                        break;
+                    case CreationCollisionOption.ReplaceExisting:
+                        ReplaceExistingImpl();
+                        break;
+                    case CreationCollisionOption.UseExisting:
+                        UseExistingImpl();
+                        break;
+                    default:
+                        throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options));
+                }
             }
 
             void FailImpl()
@@ -229,32 +227,7 @@ namespace Files.FileSystems.InMemory
                 throw new ArgumentException(ExceptionStrings.Enum.UndefinedValue(options), nameof(options));
             }
 
-            cancellationToken.ThrowIfCancellationRequested();
-
-            lock (_inMemoryFileSystem.Storage)
-            {
-                return MoveInternalNotLocking(destinationPath, options, cancellationToken);
-            }
-        }
-
-        private StorageFolder MoveInternalNotLocking(
-            StoragePath destinationPath,
-            NameCollisionOption options,
-            CancellationToken cancellationToken
-        )
-        {
-            cancellationToken.ThrowIfCancellationRequested();
-
-            var replaceExisting = options switch
-            {
-                NameCollisionOption.Fail => false,
-                NameCollisionOption.ReplaceExisting => true,
-                _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
-            };
-            
-            var folderNode = _storage.GetFolderNode(Path);
-            folderNode.Move(destinationPath, replaceExisting);
-            return FileSystem.GetFolder(folderNode.Path.FullPath);
+            return MoveInternal(destinationPath, options, cancellationToken);
         }
 
         public override async Task<StorageFolder> RenameAsync(
@@ -288,7 +261,30 @@ namespace Files.FileSystems.InMemory
 
             lock (_inMemoryFileSystem.Storage)
             {
-                return MoveInternalNotLocking(destinationPath, options, cancellationToken);
+                return MoveInternal(destinationPath, options, cancellationToken);
+            }
+        }
+
+        private StorageFolder MoveInternal(
+            StoragePath destinationPath,
+            NameCollisionOption options,
+            CancellationToken cancellationToken
+        )
+        {
+            cancellationToken.ThrowIfCancellationRequested();
+
+            var replaceExisting = options switch
+            {
+                NameCollisionOption.Fail => false,
+                NameCollisionOption.ReplaceExisting => true,
+                _ => throw new NotSupportedException(ExceptionStrings.Enum.UnsupportedValue(options)),
+            };
+
+            lock (_inMemoryFileSystem.Storage)
+            {
+                var folderNode = _storage.GetFolderNode(Path);
+                folderNode.Move(destinationPath, replaceExisting);
+                return FileSystem.GetFolder(folderNode.Path.FullPath);
             }
         }
 
