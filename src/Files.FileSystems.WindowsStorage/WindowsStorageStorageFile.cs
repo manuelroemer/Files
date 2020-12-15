@@ -72,7 +72,7 @@
 
                 cancellationToken.ThrowIfCancellationRequested();
                 File.SetAttributes(_fullPath.ToString(), attributes);
-            });
+            }, cancellationToken);
         }
 
         public override async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
@@ -276,7 +276,7 @@
                 try
                 {
                     var file = await FsHelper.GetFileAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-                    if (file is object)
+                    if (file is not null)
                     {
                         await file.DeleteAsync(StorageDeleteOption.PermanentDelete).AsAwaitable(cancellationToken);
                     }
@@ -310,7 +310,7 @@
 
         public override async Task<byte[]> ReadBytesAsync(CancellationToken cancellationToken = default)
         {
-            using var stream = await OpenAsync(FileAccess.Read).ConfigureAwait(false);
+            using var stream = await OpenAsync(FileAccess.Read, cancellationToken).ConfigureAwait(false);
             using var ms = new MemoryStream();
             await stream.CopyToAsync(ms).ConfigureAwait(false);
             return ms.ToArray();

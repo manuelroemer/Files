@@ -1,4 +1,4 @@
-﻿namespace Files.Specification.Tests
+namespace Files.Specification.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -18,7 +18,7 @@
 
         public abstract IEnumerable<object[]> InvalidPathStringData { get; }
 
-        public FileSystemSpecificationTests(FileSystemTestContext context)
+        protected FileSystemSpecificationTests(FileSystemTestContext context)
             : base(context) { }
 
         #region PathInformation Tests

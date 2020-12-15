@@ -1,4 +1,4 @@
-﻿namespace Files.Specification.Tests
+namespace Files.Specification.Tests
 {
     using System;
     using System.Diagnostics.CodeAnalysis;
@@ -63,7 +63,7 @@
         ///     <paramref name="context"/> for testing a file system.
         /// </summary>
         /// <param name="context">The context to be used for testing a file system.</param>
-        public FileSystemTestBase(FileSystemTestContext context)
+        protected FileSystemTestBase(FileSystemTestContext context)
         {
             Context = context ?? throw new ArgumentNullException(nameof(context));
             TestFolder = null!; // That's good enough for the tests.
@@ -90,7 +90,7 @@
         {
             try
             {
-                if (_testFolder is object)
+                if (_testFolder is not null)
                 {
                     await LogFinalTestFolderStateAsync();
                     await _testFolder.DeleteAsync(DeletionOption.IgnoreMissing);

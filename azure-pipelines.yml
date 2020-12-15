@@ -5,6 +5,7 @@ variables:
   buildConfiguration: 'Release'
   releaseBranch: 'refs/heads/master'
   nuGetArtifactName: 'NuGet Packages'
+  CI: true
 
 jobs:
 - job: Build
@@ -43,6 +44,11 @@ jobs:
     displayName: Install .NET Core 3.1 SDK
     inputs:
       version: '3.1.x'
+
+  - task: UseDotNet@2
+    displayName: Install .NET 5.0 SDK
+    inputs:
+      version: '5.0.x'
 
   - task: PowerShell@2
     displayName: Build / Test / Pack
@@ -96,6 +102,6 @@ jobs:
     displayName: Push to NuGet
     inputs:
       command: 'push'
-      packagesToPush: '$(System.ArtifactsDirectory)/**/*.nupkg'
+      packagesToPush: '$(System.ArtifactsDirectory)/**/*.*nupkg'
       nuGetFeedType: 'external'
       publishFeedCredentials: 'NuGet'

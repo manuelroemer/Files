@@ -442,7 +442,7 @@
             }
 
             var otherStoragePath = FileSystem.GetPath(other);
-            if (otherStoragePath.Root is object)
+            if (otherStoragePath.Root is not null)
             {
                 return otherStoragePath;
             }

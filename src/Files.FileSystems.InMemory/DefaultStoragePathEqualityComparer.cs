@@ -1,4 +1,4 @@
-﻿namespace Files.FileSystems.InMemory
+namespace Files.FileSystems.InMemory
 {
     using System;
     using System.Collections.Generic;
@@ -70,7 +70,7 @@
                 return true;
             }
 
-            if (path1 is object && path2 is object)
+            if (path1 is not null && path2 is not null)
             {
                 return EqualsCore(GetFinalPath(path1),  GetFinalPath(path2));
             }

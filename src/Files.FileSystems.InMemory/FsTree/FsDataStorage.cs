@@ -62,13 +62,13 @@
             ReferenceEquals(TryGetElementNode(path1), TryGetElementNode(path2));
 
         public bool HasFileNode(StoragePath path) =>
-            TryGetFileNode(path) is object;
+            TryGetFileNode(path) is not null;
 
         public bool HasFolderNode(StoragePath path) =>
-            TryGetFolderNode(path) is object;
+            TryGetFolderNode(path) is not null;
 
         public bool HasElementNode(StoragePath path) =>
-            TryGetElementNode(path) is object;
+            TryGetElementNode(path) is not null;
 
         public FolderNode GetParentNodeAndRequirePathToHaveParent(StoragePath path) =>
             GetParentNode(path) ?? throw new IOException(ExceptionStrings.StoragePath.PathHasNoParent());
@@ -82,7 +82,7 @@
 
             if (fileNode is null)
             {
-                if (path.FullPath.Parent is object && HasFolderNode(path.FullPath.Parent))
+                if (path.FullPath.Parent is not null && HasFolderNode(path.FullPath.Parent))
                 {
                     throw new FileNotFoundException(ExceptionStrings.StorageFile.NotFound(path));
                 }
@@ -101,7 +101,7 @@
 
             if (folderNode is null)
             {
-                if (path.FullPath.Parent is object && HasFolderNode(path.FullPath.Parent))
+                if (path.FullPath.Parent is not null && HasFolderNode(path.FullPath.Parent))
                 {
                     throw new DirectoryNotFoundException(ExceptionStrings.StorageFolder.NotFound(path));
                 }

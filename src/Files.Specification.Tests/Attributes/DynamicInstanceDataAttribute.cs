@@ -2,6 +2,7 @@
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
     using System.Reflection;
     using Microsoft.VisualStudio.TestTools.UnitTesting;
 
@@ -28,28 +29,35 @@
         public IEnumerable<object?[]> GetData(MethodInfo testMethodInfo)
         {
             var testClass = GetTestClassInstance(testMethodInfo);
-            
+            IEnumerable<object?[]>? result;
+
             if (DynamicDataSourceType == DynamicDataSourceType.Property)
             {
                 var property = testClass.GetType().GetProperty(DynamicDataSourceName);
-                var value = (IEnumerable<object?[]>)property.GetValue(testClass);
-                return value;
+                result = (IEnumerable<object?[]>?)property?.GetValue(testClass);
             }
             else
             {
                 var method = testClass.GetType().GetMethod(DynamicDataSourceName);
-                return (IEnumerable<object?[]>)method.Invoke(testClass, null);
+                result = (IEnumerable<object?[]>?)method?.Invoke(testClass, null);
             }
+
+            return result ?? Enumerable.Empty<object?[]>();
         }
 
         private static object GetTestClassInstance(MethodInfo testMethodInfo)
         {
-            return Activator.CreateInstance(testMethodInfo.ReflectedType);
+            if (testMethodInfo.ReflectedType is null ||
+                Activator.CreateInstance(testMethodInfo.ReflectedType) is not object result)
+            {
+                throw new InvalidOperationException($"Creating an instance of type ${testMethodInfo.ReflectedType} failed.");
+            }
+            return result;
         }
 
         public string? GetDisplayName(MethodInfo methodInfo, object[] data)
         {
-            if (data is object)
+            if (data is not null)
             {
                 return $"{methodInfo.Name}({string.Join(", ", data)})";
             }

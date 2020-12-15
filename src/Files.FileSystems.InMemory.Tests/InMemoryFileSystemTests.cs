@@ -2,7 +2,6 @@
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using Files.Specification.Tests;
     using Files.Specification.Tests.Setup;

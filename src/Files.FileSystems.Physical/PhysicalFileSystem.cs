@@ -1,4 +1,4 @@
-﻿namespace Files.FileSystems.Physical
+namespace Files.FileSystems.Physical
 {
     using System;
     using System.IO;
@@ -37,7 +37,7 @@
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
 
-            if (!(path is PhysicalStoragePath physicalStoragePath))
+            if (path is not PhysicalStoragePath physicalStoragePath)
             {
                 throw new ArgumentException(
                     ExceptionStrings.FsCompatibility.StoragePathTypeNotSupported(),
@@ -53,7 +53,7 @@
         {
             _ = path ?? throw new ArgumentNullException(nameof(path));
             
-            if (!(path is PhysicalStoragePath physicalStoragePath))
+            if (path is not PhysicalStoragePath physicalStoragePath)
             {
                 throw new ArgumentException(
                     ExceptionStrings.FsCompatibility.StoragePathTypeNotSupported(),

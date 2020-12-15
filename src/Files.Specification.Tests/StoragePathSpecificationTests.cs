@@ -1,4 +1,4 @@
-﻿namespace Files.Specification.Tests
+namespace Files.Specification.Tests
 {
     using System;
     using System.Collections.Generic;
@@ -22,7 +22,7 @@
         private string Sep => PathInformation.DirectorySeparatorChar.ToString();
         private string AltSep => PathInformation.AltDirectorySeparatorChar.ToString();
 
-        public StoragePathSpecificationTests(FileSystemTestContext context)
+        protected StoragePathSpecificationTests(FileSystemTestContext context)
             : base(context) { }
 
         #region Kind Tests

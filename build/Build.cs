@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -24,11 +24,14 @@ using static Nuke.Common.Tools.VSTest.VSTestTasks;
 [UnsetVisualStudioEnvironmentVariables]
 class Build : NukeBuild
 {
+    const string Debug = "Debug";
+    const string Release = "Release";
+
     public static int Main () => Execute<Build>(x => IsWin ? x.WindowsBuild : x.CrossPlatformBuild);
 
     [Parameter("Configuration to build - Default is 'Debug' (local) or 'Release' (server)")]
-    readonly Configuration Configuration = IsLocalBuild ? Configuration.Debug : Configuration.Release;
-
+    readonly string Configuration = IsLocalBuild ? Debug : Release;
+    
     [Parameter("The directory where build artifacts (NuGet packages) will be placed.")]
     readonly AbsolutePath ArtifactsDirectory = RootDirectory / "artifacts";
 
@@ -146,8 +149,8 @@ class Build : NukeBuild
             foreach (var appxRecipePath in SourceDirectory.GlobFiles("**/*.appxrecipe"))
             {
                VSTest(s => s
-                    .SetToolPath(FindVsTestExe())
-                    .SetWorkingDirectory(appxRecipePath.Parent)
+                    .SetProcessToolPath(FindVsTestExe())
+                    .SetProcessWorkingDirectory(appxRecipePath.Parent)
                     .AddTestAssemblies(Path.GetFileName(appxRecipePath))
                     .SetFramework((VsTestFramework)"FrameworkUap10")
                     .SetLogger("trx"));
@@ -164,9 +167,9 @@ class Build : NukeBuild
                     "Microsoft Visual Studio"
                 );
 
-                var exePath = Glob.Files(vsBasePath, "**/vstest.console.exe", GlobOptions.CaseInsensitive)
+                var exePath = Glob.Files(vsBasePath, "**/TestPlatform/**/vstest.console.exe", GlobOptions.CaseInsensitive)
                     .OrderBy(path => path)
-                    .Last();
+                    .First();
 
                 return Path.Combine(vsBasePath, exePath);
             }
@@ -175,7 +178,7 @@ class Build : NukeBuild
     Target Pack => _ => _
         .DependsOn(TestCrossPlatformProjects)
         .DependsOn(TestUwpProjects)
-        .OnlyWhenDynamic(() => Configuration == Configuration.Release)
+        .OnlyWhenDynamic(() => Configuration == Release)
         .OnlyWhenDynamic(() => IsWin)
         .Executes(() =>
         {

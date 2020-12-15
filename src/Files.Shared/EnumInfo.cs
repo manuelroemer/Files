@@ -38,7 +38,7 @@
                     "Only use enum functionalities with enumerations based on Int32."
                 );
 
-                IsFlagged = typeof(T).GetCustomAttribute<FlagsAttribute>() is object;
+                IsFlagged = typeof(T).GetCustomAttribute<FlagsAttribute>() is not null;
 
                 if (IsFlagged)
                 {

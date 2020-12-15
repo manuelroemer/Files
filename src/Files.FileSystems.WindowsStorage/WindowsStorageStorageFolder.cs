@@ -78,7 +78,7 @@
                     // Since we're using a File API, we must manually convert the FileNotFoundException.
                     throw new DirectoryNotFoundException(message: null, ex);
                 }
-            });
+            }, cancellationToken);
         }
 
         public override async Task<bool> ExistsAsync(CancellationToken cancellationToken = default)
@@ -249,7 +249,7 @@
                 await CopyAsync(destinationPath, options, cancellationToken).ConfigureAwait(false);
             }
 
-            await DeleteAsync(DeletionOption.IgnoreMissing).ConfigureAwait(false);
+            await DeleteAsync(DeletionOption.IgnoreMissing, cancellationToken).ConfigureAwait(false);
             return destinationFolder;
         }
 
@@ -358,7 +358,7 @@
                 try
                 {
                     var folder = await FsHelper.GetFolderAsync(_fullPath, cancellationToken).ConfigureAwait(false);
-                    if (folder is object)
+                    if (folder is not null)
                     {
                         await folder.DeleteAsync(StorageDeleteOption.PermanentDelete).AsAwaitable(cancellationToken);
                     }

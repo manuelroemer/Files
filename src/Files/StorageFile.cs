@@ -1,4 +1,4 @@
-﻿namespace Files
+namespace Files
 {
     using System;
     using System.ComponentModel;
@@ -35,7 +35,7 @@
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="fileSystem"/> or <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
-        public StorageFile(FileSystem fileSystem, StoragePath path)
+        protected StorageFile(FileSystem fileSystem, StoragePath path)
             : base(fileSystem, path)
         {
             if (path.FullPath.Parent is null)
@@ -495,6 +495,209 @@
             NameCollisionOption options,
             CancellationToken cancellationToken = default
         );
+
+        /// <summary>
+        ///     Creates the file if it does not already exist and returns a stream which can be used
+        ///     for reading and writing bytes from and to the file.
+        ///     An exception is thrown if the file already exists or if one of the file's parent
+        ///     folders does not exist.
+        /// </summary>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
+        /// </param>
+        /// <remarks>
+        ///     Calling this method is equivalent to calling
+        ///     <see cref="CreateAndOpenAsync(bool, CreationCollisionOption, CancellationToken)"/> with the
+        ///     <see cref="CreationCollisionOption.Fail"/> and <c>recursive: false</c> parameters.
+        /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
+        /// <exception cref="IOException">
+        ///     The file already exists.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting folder (or file) exists at the file's path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     One of the file's parent folders does not exist.
+        /// </exception>
+        public Task<Stream> CreateAndOpenAsync(CancellationToken cancellationToken = default) =>
+            CreateAndOpenAsync(recursive: true, DefaultCreationCollisionOption, cancellationToken);
+
+        /// <summary>
+        ///     Creates the file and optionally all of its non-existing parent folders if it does
+        ///     not already exist and returns a stream which can be used for reading and writing
+        ///     bytes from and to the file.
+        ///     An exception is thrown if the file already exists.
+        /// </summary>
+        /// <param name="recursive">
+        ///     A value indicating whether the file's parent folders should be created recursively
+        ///     if they don't already exist.
+        ///     
+        ///     If <see langword="true"/>, every parent folder which does not exist will be created
+        ///     until a parent folder which already exists is reached.
+        ///     
+        ///     If <see langword="false"/>, this method will throw a <see cref="DirectoryNotFoundException"/>
+        ///     if the file's parent folder does not exist.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
+        /// </param>
+        /// <returns>
+        ///     A <see cref="Stream"/> which can be used to read and write bytes from and to the file.
+        /// </returns>
+        /// <remarks>
+        ///     Calling this method is equivalent to calling
+        ///     <see cref="CreateAndOpenAsync(bool, CreationCollisionOption, CancellationToken)"/> with the
+        ///     <see cref="CreationCollisionOption.Fail"/> parameter.
+        /// </remarks>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
+        /// <exception cref="IOException">
+        ///     The file already exists.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting folder (or file) exists at the file's path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     One of the file's parent folders does not exist and <paramref name="recursive"/>
+        ///     is <see langword="false"/>.
+        /// </exception>
+        public Task<Stream> CreateAndOpenAsync(bool recursive, CancellationToken cancellationToken = default) =>
+            CreateAndOpenAsync(recursive, DefaultCreationCollisionOption, cancellationToken);
+
+        /// <summary>
+        ///     Creates the file if it does not already exist and returns a stream which can be used
+        ///     for reading and writing bytes from and to the file.
+        ///     An exception is thrown if one of the file's parent folders does not exist.
+        /// </summary>
+        /// <param name="options">
+        ///     Defines how to react if another element with a conflicting name already exists in the
+        ///     current folder.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
+        /// </param>
+        /// <remarks>
+        ///     Calling this method is equivalent to calling
+        ///     <see cref="CreateAndOpenAsync(bool, CreationCollisionOption, CancellationToken)"/> with the
+        ///     <c>recursive: false</c> parameter.
+        /// </remarks>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="options"/> is an invalid <see cref="CreationCollisionOption"/> value.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
+        /// <exception cref="IOException">
+        ///     The file already exists and <paramref name="options"/> has the value
+        ///     <see cref="CreationCollisionOption.Fail"/>.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting folder (or file) exists at the file's path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     One of the file's parent folders does not exist.
+        /// </exception>
+        public Task<Stream> CreateAndOpenAsync(CreationCollisionOption options, CancellationToken cancellationToken = default) =>
+            CreateAndOpenAsync(recursive: true, options, cancellationToken);
+
+        /// <summary>
+        ///     Creates the file and returns a stream which can be used for reading and writing
+        ///     bytes from and to the file.
+        /// </summary>
+        /// <param name="recursive">
+        ///     A value indicating whether the file's parent folders should be created recursively
+        ///     if they don't already exist.
+        ///     
+        ///     If <see langword="true"/>, every parent folder which does not exist will be created
+        ///     until a parent folder which already exists is reached.
+        ///     
+        ///     If <see langword="false"/>, this method will throw a <see cref="DirectoryNotFoundException"/>
+        ///     if the file's parent folder does not exist.
+        /// </param>
+        /// <param name="options">
+        ///     Defines how to react if another element with a conflicting name already exists in the
+        ///     current folder.
+        ///     
+        ///     These options do not apply to any parents which are created when <paramref name="recursive"/>
+        ///     is <see langword="true"/>. They only apply to the creation of this file.
+        /// </param>
+        /// <param name="cancellationToken">
+        ///     A <see cref="CancellationToken"/> which can be used to cancel the asynchronous operation.
+        /// </param>
+        /// <exception cref="ArgumentException">
+        ///     <paramref name="options"/> is an invalid <see cref="CreationCollisionOption"/> value.
+        /// </exception>
+        /// <exception cref="OperationCanceledException">
+        ///     The operation was cancelled via the specified <paramref name="cancellationToken"/>.
+        /// </exception>
+        /// <exception cref="UnauthorizedAccessException">
+        ///     Access to the file is restricted.
+        /// </exception>
+        /// <exception cref="PathTooLongException">
+        ///     The length of the file's path exceeds the system-defined maximum length.
+        /// </exception>
+        /// <exception cref="IOException">
+        ///     The file already exists and <paramref name="options"/> has the value
+        ///     <see cref="CreationCollisionOption.Fail"/>.
+        ///     
+        ///     -or-
+        ///     
+        ///     A conflicting folder (or file) exists at the file's path.
+        ///     
+        ///     -or-
+        ///     
+        ///     An undefined I/O error occured while interacting with the file system.
+        /// </exception>
+        /// <exception cref="DirectoryNotFoundException">
+        ///     One of the file's parent folders does not exist and <paramref name="recursive"/>
+        ///     is <see langword="false"/>.
+        /// </exception>
+        public virtual async Task<Stream> CreateAndOpenAsync(
+            bool recursive,
+            CreationCollisionOption options,
+            CancellationToken cancellationToken = default
+        )
+        {
+            await CreateAsync(recursive, options, cancellationToken).ConfigureAwait(false);
+            return await OpenAsync(cancellationToken).ConfigureAwait(false);
+        }
 
         /// <summary>
         ///     Opens and returns a stream which can be used for reading and writing bytes from and

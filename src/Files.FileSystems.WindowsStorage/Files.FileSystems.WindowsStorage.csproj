@@ -1,5 +1,4 @@
 <Project Sdk="MSBuild.Sdk.Extras">
-
   <PropertyGroup>
     <TargetFramework>uap10.0.16299</TargetFramework>
     <DefineConstants>$(DefineConstants);UAP</DefineConstants>
@@ -18,5 +17,4 @@ Learn more about Files at https://github.com/manuelroemer/Files.
 
   <Import Project="..\Files.Shared\Files.Shared.projitems" />
   <Import Project="..\Files.Shared.PhysicalStoragePath\Files.Shared.PhysicalStoragePath.projitems" />
-
 </Project>
