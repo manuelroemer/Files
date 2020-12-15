@@ -105,3 +105,4 @@ jobs:
       packagesToPush: '$(System.ArtifactsDirectory)/**/*.nupkg'
       nuGetFeedType: 'external'
       publishFeedCredentials: 'NuGet'
+      allowPackageConflicts: true
