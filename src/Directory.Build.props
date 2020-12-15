@@ -6,7 +6,7 @@
     <AnalysisMode>AllEnabledByDefault</AnalysisMode>
 
     <Product>Files</Product>
-    <Version>0.1.0</Version>
+    <Version>0.2.0</Version>
     <Authors>Manuel Römer</Authors>
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryType>git</RepositoryType>
