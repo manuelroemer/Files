@@ -2,6 +2,8 @@
   <PropertyGroup>
     <LangVersion>9.0</LangVersion>
     <Nullable>enable</Nullable>
+    <EnableNETAnalyzers>true</EnableNETAnalyzers>
+    <AnalysisMode>AllEnabledByDefault</AnalysisMode>
 
     <Product>Files</Product>
     <Version>0.1.0</Version>
@@ -46,7 +48,6 @@
 
   <ItemGroup>
     <PackageReference Include="Nullable" Version="*" PrivateAssets="All" />
-    <PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="*" PrivateAssets="All" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="*" PrivateAssets="All"/>
   </ItemGroup>
   

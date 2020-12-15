@@ -35,7 +35,7 @@ namespace Files
         /// <exception cref="ArgumentNullException">
         ///     <paramref name="fileSystem"/> or <paramref name="path"/> is <see langword="null"/>.
         /// </exception>
-        public StorageFile(FileSystem fileSystem, StoragePath path)
+        protected StorageFile(FileSystem fileSystem, StoragePath path)
             : base(fileSystem, path)
         {
             if (path.FullPath.Parent is null)

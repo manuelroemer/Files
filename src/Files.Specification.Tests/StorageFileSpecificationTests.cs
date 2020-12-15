@@ -22,7 +22,7 @@ namespace Files.Specification.Tests
                 .Distinct()
                 .ToArray();
 
-        public StorageFileSpecificationTests(FileSystemTestContext context)
+        protected StorageFileSpecificationTests(FileSystemTestContext context)
             : base(context) { }
 
         #region FileSystem Tests
