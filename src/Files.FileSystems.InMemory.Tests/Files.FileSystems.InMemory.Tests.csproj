@@ -9,7 +9,7 @@
     <PackageReference Include="Moq" Version="4.15.2" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.1.2" />
     <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
-    <PackageReference Include="Shouldly" Version="4.0.2" />
+    <PackageReference Include="Shouldly" Version="4.0.3" />
     <ProjectReference Include="..\Files.FileSystems.InMemory\Files.FileSystems.InMemory.csproj" />
     <ProjectReference Include="..\Files.Specification.Tests\Files.Specification.Tests.csproj" />
     <ProjectReference Include="..\Files\Files.csproj" />

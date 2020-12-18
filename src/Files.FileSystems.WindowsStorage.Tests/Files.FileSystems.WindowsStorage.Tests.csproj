@@ -168,7 +168,7 @@
       <Version>2.1.2</Version>
     </PackageReference>
     <PackageReference Include="Shouldly">
-      <Version>4.0.2</Version>
+      <Version>4.0.3</Version>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
