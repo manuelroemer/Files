@@ -1,7 +1,3 @@
-<br/>
-<br/>
-<br/>
-
 > [!CAUTION]
 > This project is not maintained anymore.
 
