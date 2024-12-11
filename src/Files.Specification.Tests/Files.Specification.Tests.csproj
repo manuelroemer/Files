@@ -15,7 +15,7 @@ Learn more about Files at https://github.com/manuelroemer/Files.
   <ItemGroup>
     <PackageReference Include="MSTest.TestFramework" Version="2.1.2" />
     <!-- Shouldly build (.targets) assets are excluded since they prevent PDB generation. -->
-    <PackageReference Include="Shouldly" Version="4.0.3" ExcludeAssets="Build" />
+    <PackageReference Include="Shouldly" Version="4.1.0" ExcludeAssets="Build" />
     <ProjectReference Include="..\Files\Files.csproj" />
   </ItemGroup>
 </Project>
